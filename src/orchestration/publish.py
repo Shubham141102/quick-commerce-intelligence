@@ -19,7 +19,7 @@ import pandas as pd
 
 from src.common.io import read_csv_strings, replace_with_retry, write_csv
 from src.common.schemas import SOURCE_SCHEMAS
-from src.orchestration.tracking import RunTracker, read_meta, utc_now
+from src.orchestration.tracking import RunTracker, utc_now
 
 MAX_SNAPSHOT_MB = 50
 DIMENSIONS = {  # app lookup tables from Silver: name -> (silver dataset, columns)
@@ -36,7 +36,7 @@ def _tables():
 
 
 def run_publish(tracker: RunTracker, gold_root: Path, silver_root: Path, demo_root: Path,
-                metadata_root: Path, generation_run_id: str, profile: str) -> dict:
+                metadata_root: Path, generation_run_id: str, profile: str) -> dict:  # noqa: ARG001 (kept for callers)
     t0, started = time.perf_counter(), utc_now()
     staging = demo_root.parent / "_demo_staging"
     if staging.exists():
@@ -59,12 +59,14 @@ def run_publish(tracker: RunTracker, gold_root: Path, silver_root: Path, demo_ro
         schema_rows += [{"table": name, "column": c, "dtype": types[c]} for c in columns]
 
     write_csv(pd.DataFrame(schema_rows), staging / "snapshot_schema.csv", ["table", "column", "dtype"])
-    runs = read_meta(metadata_root, "meta_model_runs")
-    model = runs.loc[runs["model_name"] == "demand_forecast", "model_version"]
+    # The model version comes from the published predictions themselves: the run log (meta_model_runs) is only
+    # written when a run ends, so within an `ml,publish` run it would still hold the previous model.
+    preds = read_csv_strings(staging / "gld_demand_predictions.csv")
+    model_version = preds["model_version"].iloc[0] if len(preds) else ""
     size_mb = sum(p.stat().st_size for p in staging.glob("*.csv")) / 1e6
     manifest = {"pipeline_run_id": tracker.run_id, "generation_run_id": generation_run_id, "profile": profile,
                 "published_at": utc_now(), "tables": str(len(counts)), "rows": str(sum(counts.values())),
-                "size_mb": f"{size_mb:.1f}", "forecast_model_version": model.iloc[-1] if len(model) else ""}
+                "size_mb": f"{size_mb:.1f}", "forecast_model_version": model_version}
     write_csv(pd.DataFrame(manifest.items(), columns=["key", "value"]), staging / "snapshot_manifest.csv",
               ["key", "value"])
     if size_mb > MAX_SNAPSHOT_MB:

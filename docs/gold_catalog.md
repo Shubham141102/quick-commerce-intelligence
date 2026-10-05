@@ -27,6 +27,7 @@ Built by the `gold` stage (PySpark) or, for model outputs, the `ml` stage (Pytho
 | [`gld_stockout_risk`](#gld_stockout_risk) | ml (Python) | 1 | as_of_date × store_id × product_id | Daily stockout-risk tier per store × focus SKU with reason codes (transparent rules on stock, reorder level, days of inventory and the SKU demand forecast). Advisory only. |
 | [`gld_replenishment`](#gld_replenishment) | ml (Python) | 1 | as_of_date × store_id × product_id | Suggested replenishment quantity per store × focus SKU: forecast demand over lead time + review period + safety stock − current stock. Assumptions are stored on every row. Advisory only — no order is placed. |
 | [`gld_stockout_backtest`](#gld_stockout_backtest) | ml (Python) | 1 | rule | September backtest of the risk rules on decisions taken while the SKU was still in stock: when a rule flags a SKU, does it actually stock out within the next 3 days? Compared with a naive reorder-level rule. |
+| [`gld_lost_sales`](#gld_lost_sales) | ml (Python) | 1 | store_id × product_id × business_date | Estimated sales lost on stockout days per store × focus SKU: expected demand (average daily units on the SKU's in-stock days in the previous 28 days) minus units actually sold, valued at the catalog price. Only stockout days have rows. Revenue lost for that SKU, before any substitute the customer bought. |
 
 ## Lineage
 
@@ -51,6 +52,7 @@ Built by the `gold` stage (PySpark) or, for model outputs, the `ml` stage (Pytho
 | `gld_stockout_risk` | `gld_inventory_daily`, `gld_sku_demand_forecast` |
 | `gld_replenishment` | `gld_inventory_daily`, `gld_sku_demand_forecast` |
 | `gld_stockout_backtest` | `gld_stockout_risk`, `gld_inventory_daily` |
+| `gld_lost_sales` | `gld_inventory_daily`, `slv_products` |
 
 ---
 
@@ -495,4 +497,25 @@ September backtest of the risk rules on decisions taken while the SKU was still 
 | `recall` | double | true_positives ÷ stockouts_next_3d |
 | `flag_rate` | double | flagged ÷ pair_days |
 | `model_version` | string | forecast model run used |
+
+---
+
+## gld_lost_sales
+
+Estimated sales lost on stockout days per store × focus SKU: expected demand (average daily units on the SKU's in-stock days in the previous 28 days) minus units actually sold, valued at the catalog price. Only stockout days have rows. Revenue lost for that SKU, before any substitute the customer bought.
+
+**Grain:** `store_id`, `product_id`, `business_date` · **Tier:** 1 · **Built by:** ml stage (Python) · **Sources:** `gld_inventory_daily`, `slv_products`
+
+| Column | Type | Description |
+|---|---|---|
+| `store_id` 🔑 | string | store |
+| `product_id` 🔑 | string | focus SKU |
+| `business_date` 🔑 | date | stockout day (IST) |
+| `category_id` | string | category of the SKU |
+| `units_sold` | int | units actually sold that day |
+| `expected_units` | double | average daily units on in-stock days, previous 28 days |
+| `lost_units` | double | max(0, expected_units − units_sold) |
+| `unit_price` | decimal | catalog price |
+| `lost_revenue` | decimal | lost_units × unit_price |
+| `model_version` | string | pipeline run that produced the estimate |
 

@@ -51,7 +51,10 @@ METRICS: tuple[Metric, ...] = (
            "were no sales in the last 14 days (never infinite).", "closing stock ÷ average daily units sold (last 14 days)"),
     Metric("Stockout day", "A day on which a focus SKU's stock reached zero at any point.",
            "min stock during the day ≤ 0"),
-    Metric("Bulk order", f"An order with any line of {BULK_ORDER_QUANTITY} or more units (normal lines are 1–5).",
+    Metric("Lost sales (estimate)", "Units and revenue a focus SKU would have sold on its stockout days. Revenue "
+           "lost for that SKU, before any substitute the shopper bought instead.",
+           "max(0, avg daily units on in-stock days of the previous 28 days − units sold) × catalog price"),
+    Metric("Bulk order",f"An order with any line of {BULK_ORDER_QUANTITY} or more units (normal lines are 1–5).",
            f"max(quantity) ≥ {BULK_ORDER_QUANTITY}"),
     Metric("Support / confidence / lift", "Basket association between products A and B over completed orders.",
            "support = baskets(A∧B) ÷ baskets; confidence(A→B) = baskets(A∧B) ÷ baskets(A); "

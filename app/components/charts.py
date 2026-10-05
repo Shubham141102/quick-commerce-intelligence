@@ -44,6 +44,29 @@ def stock_chart(df: pd.DataFrame) -> go.Figure:
     return _layout(fig, "units")
 
 
+def explorer_chart(df: pd.DataFrame) -> go.Figure:
+    """One SKU's full history: calculated stock, weekly counted stock, restocks, damage, stockout days."""
+    fig = go.Figure()
+    out = df[df["is_stockout"] == True]  # noqa: E712  (pandas boolean column may hold NA)
+    for day in out["day"]:
+        fig.add_vrect(x0=day - pd.Timedelta(hours=12), x1=day + pd.Timedelta(hours=12), fillcolor="rgba(228,87,86,0.12)",
+                      line_width=0, layer="below")
+    fig.add_trace(go.Scatter(x=df["day"], y=df["closing_stock"], name="Closing stock (calculated)",
+                             line=dict(color=STOCK, width=2), line_shape="hv"))
+    counted = df.dropna(subset=["snapshot_stock"])
+    fig.add_trace(go.Scatter(x=counted["day"], y=counted["snapshot_stock"], name="Weekly count", mode="markers",
+                             marker=dict(color="black", size=8, symbol="diamond"),
+                             customdata=counted["reconciliation_gap"],
+                             hovertemplate="counted %{y}<br>gap (counted − calculated) %{customdata}<extra></extra>"))
+    fig.add_trace(go.Bar(x=df["day"], y=df["restocked"], name="Restocked", marker_color=ACTUAL, opacity=0.6))
+    fig.add_trace(go.Bar(x=df["day"], y=-df["damaged"], name="Damaged (written off)", marker_color=REORDER, opacity=0.7))
+    fig.add_trace(go.Scatter(x=df["day"], y=df["reorder_level"], name="Reorder level",
+                             line=dict(color=REORDER, dash="dash", width=1)))
+    fig.add_annotation(text="shaded = stockout day", xref="paper", yref="paper", x=1, y=1.12, showarrow=False,
+                       font=dict(size=11, color=FUTURE))
+    return _layout(fig, "units")
+
+
 def importance_chart(df: pd.DataFrame) -> go.Figure:
     top = df.sort_values("importance_mae").tail(12)
     fig = go.Figure(go.Bar(x=top["importance_mae"], y=top["feature"], orientation="h", marker_color=MODEL,

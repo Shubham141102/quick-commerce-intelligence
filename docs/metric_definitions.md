@@ -23,5 +23,6 @@ Every business metric is defined once here and computed once in Gold. Dashboards
 | **Units sold (inventory)** | Units leaving stock: every order line of a focus SKU except orders cancelled before dispatch. | Σ quantity (orders not pre-dispatch cancelled) |
 | **Days of inventory** | How many days the closing stock lasts at the recent sales rate. Empty when there were no sales in the last 14 days (never infinite). | closing stock ÷ average daily units sold (last 14 days) |
 | **Stockout day** | A day on which a focus SKU's stock reached zero at any point. | min stock during the day ≤ 0 |
+| **Lost sales (estimate)** | Units and revenue a focus SKU would have sold on its stockout days. Revenue lost for that SKU, before any substitute the shopper bought instead. | max(0, avg daily units on in-stock days of the previous 28 days − units sold) × catalog price |
 | **Bulk order** | An order with any line of 8 or more units (normal lines are 1–5). | max(quantity) ≥ 8 |
 | **Support / confidence / lift** | Basket association between products A and B over completed orders. | support = baskets(A∧B) ÷ baskets; confidence(A→B) = baskets(A∧B) ÷ baskets(A); lift = confidence(A→B) ÷ (baskets(B) ÷ baskets) |

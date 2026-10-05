@@ -13,7 +13,8 @@ Documentation for the Quick-Commerce Intelligence Platform. Each completed proce
 | 5 | Demand forecasting (Phase 4B) | [05_demand_forecasting.md](05_demand_forecasting.md) | Done |
 | 6 | Stockout risk and replenishment (Phase 4C) | [06_stockout_replenishment.md](06_stockout_replenishment.md) | Done |
 | 7 | Inventory workspace — Streamlit app (Phase 4D) | [07_inventory_workspace.md](07_inventory_workspace.md) | Done |
-| 8 | Segmentation, basket analysis, recommendations, anomalies + Marketing/Business workspaces (Phase 5) | — | Next |
+| 8 | Inventory explorer + lost-sales estimate (Phase 5A) | [08_inventory_explorer_lost_sales.md](08_inventory_explorer_lost_sales.md) | Done (1 known limitation) |
+| 9 | Business workspace: sales performance, delivery & operations (Phase 5B) | — | Next |
 
 ## Reference documents (generated — do not edit by hand)
 

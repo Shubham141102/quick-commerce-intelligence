@@ -126,8 +126,25 @@ STOCKOUT_BACKTEST = GoldTable(
      Col("flag_rate", "double", "flagged ÷ pair_days"), Col("model_version", "string", "forecast model run used")),
     None, engine="python")
 
+LOST_SALES = GoldTable(
+    "gld_lost_sales", ("store_id", "product_id", "business_date"),
+    "Estimated sales lost on stockout days per store × focus SKU: expected demand (average daily units on the "
+    "SKU's in-stock days in the previous 28 days) minus units actually sold, valued at the catalog price. "
+    "Only stockout days have rows. Revenue lost for that SKU, before any substitute the customer bought.",
+    ("gld_inventory_daily", "slv_products"),
+    (Col("store_id", "string", "store"), Col("product_id", "string", "focus SKU"),
+     Col("business_date", "date", "stockout day (IST)"),
+     Col("category_id", "string", "category of the SKU"),
+     Col("units_sold", "int", "units actually sold that day"),
+     Col("expected_units", "double", "average daily units on in-stock days, previous 28 days"),
+     Col("lost_units", "double", "max(0, expected_units − units_sold)"),
+     Col("unit_price", "decimal", "catalog price"),
+     Col("lost_revenue", "decimal", "lost_units × unit_price"),
+     Col("model_version", "string", "pipeline run that produced the estimate")),
+    None, engine="python")
+
 ML_TABLES: tuple[GoldTable, ...] = (DEMAND_PREDICTIONS, FORECAST_METRICS, FEATURE_IMPORTANCE, SKU_FORECAST,
-                                    STOCKOUT_RISK, REPLENISHMENT, STOCKOUT_BACKTEST)
+                                    STOCKOUT_RISK, REPLENISHMENT, STOCKOUT_BACKTEST, LOST_SALES)
 
 
 def read_table(gold_root: Path, table: GoldTable) -> pd.DataFrame:

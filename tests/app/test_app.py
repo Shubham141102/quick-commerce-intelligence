@@ -18,12 +18,13 @@ INVENTORY_FUNCTIONS = [
     (q.stores, ()), (q.categories, ()), (q.inventory_kpis, ()), (q.stock_health_by_store, ()),
     (q.forecast_accuracy, ()), (q.accuracy_by_category, ()), (q.feature_importance, ()),
     (q.risk_list, ()), (q.replenishment_assumptions, ()), (q.stockout_backtest, ()),
+    (q.lost_sales_by_store, ()), (q.top_lost_sales_skus, (5,)),
 ]
 
 
 def test_snapshot_published_within_limits(app_env):
     result = app_env["publish_result"].results["publish"]
-    assert result["tables"] == 22 and result["size_mb"] < 50
+    assert result["tables"] == 23 and result["size_mb"] < 50
     info = q.snapshot_info()
     assert info["pipeline_run_id"] == app_env["publish_result"].run_id
 
@@ -58,6 +59,7 @@ def test_inventory_workspace_renders(app_env):
     assert not at.exception, at.exception
     labels = [m.label for m in at.metric]
     assert {"High risk", "Medium risk", "SKUs to reorder", "Model WAPE"} <= set(labels)
+    assert {"Estimated lost sales (all stores)", "Stockout days", "Est. lost sales"} <= set(labels)  # explorer tab
     assert len(at.dataframe) >= 4 and not at.error
 
 

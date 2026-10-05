@@ -234,6 +234,16 @@ gld_stockout_backtest,precision,double
 gld_stockout_backtest,recall,double
 gld_stockout_backtest,flag_rate,double
 gld_stockout_backtest,model_version,string
+gld_lost_sales,store_id,string
+gld_lost_sales,product_id,string
+gld_lost_sales,business_date,date
+gld_lost_sales,category_id,string
+gld_lost_sales,units_sold,int
+gld_lost_sales,expected_units,double
+gld_lost_sales,lost_units,double
+gld_lost_sales,unit_price,decimal
+gld_lost_sales,lost_revenue,decimal
+gld_lost_sales,model_version,string
 dim_products,product_id,string
 dim_products,product_name,string
 dim_products,category_id,string

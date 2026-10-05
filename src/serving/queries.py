@@ -163,6 +163,52 @@ def replenishment_assumptions() -> dict:
 
 
 @workspace("inventory")
+def explorer_timeline(store_id: str, product_id: str) -> pd.DataFrame:
+    """Every day of one store × SKU: stock movements, weekly count vs calculated stock, stockout, lost sales."""
+    return _q("""SELECT i.business_date AS day, i.opening_stock, i.units_sold, i.restocked, i.damaged, i.adjusted,
+                        i.closing_stock, i.reorder_level, i.is_stockout, i.snapshot_stock, i.reconciliation_gap,
+                        i.days_of_inventory, coalesce(l.lost_units, 0) AS lost_units,
+                        coalesce(l.lost_revenue, 0) AS lost_revenue
+                 FROM gld_inventory_daily i
+                 LEFT JOIN gld_lost_sales l USING (store_id, product_id, business_date)
+                 WHERE i.store_id = ? AND i.product_id = ? ORDER BY day""", [store_id, product_id])
+
+
+@workspace("inventory")
+def explorer_summary(store_id: str, product_id: str) -> dict:
+    row = _q("""SELECT p.product_name, p.price, c.category_name,
+                       count(*) FILTER (WHERE i.is_stockout) AS stockout_days,
+                       sum(i.restocked) AS restocked, sum(i.damaged) AS damaged, sum(i.units_sold) AS units_sold,
+                       round(avg(abs(i.reconciliation_gap)), 2) AS mean_abs_gap,
+                       count(i.reconciliation_gap) AS counts_compared,
+                       (SELECT coalesce(sum(lost_units), 0) FROM gld_lost_sales WHERE store_id = ? AND product_id = ?) AS lost_units,
+                       (SELECT coalesce(sum(lost_revenue), 0) FROM gld_lost_sales WHERE store_id = ? AND product_id = ?) AS lost_revenue
+                FROM gld_inventory_daily i JOIN dim_products p USING (product_id)
+                JOIN dim_categories c ON c.category_id = p.category_id
+                WHERE i.store_id = ? AND i.product_id = ? GROUP BY ALL""",
+             [store_id, product_id, store_id, product_id, store_id, product_id]).iloc[0]
+    return row.to_dict()
+
+
+@workspace("inventory")
+def lost_sales_by_store() -> pd.DataFrame:
+    return _q("""SELECT s.store_name AS store, s.city, count(*) AS stockout_days,
+                        round(sum(l.lost_units), 1) AS lost_units, sum(l.lost_revenue) AS lost_revenue
+                 FROM gld_lost_sales l JOIN dim_stores s USING (store_id)
+                 GROUP BY ALL ORDER BY lost_revenue DESC""")
+
+
+@workspace("inventory")
+def top_lost_sales_skus(limit: int = 10) -> pd.DataFrame:
+    return _q("""SELECT s.store_name AS store, p.product_name AS product, c.category_name AS category,
+                        count(*) AS stockout_days, round(sum(l.lost_units), 1) AS lost_units,
+                        sum(l.lost_revenue) AS lost_revenue, l.store_id, l.product_id
+                 FROM gld_lost_sales l JOIN dim_stores s USING (store_id) JOIN dim_products p USING (product_id)
+                 JOIN dim_categories c ON c.category_id = l.category_id
+                 GROUP BY ALL ORDER BY lost_revenue DESC LIMIT ?""", [limit])
+
+
+@workspace("inventory")
 def stockout_backtest() -> pd.DataFrame:
     return _q("""SELECT rule, pair_days, flagged, stockouts_next_3d, true_positives, precision, recall, flag_rate
                  FROM gld_stockout_backtest ORDER BY precision DESC""")
