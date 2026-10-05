@@ -12,7 +12,8 @@ Documentation for the Quick-Commerce Intelligence Platform. Each completed proce
 | 4 | Gold (business tables, metrics, ML features) | [04_gold.md](04_gold.md) | Done |
 | 5 | Demand forecasting (Phase 4B) | [05_demand_forecasting.md](05_demand_forecasting.md) | Done |
 | 6 | Stockout risk and replenishment (Phase 4C) | [06_stockout_replenishment.md](06_stockout_replenishment.md) | Done |
-| 7 | Inventory workspace — Streamlit app (Phase 4D) | — | Next |
+| 7 | Inventory workspace — Streamlit app (Phase 4D) | [07_inventory_workspace.md](07_inventory_workspace.md) | Done |
+| 8 | Segmentation, basket analysis, recommendations, anomalies + Marketing/Business workspaces (Phase 5) | — | Next |
 
 ## Reference documents (generated — do not edit by hand)
 
@@ -41,6 +42,7 @@ data/generation/<run>/        data/bronze/brz_<dataset>/       data/silver/slv_<
 Then **Gold** (PySpark): 12 business tables in `data/gold/<table>/` with shared metric definitions.
 
 Then the **ML stage** (Python / scikit-learn): demand forecasts, stockout risk and replenishment, written as Gold tables.
+The **publish stage** copies the app's tables to `data/demo/`, and the **Streamlit app** (`streamlit run app/Home.py`) reads them through DuckDB.
 
-Completion checks: `python -m scripts.check_bronze` (9 checks), `python -m scripts.check_silver` (10 checks), `python -m scripts.check_gold` (10 checks), `python -m scripts.check_ml` (10 checks).
+Completion checks: `python -m scripts.check_bronze` (9 checks), `python -m scripts.check_silver` (10 checks), `python -m scripts.check_gold` (10 checks), `python -m scripts.check_ml` (12 checks, including the app).
 Overall design: [Project_Plan_v2.md](Project_Plan_v2.md).

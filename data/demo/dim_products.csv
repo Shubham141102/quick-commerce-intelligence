@@ -1,0 +1,601 @@
+product_id,product_name,category_id,brand,price
+P0001,VitaBoost Toilet Cleaner 200 g,CAT14,VitaBoost,61.00
+P0002,PawPals Baby Food 100 g,CAT15,PawPals,231.00
+P0003,MorningGlow Apple 500 ml,CAT03,MorningGlow,169.00
+P0004,NutriKart Kulfi 500 ml,CAT08,NutriKart,79.00
+P0005,NutriKart Vanilla Tub 200 ml,CAT08,NutriKart,85.00
+P0006,Shubh Pooja Pasta 200 ml,CAT09,Shubh Pooja,23.00
+P0007,TinyToes Fish Fillet Pack of 6,CAT18,TinyToes,422.00
+P0008,VitaBoost Detergent Powder 100 g,CAT14,VitaBoost,67.00
+P0009,SunMeadow Toffees 500 g,CAT12,SunMeadow,41.00
+P0010,Swadeshi Select Mango 200 ml,CAT03,Swadeshi Select,69.00
+P0011,DesiHarvest Dog Food 500 g,CAT16,DesiHarvest,501.00
+P0012,SparkleHome Cola Pack of 6,CAT07,SparkleHome,154.00
+P0013,UrbanPantry Baby Lotion 1 kg,CAT15,UrbanPantry,319.00
+P0014,SaucyChef Filter Coffee Pack of 2,CAT11,SaucyChef,429.00
+P0015,Crunchies Muesli Pack of 6,CAT10,Crunchies,150.00
+P0016,TinyToes Whole Wheat Bread 100 g,CAT02,TinyToes,42.00
+P0017,PawPals Gel Pens 200 ml,CAT20,PawPals,29.00
+P0018,DesiHarvest Pasta 1 kg,CAT09,DesiHarvest,99.00
+P0019,Swadeshi Select Apple 200 ml,CAT03,Swadeshi Select,214.00
+P0020,SaucyChef Popcorn Pack of 2,CAT06,SaucyChef,99.00
+P0021,SunMeadow Carrot 1 L,CAT04,SunMeadow,28.00
+P0022,MorningGlow Whole Wheat Atta 500 g,CAT05,MorningGlow,289.00
+P0023,PawPals Balloons 1 kg,CAT20,PawPals,49.00
+P0024,Shubh Pooja Frozen Fries 200 ml,CAT09,Shubh Pooja,289.00
+P0025,SpiceRoute Extra Virgin Olive Oil 200 g,CAT17,SpiceRoute,947.00
+P0026,PureNest Candles 1 L,CAT20,PureNest,174.00
+P0027,PureNest Spinach 200 g,CAT04,PureNest,45.00
+P0028,SpiceRoute Detergent Powder 1 L,CAT14,SpiceRoute,67.00
+P0029,TinyToes Assam Tea Pack of 4,CAT11,TinyToes,89.00
+P0030,SpiceRoute Basmati Rice 200 g,CAT05,SpiceRoute,382.00
+P0031,SunMeadow Pomegranate Pack of 6,CAT03,SunMeadow,90.00
+P0032,GreenLeaf Filter Coffee 1 kg,CAT11,GreenLeaf,85.00
+P0033,GoldenDrop Corn Flakes 1 L,CAT10,GoldenDrop,345.00
+P0034,VitaBoost Orange 1 L,CAT03,VitaBoost,99.00
+P0035,Annapurna Foods Kulfi 1 L,CAT08,Annapurna Foods,242.00
+P0036,NutriKart Toor Dal Pack of 2,CAT05,NutriKart,134.00
+P0037,VitaBoost Toilet Cleaner 1 L,CAT14,VitaBoost,116.00
+P0038,GoldenDrop Brownie Pack of 2,CAT08,GoldenDrop,249.00
+P0039,UrbanPantry Croissant 500 ml,CAT02,UrbanPantry,109.00
+P0040,NutriKart Brownie Pack of 4,CAT08,NutriKart,59.00
+P0041,BlueRiver Roasted Peanuts 500 ml,CAT06,BlueRiver,59.00
+P0042,PawPals Vanilla Tub 200 ml,CAT08,PawPals,139.00
+P0043,VitaBoost Orange Pack of 6,CAT03,VitaBoost,78.00
+P0044,SaucyChef Assam Tea 1 L,CAT11,SaucyChef,189.00
+P0045,Swadeshi Select Spinach 200 g,CAT04,Swadeshi Select,36.00
+P0046,SparkleHome Coconut Water 200 ml,CAT07,SparkleHome,75.00
+P0047,PawPals Gulab Jamun Tin 100 g,CAT08,PawPals,34.00
+P0048,SunMeadow Cat Food Pack of 6,CAT16,SunMeadow,869.00
+P0049,SaucyChef Chicken Breast 200 ml,CAT18,SaucyChef,209.00
+P0050,PaperTrail Deodorant 500 g,CAT13,PaperTrail,96.00
+P0051,SaucyChef Fish Fillet 200 ml,CAT18,SaucyChef,769.00
+P0052,GoldenDrop Detergent Powder 200 g,CAT14,GoldenDrop,159.00
+P0053,HomeEase Nachos 1 L,CAT06,HomeEase,114.00
+P0054,VitaBoost Detergent Powder Pack of 4,CAT14,VitaBoost,134.00
+P0055,UrbanPantry Rusk 500 g,CAT02,UrbanPantry,169.00
+P0056,BlueRiver Dog Food Pack of 4,CAT16,BlueRiver,669.00
+P0057,KhetSe Honey 1 L,CAT10,KhetSe,239.00
+P0058,Shubh Pooja Frozen Fries 1 kg,CAT09,Shubh Pooja,35.00
+P0059,Annapurna Foods Chyawanprash Pack of 6,CAT19,Annapurna Foods,119.00
+P0060,Annapurna Foods Protein Bar Pack of 6,CAT19,Annapurna Foods,439.00
+P0061,MorningGlow Instant Noodles 200 g,CAT09,MorningGlow,72.00
+P0062,SparkleHome Milk Chocolate 200 ml,CAT12,SparkleHome,306.00
+P0063,BlueRiver Nachos Pack of 6,CAT06,BlueRiver,115.00
+P0064,SeaCatch Moong Dal 200 g,CAT05,SeaCatch,388.00
+P0065,PaperTrail Shampoo Pack of 2,CAT13,PaperTrail,349.00
+P0066,FreshFarm Protein Bar 200 g,CAT19,FreshFarm,449.00
+P0067,PureNest Coriander Pack of 2,CAT04,PureNest,31.00
+P0068,NutriKart Gulab Jamun Tin 500 ml,CAT08,NutriKart,119.00
+P0069,SunMeadow Nachos Pack of 2,CAT06,SunMeadow,45.00
+P0070,GreenLeaf Muesli 200 g,CAT10,GreenLeaf,469.00
+P0071,NutriKart Basmati Rice Pack of 4,CAT05,NutriKart,405.00
+P0072,Swadeshi Select Organic Quinoa 200 g,CAT17,Swadeshi Select,1109.00
+P0073,TinyToes Body Wash 200 ml,CAT13,TinyToes,299.00
+P0074,DesiHarvest Toffees Pack of 4,CAT12,DesiHarvest,134.00
+P0075,SunMeadow Pet Treats 100 g,CAT16,SunMeadow,232.00
+P0076,ChillZone Pav Pack of 6,CAT02,ChillZone,31.00
+P0077,SparkleHome Milk Chocolate 200 ml,CAT12,SparkleHome,168.00
+P0078,GoldenDrop Kulfi 1 kg,CAT08,GoldenDrop,60.00
+P0079,NutriKart Cashews Pack of 6,CAT17,NutriKart,749.00
+P0080,GreenLeaf Chicken Breast Pack of 2,CAT18,GreenLeaf,381.00
+P0081,UrbanPantry Soda 1 L,CAT07,UrbanPantry,139.00
+P0082,SaucyChef Iced Tea 500 g,CAT07,SaucyChef,149.00
+P0083,ChillZone Whole Wheat Bread 200 ml,CAT02,ChillZone,68.00
+P0084,Shubh Pooja Instant Noodles Pack of 4,CAT09,Shubh Pooja,16.00
+P0085,GreenLeaf Corn Flakes 1 kg,CAT10,GreenLeaf,137.00
+P0086,SunMeadow Banana 500 g,CAT03,SunMeadow,241.00
+P0087,NutriKart Poha Pack of 4,CAT05,NutriKart,69.00
+P0088,BlueRiver Bhujia 200 ml,CAT06,BlueRiver,140.00
+P0089,SeaCatch Poha 1 kg,CAT05,SeaCatch,266.00
+P0090,DesiHarvest Chicken Sausages 200 ml,CAT18,DesiHarvest,470.00
+P0091,SparkleHome Protein Bar 200 ml,CAT19,SparkleHome,99.00
+P0092,VitaBoost Toilet Cleaner 500 g,CAT14,VitaBoost,349.00
+P0093,PureNest Carrot 100 g,CAT04,PureNest,19.00
+P0094,BlueRiver Dog Food Pack of 2,CAT16,BlueRiver,159.00
+P0095,BlueRiver Curd 1 L,CAT01,BlueRiver,116.00
+P0096,FreshFarm Multivitamin 200 ml,CAT19,FreshFarm,209.00
+P0097,PawPals Gift Wrap 200 ml,CAT20,PawPals,228.00
+P0098,Shubh Pooja Ghee Pack of 2,CAT01,Shubh Pooja,219.00
+P0099,SeaCatch Basmati Rice 1 kg,CAT05,SeaCatch,362.00
+P0100,SeaCatch Whole Wheat Atta 1 L,CAT05,SeaCatch,199.00
+P0101,Swadeshi Select Grapes 100 g,CAT03,Swadeshi Select,48.00
+P0102,VitaBoost Papaya Pack of 2,CAT03,VitaBoost,129.00
+P0103,GoldenDrop Detergent Powder 500 ml,CAT14,GoldenDrop,103.00
+P0104,DesiHarvest Mutton Curry Cut 1 kg,CAT18,DesiHarvest,229.00
+P0105,SaucyChef Paneer Pack of 2,CAT01,SaucyChef,37.00
+P0106,PureNest Tomato 500 ml,CAT04,PureNest,40.00
+P0107,NutriKart Whole Wheat Atta 1 L,CAT05,NutriKart,79.00
+P0108,Swadeshi Select Banana 200 ml,CAT03,Swadeshi Select,169.00
+P0109,PureNest Carrot 1 kg,CAT04,PureNest,22.00
+P0110,Swadeshi Select Spinach 100 g,CAT04,Swadeshi Select,114.00
+P0111,SaucyChef Buttermilk Pack of 2,CAT01,SaucyChef,128.00
+P0112,Annapurna Foods Chyawanprash Pack of 6,CAT19,Annapurna Foods,189.00
+P0113,Shubh Pooja Ghee 200 ml,CAT01,Shubh Pooja,32.00
+P0114,SaucyChef Orange Juice 100 g,CAT07,SaucyChef,24.00
+P0115,NutriKart Organic Quinoa Pack of 6,CAT17,NutriKart,329.00
+P0116,TinyToes Filter Coffee Pack of 2,CAT11,TinyToes,274.00
+P0117,SaucyChef Bhujia 500 g,CAT06,SaucyChef,129.00
+P0118,TinyToes Filter Coffee 500 ml,CAT11,TinyToes,129.00
+P0119,KhetSe Candles Pack of 2,CAT20,KhetSe,159.00
+P0120,FreshFarm Notebook Pack of 4,CAT20,FreshFarm,122.00
+P0121,PureNest Balloons Pack of 4,CAT20,PureNest,159.00
+P0122,Crunchies Muesli Pack of 4,CAT10,Crunchies,248.00
+P0123,HomeEase Nachos 500 g,CAT06,HomeEase,69.00
+P0124,NutriKart Organic Quinoa 1 L,CAT17,NutriKart,699.00
+P0125,UrbanPantry Whole Wheat Bread 100 g,CAT02,UrbanPantry,159.00
+P0126,SaucyChef Assam Tea 200 ml,CAT11,SaucyChef,89.00
+P0127,Shubh Pooja Ready-to-Eat Biryani 500 ml,CAT09,Shubh Pooja,160.00
+P0128,PureNest Baby Food 200 g,CAT15,PureNest,219.00
+P0129,PureNest Spinach 200 g,CAT04,PureNest,89.00
+P0130,Shubh Pooja Organic Quinoa Pack of 6,CAT17,Shubh Pooja,684.00
+P0131,DesiHarvest Chicken Breast 200 ml,CAT18,DesiHarvest,466.00
+P0132,BlueRiver Dog Food 1 kg,CAT16,BlueRiver,227.00
+P0133,PaperTrail Curd 100 g,CAT01,PaperTrail,40.00
+P0134,KhetSe Chyawanprash 100 g,CAT19,KhetSe,393.00
+P0135,PureNest Baby Food 500 g,CAT15,PureNest,159.00
+P0136,BlueRiver Cat Food 1 kg,CAT16,BlueRiver,637.00
+P0137,GreenLeaf Green Tea 1 kg,CAT11,GreenLeaf,328.00
+P0138,PureNest Diapers 200 ml,CAT15,PureNest,199.00
+P0139,Crunchies Capsicum 1 L,CAT04,Crunchies,17.00
+P0140,ChillZone Shampoo 1 kg,CAT13,ChillZone,138.00
+P0141,Swadeshi Select Potato 500 ml,CAT04,Swadeshi Select,83.00
+P0142,PaperTrail Face Wash 1 L,CAT13,PaperTrail,89.00
+P0143,SaucyChef Fish Fillet Pack of 4,CAT18,SaucyChef,579.00
+P0144,MorningGlow Frozen Fries 500 ml,CAT09,MorningGlow,69.00
+P0145,DesiHarvest Frozen Peas Pack of 4,CAT09,DesiHarvest,17.00
+P0146,BlueRiver Curd 500 ml,CAT01,BlueRiver,199.00
+P0147,TinyToes Shampoo Pack of 4,CAT13,TinyToes,229.00
+P0148,SparkleHome Wafer Bar Pack of 4,CAT12,SparkleHome,24.00
+P0149,GoldenDrop Instant Coffee 200 g,CAT11,GoldenDrop,199.00
+P0150,Crunchies Carrot Pack of 2,CAT04,Crunchies,46.00
+P0151,DesiHarvest Mutton Curry Cut 200 g,CAT18,DesiHarvest,210.00
+P0152,Shubh Pooja Almonds 200 g,CAT17,Shubh Pooja,308.00
+P0153,PawPals Gulab Jamun Tin Pack of 4,CAT08,PawPals,119.00
+P0154,KhetSe Honey 1 kg,CAT10,KhetSe,179.00
+P0155,PawPals Baby Lotion Pack of 2,CAT15,PawPals,219.00
+P0156,Crunchies Rolled Oats 1 L,CAT10,Crunchies,383.00
+P0157,NutriKart Whole Wheat Atta Pack of 4,CAT05,NutriKart,483.00
+P0158,ChillZone Croissant Pack of 6,CAT02,ChillZone,159.00
+P0159,Swadeshi Select Papaya Pack of 4,CAT03,Swadeshi Select,249.00
+P0160,KhetSe Mixed Fruit Jam 500 ml,CAT10,KhetSe,489.00
+P0161,KhetSe Candles Pack of 6,CAT20,KhetSe,59.00
+P0162,Swadeshi Select Dishwash Liquid 200 g,CAT14,Swadeshi Select,134.00
+P0163,Swadeshi Select Extra Virgin Olive Oil 1 kg,CAT17,Swadeshi Select,1149.00
+P0164,Shubh Pooja Ghee Pack of 6,CAT01,Shubh Pooja,319.00
+P0165,DesiHarvest Chicken Sausages Pack of 4,CAT18,DesiHarvest,625.00
+P0166,GoldenDrop Garbage Bags 1 L,CAT14,GoldenDrop,59.00
+P0167,Shubh Pooja Almonds Pack of 6,CAT17,Shubh Pooja,775.00
+P0168,KhetSe Mixed Fruit Jam Pack of 2,CAT10,KhetSe,299.00
+P0169,BlueRiver Pet Treats 1 kg,CAT16,BlueRiver,162.00
+P0170,Shubh Pooja Cashews 200 ml,CAT17,Shubh Pooja,789.00
+P0171,PaperTrail Curd 100 g,CAT01,PaperTrail,299.00
+P0172,Annapurna Foods Brownie Pack of 2,CAT08,Annapurna Foods,139.00
+P0173,UrbanPantry Pav 200 g,CAT02,UrbanPantry,159.00
+P0174,SpiceRoute Organic Honey 500 g,CAT17,SpiceRoute,469.00
+P0175,Shubh Pooja Organic Quinoa 1 kg,CAT17,Shubh Pooja,291.00
+P0176,TinyToes Chicken Breast 1 kg,CAT18,TinyToes,774.00
+P0177,PaperTrail Paneer 1 L,CAT01,PaperTrail,119.00
+P0178,Swadeshi Select Papaya Pack of 2,CAT03,Swadeshi Select,72.00
+P0179,SaucyChef Popcorn 1 L,CAT06,SaucyChef,82.00
+P0180,DesiHarvest Frozen Peas 1 L,CAT09,DesiHarvest,69.00
+P0181,SaucyChef Khakhra Pack of 4,CAT06,SaucyChef,24.00
+P0182,KhetSe Peanut Butter 500 ml,CAT10,KhetSe,296.00
+P0183,SunMeadow Apple 1 kg,CAT03,SunMeadow,244.00
+P0184,Annapurna Foods Kulfi 500 ml,CAT08,Annapurna Foods,122.00
+P0185,GoldenDrop Rolled Oats Pack of 4,CAT10,GoldenDrop,169.00
+P0186,SpiceRoute Almonds Pack of 6,CAT17,SpiceRoute,309.00
+P0187,BlueRiver Popcorn 100 g,CAT06,BlueRiver,149.00
+P0188,Swadeshi Select Rusk Pack of 2,CAT02,Swadeshi Select,120.00
+P0189,GreenLeaf Fish Fillet 500 ml,CAT18,GreenLeaf,346.00
+P0190,PawPals Baby Lotion 200 g,CAT15,PawPals,331.00
+P0191,TinyToes Toothpaste 500 ml,CAT13,TinyToes,99.00
+P0192,Swadeshi Select Orange 500 g,CAT03,Swadeshi Select,79.00
+P0193,DailyDelight Orange Juice 500 ml,CAT07,DailyDelight,20.00
+P0194,SaucyChef Iced Tea Pack of 2,CAT07,SaucyChef,33.00
+P0195,SparkleHome Pasta 500 g,CAT09,SparkleHome,38.00
+P0196,Shubh Pooja Frozen Peas Pack of 2,CAT09,Shubh Pooja,69.00
+P0197,Shubh Pooja Dark Chocolate 1 kg,CAT12,Shubh Pooja,114.00
+P0198,PaperTrail Toned Milk 200 g,CAT01,PaperTrail,239.00
+P0199,Shubh Pooja Eggs 200 ml,CAT01,Shubh Pooja,32.00
+P0200,DesiHarvest Cat Food 100 g,CAT16,DesiHarvest,209.00
+P0201,KhetSe Chyawanprash 500 g,CAT19,KhetSe,48.00
+P0202,Crunchies Muesli 100 g,CAT10,Crunchies,106.00
+P0203,GoldenDrop Garbage Bags 1 L,CAT14,GoldenDrop,213.00
+P0204,DailyDelight Soda Pack of 2,CAT07,DailyDelight,139.00
+P0205,MorningGlow Apple Pack of 4,CAT03,MorningGlow,101.00
+P0206,UrbanPantry Diapers 1 L,CAT15,UrbanPantry,294.00
+P0207,MorningGlow Pomegranate Pack of 4,CAT03,MorningGlow,118.00
+P0208,SparkleHome Iced Tea 200 g,CAT07,SparkleHome,23.00
+P0209,SunMeadow Pomegranate 1 kg,CAT03,SunMeadow,59.00
+P0210,GreenLeaf Chicken Sausages 500 g,CAT18,GreenLeaf,209.00
+P0211,GoldenDrop Brownie 1 kg,CAT08,GoldenDrop,79.00
+P0212,PawPals Balloons Pack of 2,CAT20,PawPals,30.00
+P0213,SaucyChef Soda 1 L,CAT07,SaucyChef,21.00
+P0214,UrbanPantry Energy Drink Pack of 2,CAT07,UrbanPantry,156.00
+P0215,MorningGlow Moong Dal 100 g,CAT05,MorningGlow,168.00
+P0216,Swadeshi Select Organic Quinoa 1 kg,CAT17,Swadeshi Select,369.00
+P0217,TinyToes Green Tea 200 ml,CAT11,TinyToes,435.00
+P0218,TinyToes Muffin 200 g,CAT02,TinyToes,61.00
+P0219,UrbanPantry Diapers 1 kg,CAT15,UrbanPantry,403.00
+P0220,TinyToes Assam Tea Pack of 6,CAT11,TinyToes,252.00
+P0221,PureNest Balloons 200 g,CAT20,PureNest,149.00
+P0222,UrbanPantry Rusk 1 L,CAT02,UrbanPantry,133.00
+P0223,Swadeshi Select Extra Virgin Olive Oil 1 kg,CAT17,Swadeshi Select,711.00
+P0224,DesiHarvest Dark Chocolate Pack of 2,CAT12,DesiHarvest,254.00
+P0225,BlueRiver Butter 200 ml,CAT01,BlueRiver,413.00
+P0226,SaucyChef Popcorn 100 g,CAT06,SaucyChef,93.00
+P0227,Swadeshi Select Coriander 500 ml,CAT04,Swadeshi Select,39.00
+P0228,Swadeshi Select Papaya 100 g,CAT03,Swadeshi Select,43.00
+P0229,Annapurna Foods Electrolyte Drink 500 g,CAT19,Annapurna Foods,119.00
+P0230,SaucyChef Roasted Peanuts 100 g,CAT06,SaucyChef,130.00
+P0231,PaperTrail Face Wash 1 kg,CAT13,PaperTrail,309.00
+P0232,SparkleHome Kaju Katli 200 g,CAT12,SparkleHome,61.00
+P0233,SparkleHome Kaju Katli 200 g,CAT12,SparkleHome,149.00
+P0234,PaperTrail Toothpaste 1 kg,CAT13,PaperTrail,209.00
+P0235,DesiHarvest Toffees 100 g,CAT12,DesiHarvest,12.00
+P0236,PaperTrail Face Wash 1 L,CAT13,PaperTrail,99.00
+P0237,SunMeadow Cat Food Pack of 4,CAT16,SunMeadow,179.00
+P0238,GreenLeaf Fish Fillet 1 L,CAT18,GreenLeaf,409.00
+P0239,SparkleHome Coconut Water 500 g,CAT07,SparkleHome,24.00
+P0240,PaperTrail Body Wash Pack of 4,CAT13,PaperTrail,70.00
+P0241,SunMeadow Pet Treats 500 ml,CAT16,SunMeadow,378.00
+P0242,NutriKart Organic Honey 1 L,CAT17,NutriKart,359.00
+P0243,DesiHarvest Dog Food 100 g,CAT16,DesiHarvest,182.00
+P0244,Annapurna Foods Brownie 500 ml,CAT08,Annapurna Foods,69.00
+P0245,PawPals Toothpaste 500 ml,CAT13,PawPals,62.00
+P0246,UrbanPantry Muffin 500 ml,CAT02,UrbanPantry,159.00
+P0247,TinyToes Filter Coffee 100 g,CAT11,TinyToes,141.00
+P0248,HomeEase Popcorn Pack of 4,CAT06,HomeEase,32.00
+P0249,PureNest Potato 100 g,CAT04,PureNest,33.00
+P0250,PaperTrail Shampoo 500 g,CAT13,PaperTrail,66.00
+P0251,GreenLeaf Corn Flakes 200 ml,CAT10,GreenLeaf,239.00
+P0252,TinyToes Mutton Curry Cut 200 ml,CAT18,TinyToes,229.00
+P0253,Crunchies Muesli 1 kg,CAT10,Crunchies,98.00
+P0254,NutriKart Vanilla Tub Pack of 2,CAT08,NutriKart,43.00
+P0255,PaperTrail Eggs 500 ml,CAT01,PaperTrail,42.00
+P0256,KhetSe Chyawanprash 200 ml,CAT19,KhetSe,141.00
+P0257,PaperTrail Curd 200 g,CAT01,PaperTrail,539.00
+P0258,FreshFarm Multivitamin 1 kg,CAT19,FreshFarm,101.00
+P0259,GoldenDrop Kulfi 200 ml,CAT08,GoldenDrop,311.00
+P0260,SpiceRoute Organic Honey 500 ml,CAT17,SpiceRoute,922.00
+P0261,SunMeadow Roasted Peanuts 1 L,CAT06,SunMeadow,69.00
+P0262,MorningGlow Pasta 1 L,CAT09,MorningGlow,28.00
+P0263,PaperTrail Curd 500 ml,CAT01,PaperTrail,59.00
+P0264,VitaBoost Dishwash Liquid 1 L,CAT14,VitaBoost,59.00
+P0265,DailyDelight Cold Coffee Pack of 4,CAT07,DailyDelight,157.00
+P0266,SparkleHome Dark Chocolate 200 g,CAT12,SparkleHome,69.00
+P0267,Shubh Pooja Organic Honey 100 g,CAT17,Shubh Pooja,691.00
+P0268,Shubh Pooja Almonds Pack of 2,CAT17,Shubh Pooja,287.00
+P0269,PawPals Deodorant 200 g,CAT13,PawPals,169.00
+P0270,ChillZone Whole Wheat Bread Pack of 6,CAT02,ChillZone,99.00
+P0271,FreshFarm Diapers 100 g,CAT15,FreshFarm,352.00
+P0272,PawPals Shampoo Pack of 4,CAT13,PawPals,273.00
+P0273,GreenLeaf Assam Tea 500 g,CAT11,GreenLeaf,169.00
+P0274,PaperTrail Deodorant 500 ml,CAT13,PaperTrail,189.00
+P0275,BlueRiver Pet Treats 200 ml,CAT16,BlueRiver,152.00
+P0276,KhetSe Chyawanprash Pack of 6,CAT19,KhetSe,109.00
+P0277,PawPals Notebook 1 kg,CAT20,PawPals,47.00
+P0278,KhetSe Peanut Butter 500 g,CAT10,KhetSe,219.00
+P0279,SunMeadow Milk Chocolate 500 g,CAT12,SunMeadow,99.00
+P0280,TinyToes Chicken Breast Pack of 2,CAT18,TinyToes,579.00
+P0281,SpiceRoute Extra Virgin Olive Oil 500 ml,CAT17,SpiceRoute,570.00
+P0282,GreenLeaf Instant Coffee 1 L,CAT11,GreenLeaf,525.00
+P0283,MorningGlow Mango 100 g,CAT03,MorningGlow,249.00
+P0284,UrbanPantry Iced Tea 1 kg,CAT07,UrbanPantry,35.00
+P0285,BlueRiver Potato Chips Pack of 4,CAT06,BlueRiver,35.00
+P0286,PaperTrail Curd 100 g,CAT01,PaperTrail,398.00
+P0287,NutriKart Moong Dal 200 g,CAT05,NutriKart,79.00
+P0288,VitaBoost Toilet Cleaner 500 g,CAT14,VitaBoost,469.00
+P0289,PureNest Potato 200 ml,CAT04,PureNest,15.00
+P0290,TinyToes Whole Wheat Bread Pack of 4,CAT02,TinyToes,149.00
+P0291,KhetSe Protein Bar 1 L,CAT19,KhetSe,492.00
+P0292,MorningGlow Whole Wheat Atta 100 g,CAT05,MorningGlow,447.00
+P0293,KhetSe Chyawanprash 500 g,CAT19,KhetSe,40.00
+P0294,PawPals Gel Pens 1 kg,CAT20,PawPals,59.00
+P0295,SunMeadow Pet Treats 1 L,CAT16,SunMeadow,329.00
+P0296,DesiHarvest Cat Food 500 ml,CAT16,DesiHarvest,499.00
+P0297,KhetSe Mixed Fruit Jam Pack of 2,CAT10,KhetSe,131.00
+P0298,SunMeadow Mango 500 ml,CAT03,SunMeadow,147.00
+P0299,SparkleHome Instant Noodles 500 ml,CAT09,SparkleHome,169.00
+P0300,SpiceRoute Toor Dal 500 ml,CAT05,SpiceRoute,209.00
+P0301,PawPals Kulfi Pack of 6,CAT08,PawPals,245.00
+P0302,SaucyChef Popcorn 500 g,CAT06,SaucyChef,20.00
+P0303,SaucyChef Assam Tea 1 kg,CAT11,SaucyChef,98.00
+P0304,FreshFarm Gift Wrap Pack of 2,CAT20,FreshFarm,69.00
+P0305,UrbanPantry Cold Coffee 500 g,CAT07,UrbanPantry,91.00
+P0306,DesiHarvest Chicken Sausages Pack of 6,CAT18,DesiHarvest,273.00
+P0307,BlueRiver Cat Food 200 g,CAT16,BlueRiver,461.00
+P0308,TinyToes Green Tea 1 L,CAT11,TinyToes,499.00
+P0309,SeaCatch Poha Pack of 4,CAT05,SeaCatch,279.00
+P0310,DesiHarvest Frozen Paratha 200 ml,CAT09,DesiHarvest,78.00
+P0311,SparkleHome Frozen Fries 200 g,CAT09,SparkleHome,209.00
+P0312,DesiHarvest Fish Fillet Pack of 4,CAT18,DesiHarvest,369.00
+P0313,TinyToes Fish Fillet 500 ml,CAT18,TinyToes,241.00
+P0314,SunMeadow Dark Chocolate Pack of 6,CAT12,SunMeadow,13.00
+P0315,SpiceRoute Floor Cleaner 1 L,CAT14,SpiceRoute,409.00
+P0316,FreshFarm Baby Wipes 1 L,CAT15,FreshFarm,589.00
+P0317,SaucyChef Filter Coffee 500 g,CAT11,SaucyChef,429.00
+P0318,Crunchies Peanut Butter 100 g,CAT10,Crunchies,159.00
+P0319,BlueRiver Pet Treats 200 ml,CAT16,BlueRiver,219.00
+P0320,PureNest Potato Pack of 2,CAT04,PureNest,49.00
+P0321,Crunchies Cucumber 200 g,CAT04,Crunchies,38.00
+P0322,Swadeshi Select Croissant 100 g,CAT02,Swadeshi Select,35.00
+P0323,UrbanPantry Diapers 1 L,CAT15,UrbanPantry,739.00
+P0324,BlueRiver Dog Food Pack of 2,CAT16,BlueRiver,259.00
+P0325,PureNest Baby Wipes 500 ml,CAT15,PureNest,289.00
+P0326,SunMeadow Dog Food Pack of 2,CAT16,SunMeadow,156.00
+P0327,BlueRiver Pet Treats Pack of 2,CAT16,BlueRiver,754.00
+P0328,SaucyChef Roasted Peanuts Pack of 4,CAT06,SaucyChef,22.00
+P0329,Organica Cat Food Pack of 2,CAT16,Organica,591.00
+P0330,PureNest Baby Wipes 500 ml,CAT15,PureNest,803.00
+P0331,FreshFarm Baby Food 500 g,CAT15,FreshFarm,459.00
+P0332,Shubh Pooja Pasta Pack of 6,CAT09,Shubh Pooja,21.00
+P0333,TinyToes Garlic Bread 100 g,CAT02,TinyToes,79.00
+P0334,VitaBoost Orange Pack of 2,CAT03,VitaBoost,45.00
+P0335,Crunchies Muesli 200 ml,CAT10,Crunchies,240.00
+P0336,PureNest Baby Lotion 200 ml,CAT15,PureNest,229.00
+P0337,UrbanPantry Coconut Water 200 g,CAT07,UrbanPantry,40.00
+P0338,SunMeadow Capsicum 200 g,CAT04,SunMeadow,59.00
+P0339,Swadeshi Select Pav 1 kg,CAT02,Swadeshi Select,149.00
+P0340,SunMeadow Kaju Katli Pack of 4,CAT12,SunMeadow,109.00
+P0341,PawPals Gift Wrap Pack of 2,CAT20,PawPals,32.00
+P0342,GoldenDrop Gulab Jamun Tin 500 g,CAT08,GoldenDrop,38.00
+P0343,FreshFarm Candles 200 ml,CAT20,FreshFarm,162.00
+P0344,SpiceRoute Moong Dal Pack of 4,CAT05,SpiceRoute,70.00
+P0345,UrbanPantry Baby Wipes Pack of 2,CAT15,UrbanPantry,769.00
+P0346,DesiHarvest Cat Food 1 kg,CAT16,DesiHarvest,608.00
+P0347,MorningGlow Apple Pack of 4,CAT03,MorningGlow,182.00
+P0348,PawPals Baby Wipes Pack of 6,CAT15,PawPals,869.00
+P0349,Swadeshi Select Tomato 200 ml,CAT04,Swadeshi Select,69.00
+P0350,Annapurna Foods Electrolyte Drink Pack of 4,CAT19,Annapurna Foods,669.00
+P0351,GreenLeaf Green Tea 200 g,CAT11,GreenLeaf,97.00
+P0352,KhetSe Protein Bar 1 L,CAT19,KhetSe,75.00
+P0353,SaucyChef Assam Tea Pack of 4,CAT11,SaucyChef,89.00
+P0354,Shubh Pooja Milk Chocolate 200 ml,CAT12,Shubh Pooja,57.00
+P0355,HomeEase Nachos Pack of 2,CAT06,HomeEase,79.00
+P0356,PureNest Gift Wrap 100 g,CAT20,PureNest,79.00
+P0357,SunMeadow Dark Chocolate 200 g,CAT12,SunMeadow,183.00
+P0358,Swadeshi Select Banana 200 ml,CAT03,Swadeshi Select,89.00
+P0359,SpiceRoute Basmati Rice 500 g,CAT05,SpiceRoute,117.00
+P0360,SparkleHome Coconut Water Pack of 2,CAT07,SparkleHome,69.00
+P0361,Swadeshi Select Tomato 1 kg,CAT04,Swadeshi Select,17.00
+P0362,Swadeshi Select Toilet Cleaner 500 ml,CAT14,Swadeshi Select,50.00
+P0363,Annapurna Foods Brownie 200 g,CAT08,Annapurna Foods,339.00
+P0364,VitaBoost Orange Pack of 2,CAT03,VitaBoost,58.00
+P0365,SaucyChef Cold Coffee Pack of 6,CAT07,SaucyChef,25.00
+P0366,SparkleHome Protein Bar 500 g,CAT19,SparkleHome,147.00
+P0367,Annapurna Foods Electrolyte Drink Pack of 4,CAT19,Annapurna Foods,109.00
+P0368,SpiceRoute Toilet Cleaner 200 ml,CAT14,SpiceRoute,327.00
+P0369,Shubh Pooja Frozen Fries 500 g,CAT09,Shubh Pooja,44.00
+P0370,Shubh Pooja Organic Quinoa 1 kg,CAT17,Shubh Pooja,709.00
+P0371,Annapurna Foods Chyawanprash Pack of 6,CAT19,Annapurna Foods,239.00
+P0372,Shubh Pooja Toffees Pack of 2,CAT12,Shubh Pooja,59.00
+P0373,SpiceRoute Cashews 200 g,CAT17,SpiceRoute,1158.00
+P0374,KhetSe Protein Bar 500 ml,CAT19,KhetSe,270.00
+P0375,SparkleHome Toffees 1 kg,CAT12,SparkleHome,35.00
+P0376,BlueRiver Eggs 1 kg,CAT01,BlueRiver,509.00
+P0377,DesiHarvest Fish Fillet 500 ml,CAT18,DesiHarvest,205.00
+P0378,GreenLeaf Assam Tea 1 kg,CAT11,GreenLeaf,529.00
+P0379,PaperTrail Hand Wash Pack of 6,CAT13,PaperTrail,439.00
+P0380,PureNest Notebook Pack of 4,CAT20,PureNest,118.00
+P0381,ChillZone Shampoo 200 ml,CAT13,ChillZone,279.00
+P0382,Annapurna Foods Brownie Pack of 2,CAT08,Annapurna Foods,59.00
+P0383,PawPals Shampoo 200 g,CAT13,PawPals,319.00
+P0384,DesiHarvest Toffees Pack of 6,CAT12,DesiHarvest,59.00
+P0385,UrbanPantry Rusk 1 kg,CAT02,UrbanPantry,37.00
+P0386,GoldenDrop Assam Tea Pack of 2,CAT11,GoldenDrop,139.00
+P0387,Shubh Pooja Wafer Bar 500 g,CAT12,Shubh Pooja,106.00
+P0388,FreshFarm Electrolyte Drink Pack of 2,CAT19,FreshFarm,90.00
+P0389,Shubh Pooja Toned Milk 1 kg,CAT01,Shubh Pooja,43.00
+P0390,BlueRiver Dog Food 500 g,CAT16,BlueRiver,844.00
+P0391,HomeEase Bhujia 100 g,CAT06,HomeEase,42.00
+P0392,Annapurna Foods Chyawanprash 500 g,CAT19,Annapurna Foods,59.00
+P0393,BlueRiver Cheese Slices 500 ml,CAT01,BlueRiver,214.00
+P0394,GoldenDrop Filter Coffee 500 ml,CAT11,GoldenDrop,159.00
+P0395,UrbanPantry Coconut Water 1 kg,CAT07,UrbanPantry,139.00
+P0396,DesiHarvest Pasta 1 kg,CAT09,DesiHarvest,18.00
+P0397,Crunchies Corn Flakes Pack of 4,CAT10,Crunchies,269.00
+P0398,SparkleHome Wafer Bar 100 g,CAT12,SparkleHome,89.00
+P0399,Swadeshi Select Apple 1 kg,CAT03,Swadeshi Select,119.00
+P0400,GoldenDrop Toilet Cleaner Pack of 6,CAT14,GoldenDrop,88.00
+P0401,Annapurna Foods Protein Bar 1 L,CAT19,Annapurna Foods,461.00
+P0402,Swadeshi Select Papaya 1 kg,CAT03,Swadeshi Select,44.00
+P0403,VitaBoost Toilet Cleaner Pack of 4,CAT14,VitaBoost,437.00
+P0404,NutriKart Organic Honey 200 g,CAT17,NutriKart,366.00
+P0405,SeaCatch Basmati Rice 200 ml,CAT05,SeaCatch,61.00
+P0406,BlueRiver Toned Milk Pack of 4,CAT01,BlueRiver,28.00
+P0407,UrbanPantry Muffin 500 ml,CAT02,UrbanPantry,111.00
+P0408,DesiHarvest Cat Food 500 ml,CAT16,DesiHarvest,303.00
+P0409,SunMeadow Wafer Bar 1 L,CAT12,SunMeadow,193.00
+P0410,Organica Dog Food 500 ml,CAT16,Organica,556.00
+P0411,UrbanPantry Cold Coffee 200 g,CAT07,UrbanPantry,47.00
+P0412,UrbanPantry Energy Drink Pack of 6,CAT07,UrbanPantry,69.00
+P0413,MorningGlow Ready-to-Eat Biryani 100 g,CAT09,MorningGlow,82.00
+P0414,Crunchies Corn Flakes Pack of 2,CAT10,Crunchies,199.00
+P0415,SunMeadow Popcorn 1 kg,CAT06,SunMeadow,22.00
+P0416,TinyToes Pav 200 g,CAT02,TinyToes,61.00
+P0417,FreshFarm Balloons 200 g,CAT20,FreshFarm,119.00
+P0418,MorningGlow Frozen Fries Pack of 6,CAT09,MorningGlow,70.00
+P0419,Shubh Pooja Frozen Fries 200 ml,CAT09,Shubh Pooja,269.00
+P0420,SparkleHome Wafer Bar 100 g,CAT12,SparkleHome,179.00
+P0421,KhetSe Protein Bar 500 ml,CAT19,KhetSe,195.00
+P0422,Swadeshi Select Croissant 500 ml,CAT02,Swadeshi Select,80.00
+P0423,PureNest Diapers 500 ml,CAT15,PureNest,699.00
+P0424,SunMeadow Dog Food 1 L,CAT16,SunMeadow,499.00
+P0425,PawPals Baby Food 200 ml,CAT15,PawPals,231.00
+P0426,SunMeadow Spinach 200 ml,CAT04,SunMeadow,33.00
+P0427,UrbanPantry Baby Lotion 200 g,CAT15,UrbanPantry,229.00
+P0428,BlueRiver Buttermilk 500 ml,CAT01,BlueRiver,199.00
+P0429,Annapurna Foods Gulab Jamun Tin Pack of 6,CAT08,Annapurna Foods,149.00
+P0430,Annapurna Foods Kulfi Pack of 4,CAT08,Annapurna Foods,39.00
+P0431,Annapurna Foods Gulab Jamun Tin 1 kg,CAT08,Annapurna Foods,149.00
+P0432,GreenLeaf Filter Coffee 1 L,CAT11,GreenLeaf,429.00
+P0433,PawPals Balloons 200 ml,CAT20,PawPals,179.00
+P0434,VitaBoost Garbage Bags Pack of 6,CAT14,VitaBoost,86.00
+P0435,SpiceRoute Garbage Bags 500 ml,CAT14,SpiceRoute,94.00
+P0436,SparkleHome Wafer Bar Pack of 4,CAT12,SparkleHome,44.00
+P0437,SaucyChef Energy Drink Pack of 6,CAT07,SaucyChef,84.00
+P0438,SpiceRoute Poha 200 ml,CAT05,SpiceRoute,203.00
+P0439,GoldenDrop Toilet Cleaner 1 L,CAT14,GoldenDrop,148.00
+P0440,SaucyChef Cold Coffee 1 L,CAT07,SaucyChef,110.00
+P0441,MorningGlow Pasta 500 g,CAT09,MorningGlow,49.00
+P0442,GreenLeaf Honey 200 ml,CAT10,GreenLeaf,149.00
+P0443,SpiceRoute Toilet Cleaner 200 g,CAT14,SpiceRoute,70.00
+P0444,HomeEase Roasted Peanuts Pack of 4,CAT06,HomeEase,29.00
+P0445,ChillZone Croissant 500 ml,CAT02,ChillZone,44.00
+P0446,Crunchies Rolled Oats Pack of 4,CAT10,Crunchies,213.00
+P0447,GreenLeaf Mixed Fruit Jam 200 g,CAT10,GreenLeaf,409.00
+P0448,SpiceRoute Besan 1 kg,CAT05,SpiceRoute,289.00
+P0449,KhetSe Gel Pens 500 ml,CAT20,KhetSe,24.00
+P0450,PawPals Body Wash 1 L,CAT13,PawPals,151.00
+P0451,GreenLeaf Corn Flakes Pack of 6,CAT10,GreenLeaf,389.00
+P0452,PawPals Shampoo 100 g,CAT13,PawPals,132.00
+P0453,SunMeadow Pet Treats 200 ml,CAT16,SunMeadow,289.00
+P0454,SpiceRoute Besan Pack of 4,CAT05,SpiceRoute,109.00
+P0455,Shubh Pooja Cashews 200 g,CAT17,Shubh Pooja,349.00
+P0456,ChillZone Whole Wheat Bread 500 g,CAT02,ChillZone,169.00
+P0457,DesiHarvest Chicken Breast Pack of 6,CAT18,DesiHarvest,236.00
+P0458,Swadeshi Select Carrot 1 L,CAT04,Swadeshi Select,21.00
+P0459,MorningGlow Pasta 500 ml,CAT09,MorningGlow,19.00
+P0460,SunMeadow Toffees 500 g,CAT12,SunMeadow,419.00
+P0461,SunMeadow Tomato Pack of 4,CAT04,SunMeadow,59.00
+P0462,Crunchies Spinach 1 kg,CAT04,Crunchies,52.00
+P0463,SaucyChef Mutton Curry Cut 200 ml,CAT18,SaucyChef,239.00
+P0464,PureNest Coriander Pack of 6,CAT04,PureNest,20.00
+P0465,PawPals Body Wash 500 g,CAT13,PawPals,119.00
+P0466,UrbanPantry Croissant Pack of 4,CAT02,UrbanPantry,189.00
+P0467,KhetSe Candles 1 kg,CAT20,KhetSe,119.00
+P0468,PawPals Baby Wipes Pack of 2,CAT15,PawPals,519.00
+P0469,ChillZone Body Wash 200 ml,CAT13,ChillZone,79.00
+P0470,Annapurna Foods Electrolyte Drink 500 g,CAT19,Annapurna Foods,364.00
+P0471,NutriKart Chocolate Cone 200 g,CAT08,NutriKart,40.00
+P0472,MorningGlow Frozen Peas 1 kg,CAT09,MorningGlow,274.00
+P0473,Shubh Pooja Frozen Fries 500 ml,CAT09,Shubh Pooja,261.00
+P0474,BlueRiver Pet Treats Pack of 6,CAT16,BlueRiver,736.00
+P0475,UrbanPantry Baby Food 1 L,CAT15,UrbanPantry,639.00
+P0476,SunMeadow Carrot 200 ml,CAT04,SunMeadow,80.00
+P0477,ChillZone Whole Wheat Bread 100 g,CAT02,ChillZone,65.00
+P0478,MorningGlow Frozen Fries Pack of 6,CAT09,MorningGlow,79.00
+P0479,GreenLeaf Filter Coffee 500 ml,CAT11,GreenLeaf,244.00
+P0480,HomeEase Bhujia Pack of 2,CAT06,HomeEase,63.00
+P0481,MorningGlow Basmati Rice Pack of 6,CAT05,MorningGlow,416.00
+P0482,SunMeadow Papaya 1 L,CAT03,SunMeadow,231.00
+P0483,GoldenDrop Peanut Butter 200 ml,CAT10,GoldenDrop,189.00
+P0484,MorningGlow Instant Noodles 1 kg,CAT09,MorningGlow,278.00
+P0485,PawPals Hand Wash Pack of 4,CAT13,PawPals,136.00
+P0486,PawPals Gift Wrap 1 L,CAT20,PawPals,24.00
+P0487,PawPals Body Wash Pack of 2,CAT13,PawPals,89.00
+P0488,SaucyChef Soda 500 ml,CAT07,SaucyChef,29.00
+P0489,FreshFarm Diapers 100 g,CAT15,FreshFarm,152.00
+P0490,PawPals Shampoo 200 g,CAT13,PawPals,89.00
+P0491,KhetSe Honey Pack of 2,CAT10,KhetSe,239.00
+P0492,Crunchies Spinach 200 ml,CAT04,Crunchies,99.00
+P0493,SpiceRoute Garbage Bags 200 g,CAT14,SpiceRoute,83.00
+P0494,ChillZone Deodorant 500 g,CAT13,ChillZone,160.00
+P0495,Swadeshi Select Grapes 1 kg,CAT03,Swadeshi Select,59.00
+P0496,Shubh Pooja Ghee Pack of 4,CAT01,Shubh Pooja,129.00
+P0497,GoldenDrop Floor Cleaner Pack of 2,CAT14,GoldenDrop,266.00
+P0498,SunMeadow Toffees Pack of 6,CAT12,SunMeadow,29.00
+P0499,SunMeadow Milk Chocolate 500 g,CAT12,SunMeadow,15.00
+P0500,KhetSe Balloons Pack of 2,CAT20,KhetSe,30.00
+P0501,DailyDelight Coconut Water 1 kg,CAT07,DailyDelight,73.00
+P0502,TinyToes Assam Tea 500 g,CAT11,TinyToes,389.00
+P0503,SpiceRoute Dishwash Liquid 500 ml,CAT14,SpiceRoute,103.00
+P0504,PureNest Balloons 1 L,CAT20,PureNest,38.00
+P0505,SunMeadow Nachos 500 g,CAT06,SunMeadow,149.00
+P0506,PawPals Chocolate Cone 100 g,CAT08,PawPals,36.00
+P0507,Swadeshi Select Whole Wheat Bread 100 g,CAT02,Swadeshi Select,42.00
+P0508,Swadeshi Select Organic Quinoa 100 g,CAT17,Swadeshi Select,689.00
+P0509,SunMeadow Dark Chocolate 100 g,CAT12,SunMeadow,23.00
+P0510,NutriKart Besan 200 ml,CAT05,NutriKart,253.00
+P0511,PaperTrail Cheese Slices 1 kg,CAT01,PaperTrail,169.00
+P0512,KhetSe Muesli 1 kg,CAT10,KhetSe,268.00
+P0513,UrbanPantry Diapers 200 ml,CAT15,UrbanPantry,169.00
+P0514,PawPals Baby Lotion 500 g,CAT15,PawPals,460.00
+P0515,GreenLeaf Instant Coffee Pack of 6,CAT11,GreenLeaf,139.00
+P0516,Swadeshi Select Grapes 1 kg,CAT03,Swadeshi Select,56.00
+P0517,DesiHarvest Cat Food Pack of 2,CAT16,DesiHarvest,289.00
+P0518,GreenLeaf Filter Coffee 200 ml,CAT11,GreenLeaf,369.00
+P0519,SaucyChef Cheese Slices 500 g,CAT01,SaucyChef,49.00
+P0520,SunMeadow Khakhra 200 ml,CAT06,SunMeadow,20.00
+P0521,UrbanPantry Cola 200 g,CAT07,UrbanPantry,21.00
+P0522,NutriKart Whole Wheat Atta 100 g,CAT05,NutriKart,68.00
+P0523,DesiHarvest Prawns Pack of 4,CAT18,DesiHarvest,877.00
+P0524,MorningGlow Toor Dal 500 ml,CAT05,MorningGlow,139.00
+P0525,SunMeadow Nachos Pack of 6,CAT06,SunMeadow,43.00
+P0526,SeaCatch Poha 1 L,CAT05,SeaCatch,91.00
+P0527,MorningGlow Besan 1 L,CAT05,MorningGlow,369.00
+P0528,Swadeshi Select Garlic Bread 1 L,CAT02,Swadeshi Select,59.00
+P0529,UrbanPantry Soda Pack of 4,CAT07,UrbanPantry,119.00
+P0530,SparkleHome Protein Bar 1 L,CAT19,SparkleHome,245.00
+P0531,PaperTrail Curd 1 L,CAT01,PaperTrail,129.00
+P0532,GreenLeaf Chicken Sausages 200 g,CAT18,GreenLeaf,347.00
+P0533,ChillZone Croissant Pack of 6,CAT02,ChillZone,147.00
+P0534,Shubh Pooja Almonds 500 g,CAT17,Shubh Pooja,439.00
+P0535,BlueRiver Khakhra 500 ml,CAT06,BlueRiver,149.00
+P0536,Swadeshi Select Garbage Bags 500 ml,CAT14,Swadeshi Select,319.00
+P0537,Annapurna Foods Protein Bar 100 g,CAT19,Annapurna Foods,659.00
+P0538,SparkleHome Ready-to-Eat Biryani Pack of 6,CAT09,SparkleHome,44.00
+P0539,TinyToes Muffin 200 g,CAT02,TinyToes,96.00
+P0540,Swadeshi Select Cashews 500 g,CAT17,Swadeshi Select,368.00
+P0541,FreshFarm Candles 1 kg,CAT20,FreshFarm,202.00
+P0542,SpiceRoute Floor Cleaner 200 ml,CAT14,SpiceRoute,410.00
+P0543,KhetSe Notebook 1 L,CAT20,KhetSe,189.00
+P0544,Swadeshi Select Garbage Bags 1 kg,CAT14,Swadeshi Select,50.00
+P0545,SparkleHome Soda 500 g,CAT07,SparkleHome,22.00
+P0546,SpiceRoute Organic Quinoa 200 g,CAT17,SpiceRoute,830.00
+P0547,SpiceRoute Almonds 500 g,CAT17,SpiceRoute,459.00
+P0548,SaucyChef Instant Coffee 200 g,CAT11,SaucyChef,119.00
+P0549,NutriKart Basmati Rice 200 ml,CAT05,NutriKart,423.00
+P0550,Swadeshi Select Coriander 500 g,CAT04,Swadeshi Select,55.00
+P0551,Crunchies Coriander 200 ml,CAT04,Crunchies,32.00
+P0552,TinyToes Fish Fillet 200 ml,CAT18,TinyToes,299.00
+P0553,FreshFarm Notebook 500 g,CAT20,FreshFarm,44.00
+P0554,PureNest Notebook 100 g,CAT20,PureNest,23.00
+P0555,MorningGlow Poha Pack of 4,CAT05,MorningGlow,179.00
+P0556,GreenLeaf Assam Tea Pack of 2,CAT11,GreenLeaf,217.00
+P0557,KhetSe Honey 1 kg,CAT10,KhetSe,303.00
+P0558,GreenLeaf Muesli 200 ml,CAT10,GreenLeaf,99.00
+P0559,GoldenDrop Chocolate Cone Pack of 6,CAT08,GoldenDrop,88.00
+P0560,PawPals Gel Pens Pack of 6,CAT20,PawPals,50.00
+P0561,FreshFarm Baby Lotion 200 g,CAT15,FreshFarm,409.00
+P0562,SaucyChef Nachos 200 g,CAT06,SaucyChef,23.00
+P0563,ChillZone Deodorant Pack of 4,CAT13,ChillZone,234.00
+P0564,PawPals Baby Food 500 g,CAT15,PawPals,779.00
+P0565,Swadeshi Select Garlic Bread 1 kg,CAT02,Swadeshi Select,119.00
+P0566,BlueRiver Nachos 100 g,CAT06,BlueRiver,83.00
+P0567,BlueRiver Curd 500 ml,CAT01,BlueRiver,27.00
+P0568,Annapurna Foods Vanilla Tub 1 L,CAT08,Annapurna Foods,56.00
+P0569,GreenLeaf Mutton Curry Cut 200 g,CAT18,GreenLeaf,319.00
+P0570,Swadeshi Select Floor Cleaner 1 kg,CAT14,Swadeshi Select,278.00
+P0571,TinyToes Hand Wash 100 g,CAT13,TinyToes,214.00
+P0572,Annapurna Foods Electrolyte Drink Pack of 2,CAT19,Annapurna Foods,190.00
+P0573,SparkleHome Instant Noodles 1 kg,CAT09,SparkleHome,151.00
+P0574,HomeEase Nachos Pack of 2,CAT06,HomeEase,139.00
+P0575,SunMeadow Toffees Pack of 4,CAT12,SunMeadow,45.00
+P0576,Swadeshi Select Garbage Bags 200 ml,CAT14,Swadeshi Select,180.00
+P0577,PawPals Baby Wipes 200 g,CAT15,PawPals,159.00
+P0578,SunMeadow Tomato 1 kg,CAT04,SunMeadow,94.00
+P0579,SparkleHome Milk Chocolate 500 g,CAT12,SparkleHome,288.00
+P0580,Shubh Pooja Eggs 100 g,CAT01,Shubh Pooja,32.00
+P0581,UrbanPantry Baby Wipes 1 L,CAT15,UrbanPantry,529.00
+P0582,GoldenDrop Gulab Jamun Tin 200 ml,CAT08,GoldenDrop,209.00
+P0583,TinyToes Chicken Breast 100 g,CAT18,TinyToes,309.00
+P0584,GreenLeaf Chicken Sausages 1 L,CAT18,GreenLeaf,276.00
+P0585,DailyDelight Orange Juice 200 g,CAT07,DailyDelight,46.00
+P0586,PawPals Gulab Jamun Tin Pack of 2,CAT08,PawPals,269.00
+P0587,GreenLeaf Fish Fillet Pack of 2,CAT18,GreenLeaf,539.00
+P0588,SaucyChef Cold Coffee 1 L,CAT07,SaucyChef,119.00
+P0589,VitaBoost Orange 1 L,CAT03,VitaBoost,89.00
+P0590,PaperTrail Cheese Slices 500 ml,CAT01,PaperTrail,46.00
+P0591,NutriKart Extra Virgin Olive Oil Pack of 4,CAT17,NutriKart,729.00
+P0592,GreenLeaf Filter Coffee Pack of 6,CAT11,GreenLeaf,258.00
+P0593,SaucyChef Paneer 1 L,CAT01,SaucyChef,199.00
+P0594,Organica Cat Food 1 kg,CAT16,Organica,175.00
+P0595,ChillZone Toothpaste 1 L,CAT13,ChillZone,392.00
+P0596,Annapurna Foods Electrolyte Drink Pack of 2,CAT19,Annapurna Foods,179.00
+P0597,FreshFarm Electrolyte Drink 200 ml,CAT19,FreshFarm,410.00
+P0598,SaucyChef Fish Fillet Pack of 4,CAT18,SaucyChef,359.00
+P0599,PawPals Notebook Pack of 2,CAT20,PawPals,118.00
+P0600,PawPals Brownie 500 ml,CAT08,PawPals,251.00

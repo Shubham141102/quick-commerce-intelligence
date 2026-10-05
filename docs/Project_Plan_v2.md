@@ -682,29 +682,50 @@ A provider-agnostic `LLMClient` interface. The API key comes from Streamlit secr
 
 ## 10. Streamlit application
 
-### 10.1 Roles
+### 10.1 Personas and use cases (agreed 2026-10-05)
 
-| Role | Workspace |
-|---|---|
-| Inventory & Supply Chain Manager | inventory, forecasting, stockout, replenishment |
-| Growth & Marketing Manager | segments, customer insights, recommendations, affinity |
-| Business & Revenue Analyst | executive overview, sales, anomalies, basket analysis |
-| Data Engineer | pipeline, tables, quality, lineage, runs, ML/RAG monitoring |
-| Demo admin | all (only if enabled in config) |
+Principle: **one owner per decision.** Each use case belongs to the persona who acts on it; data can be shared across workspaces, ownership is not. Every persona has a home view answering "how are we doing?".
+
+| Persona | Use case | Main data | Status |
+|---|---|---|---|
+| **Inventory & Supply Chain Manager** | Inventory health overview | `gld_stockout_risk`, `gld_inventory_daily` | built (4D) |
+| | Demand forecasting | `gld_demand_predictions`, `gld_forecast_metrics` | built (4B, 4D) |
+| | Stockout prevention & replenishment | `gld_stockout_risk`, `gld_replenishment` | built (4C, 4D) |
+| | Inventory explorer + **lost-sales estimate** | `gld_inventory_daily`, `slv_inventory_events`, snapshots | Phase 5 |
+| **Growth & Marketing Manager** | Customer segmentation for targeted marketing | `gld_customer_360`, `gld_customer_category` | Phase 5 |
+| | Basket analysis & product affinity | `gld_basket_pairs` | Phase 5 |
+| | Product recommendations | `gld_customer_category`, `gld_basket_pairs` | Phase 5 |
+| | Retention & at-risk customers (**descriptive**) | `slv_orders`, `gld_customer_360` | Phase 5 |
+| | Promotion effectiveness | `gld_promotion_metrics` | Phase 5 |
+| **Business & Revenue Analyst** | Sales & revenue performance | `gld_daily_sales`, `gld_product_performance` | Phase 5 |
+| | Sales anomaly detection | `gld_daily_sales` (+ hourly from orders) | Phase 5 |
+| | Delivery & operations (delivery, cancellations) | `gld_delivery_metrics`, `gld_cancellation_metrics` | Phase 5 |
+| **Data Engineer** | Pipeline runs & monitoring | `meta_pipeline_runs`, `meta_stage_runs`, `meta_table_runs` | Phase 7 |
+| | Data quality & quarantine | `gld_quality_summary`, `qtn_records` | Phase 7 |
+| | Lineage, table explorer & transformation catalog | `meta_lineage_edges`, generated catalogs | Phase 7 |
+| | Model monitoring | `meta_model_runs`, `meta_model_metrics` | Phase 7 |
+| **All personas** | Business assistant (RAG) | policy documents + whitelisted metric functions | Phase 6 |
+| Demo admin | all workspaces | | |
+
+**Decisions behind this map (2026-10-05):**
+- **Delivery metrics → Business analyst** ("Delivery & operations"): delivery is last-mile operations, which the inventory manager does not control.
+- **Promotions → Marketing** ("Promotion effectiveness"): marketing designs and runs promotions; the analyst still sees their revenue impact in sales performance.
+- **Added:** Demand forecasting (Inventory), Sales & revenue performance (Business), Lineage and Model monitoring (Data Engineer), and a **lost-sales estimate** (stockout days × forecast demand × price, validated against the simulator's recorded lost units).
+- **Churn: descriptive retention only** (cohort retention, repeat-purchase rate, at-risk list by recency and value). The generator gives every customer a steady ordering rate for 6 months, so no real churn exists to learn; a predictive churn model would learn random gaps. **Predictive churn is a Tier 2 option** that requires planting churners in the generator and regenerating all layers.
 
 **Auth (demo-grade):** usernames, bcrypt password hashes and roles live in `st.secrets`. Authorization is checked in `src/serving/permissions.py` **inside every data-access function**, not just in navigation. Documented as not production security. Streamlit's built-in OIDC `st.login` is an optional upgrade.
 
-### 10.2 Pages by tier
+### 10.2 Pages per workspace
 
-| Workspace | Tier 1 pages | Tier 2 pages |
-|---|---|---|
-| Inventory | Overview, Demand Forecasting, Stockout & Replenishment | Inventory Explorer |
-| Marketing | Customer Segments | Customer Insights, Recommendations, Product Affinity |
-| Business | Executive Overview, Basket Analysis | Sales Analytics, Anomaly Detection |
-| Data Engineer | Pipeline Overview, Table Explorer (with lineage), Data Quality (with quarantine drill-down), Execution History | Transformations catalog, ML & RAG Monitoring |
-| All | Business Assistant (shared component) | |
+| Workspace | Views |
+|---|---|
+| Inventory & Supply Chain | Overview · Demand forecasting · Stockout risk & replenishment · Inventory explorer |
+| Growth & Marketing | Customer segments · Basket & affinity · Recommendations · Retention · Promotion effectiveness |
+| Business & Revenue | Sales performance · Anomaly detection · Delivery & operations |
+| Data Engineer | Pipeline runs · Data quality & quarantine · Lineage & tables (incl. transformation catalog) · Model monitoring |
+| All | Business assistant (shared component) |
 
-Tier 1 has **11 pages**, against v1's ~27 required pages.
+16 views in total (3 already built). The original Tier 1 list had 11 pages; the extra views reuse Gold tables that already exist.
 
 ### 10.3 Shared UI rules
 

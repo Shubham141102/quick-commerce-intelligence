@@ -6,6 +6,7 @@
 no train/test overlap, registry + loadable model files, planted demand drivers recognised.
 4C stockout risk + replenishment: complete tiers with reasons, replenishment formula, backtest vs a naive
 rule, planted supplier outages warned (ground truth read only here; pass bar fixed before measuring).
+4D app: snapshot published within limits from the current model; Inventory data functions role-checked.
 """
 
 from __future__ import annotations
@@ -31,7 +32,7 @@ from src.ml.tables import (
 from src.orchestration.tracking import read_meta
 
 
-def evaluate(paths: dict, strict_accuracy: bool = True) -> list[tuple[str, bool, str]]:
+def evaluate(paths: dict, strict_accuracy: bool = True, include_app: bool = True) -> list[tuple[str, bool, str]]:
     gold, metadata = resolve(paths["gold"]), resolve(paths["metadata"])
     preds, sku = read_table(gold, DEMAND_PREDICTIONS), read_table(gold, SKU_FORECAST)
     metrics, imp = read_table(gold, FORECAST_METRICS), read_table(gold, FEATURE_IMPORTANCE)
@@ -86,7 +87,51 @@ def evaluate(paths: dict, strict_accuracy: bool = True) -> list[tuple[str, bool,
                    f"ranks: day_of_week {rank.get('day_of_week')}, promo_active {rank.get('promo_active')}, "
                    f"rainfall_mm {rank.get('rainfall_mm')} of {len(rank)}"))
     checks += _stockout_checks(paths, strict_accuracy)
+    if include_app:
+        checks += _app_checks(paths, preds["model_version"].iloc[0])
     return checks
+
+
+def _app_checks(paths: dict, model_version: str) -> list[tuple[str, bool, str]]:
+    import os
+
+    from src.serving import queries as q
+    from src.serving.db import get_snapshot
+    from src.serving.permissions import AccessDenied
+
+    demo = resolve(paths["demo"])
+    out = []
+    try:
+        snap = get_snapshot(str(demo))
+    except FileNotFoundError:
+        return [("11. App snapshot published (< 50 MB, current model)", False, "no snapshot; run --stages publish")]
+    info = snap.manifest
+    ok = float(info["size_mb"]) < 50 and info["forecast_model_version"].startswith(model_version)
+    out.append(("11. App snapshot published (< 50 MB, current model)", ok,
+                f"{info['tables']} tables, {int(info['rows']):,} rows, {info['size_mb']} MB, run {info['pipeline_run_id']}"))
+    previous = os.environ.get("QCI_DEMO_DIR")
+    os.environ["QCI_DEMO_DIR"] = str(demo)
+    get_snapshot.cache_clear()
+    try:
+        functions = [q.stores, q.categories, q.inventory_kpis, q.stock_health_by_store, q.forecast_accuracy,
+                     q.accuracy_by_category, q.feature_importance, q.risk_list, q.replenishment_assumptions,
+                     q.stockout_backtest]
+        works = all(f("inventory_manager") is not None for f in functions)
+        blocked = 0
+        for f in functions:
+            try:
+                f("marketing_manager")
+            except AccessDenied:
+                blocked += 1
+        out.append(("12. Inventory data functions work for the right role, block others", works and blocked == len(functions),
+                    f"{len(functions)} functions ran for inventory_manager; {blocked}/{len(functions)} blocked for marketing_manager"))
+    finally:
+        if previous is None:
+            os.environ.pop("QCI_DEMO_DIR", None)
+        else:
+            os.environ["QCI_DEMO_DIR"] = previous
+        get_snapshot.cache_clear()
+    return out
 
 
 def _stockout_checks(paths: dict, strict: bool) -> list[tuple[str, bool, str]]:

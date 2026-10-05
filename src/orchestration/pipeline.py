@@ -14,7 +14,7 @@ from src.common.paths import resolve
 from src.generation.manifest import git_commit
 from src.orchestration.tracking import RunTracker
 
-STAGES = ("ingest", "silver", "gold", "ml")
+STAGES = ("ingest", "silver", "gold", "ml", "publish")
 SPARK_STAGES = {"ingest", "silver", "gold"}
 
 
@@ -97,6 +97,12 @@ def run_pipeline(stages: list[str], generation_run: str | None = None, generatio
                                                 resolve(cfg.paths["ml"])),
                     "stockout": run_stockout(tracker, gold_root),
                 }
+        if "publish" in stages:
+            from src.orchestration.publish import run_publish
+            with tracker.stage("publish"):
+                result.results["publish"] = run_publish(tracker, resolve(cfg.paths["gold"]), resolve(cfg.paths["silver"]),
+                                                        resolve(cfg.paths["demo"]), metadata_root, generation_dir.name,
+                                                        cfg.profile)
         result.status = "success"
         tracker.finish("success")
     except BaseException as exc:

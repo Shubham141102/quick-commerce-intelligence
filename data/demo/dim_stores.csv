@@ -1,0 +1,13 @@
+store_id,store_name,city_id,city,state
+S01,QC Dark Store Koramangala,C01,Bengaluru,Karnataka
+S02,QC Dark Store Indiranagar,C01,Bengaluru,Karnataka
+S03,QC Dark Store HSR Layout,C01,Bengaluru,Karnataka
+S04,QC Dark Store Whitefield,C01,Bengaluru,Karnataka
+S05,QC Dark Store Andheri West,C02,Mumbai,Maharashtra
+S06,QC Dark Store Bandra,C02,Mumbai,Maharashtra
+S07,QC Dark Store Powai,C02,Mumbai,Maharashtra
+S08,QC Dark Store Lower Parel,C02,Mumbai,Maharashtra
+S09,QC Dark Store Saket,C03,Delhi,Delhi
+S10,QC Dark Store Dwarka,C03,Delhi,Delhi
+S11,QC Dark Store Rohini,C03,Delhi,Delhi
+S12,QC Dark Store Lajpat Nagar,C03,Delhi,Delhi

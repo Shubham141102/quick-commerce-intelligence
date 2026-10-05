@@ -21,7 +21,7 @@ def ml_env(gold_env, small_run):
 
 
 def test_structural_checks_pass(ml_env):
-    checks = evaluate(ml_env["paths"], strict_accuracy=False)
+    checks = evaluate(ml_env["paths"], strict_accuracy=False, include_app=False)  # app checks: tests/app
     failed = [(name, detail) for name, ok, detail in checks if not ok]
     assert not failed, failed
 
