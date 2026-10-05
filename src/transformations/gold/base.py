@@ -36,12 +36,17 @@ class GoldTable:
     description: str
     sources: tuple[str, ...]        # Silver / Gold tables read
     columns: tuple[Col, ...]
-    build: Callable[["GoldContext"], DataFrame]
+    build: Callable[["GoldContext"], DataFrame] | None   # None for tables written by the Python ML stage
     tier: int = 1
+    engine: str = "spark"                                  # "spark" (gold stage) or "python" (ml stage)
 
     @property
     def column_names(self) -> list[str]:
         return [c.name for c in self.columns]
+
+    @property
+    def typed_columns(self) -> list[tuple[str, str]]:
+        return [(c.name, c.dtype) for c in self.columns]
 
     def schema(self) -> T.StructType:
         return T.StructType([T.StructField(c.name, SPARK_TYPES[c.dtype], True) for c in self.columns])

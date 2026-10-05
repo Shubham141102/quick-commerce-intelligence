@@ -11,7 +11,7 @@ The full design is in [`docs/Project_Plan_v2.md`](docs/Project_Plan_v2.md); all 
 | 1 | Foundation: config, schemas, data generator, dirty data, manifest, data dictionary | Done |
 | 2 | Bronze / Silver | Done (Bronze 9/9, Silver 10/10 completion checks) |
 | 3 | Gold | Done (10/10 completion checks) |
-| 4 | Inventory vertical slice | Not started |
+| 4 | Inventory vertical slice | Forecasting + stockout risk done (check_ml 10/10); Inventory workspace next |
 | 5 | Segmentation + basket analysis | Not started |
 | 6 | RAG assistant | Not started |
 | 7 | Data Engineer workspace | Not started |
@@ -64,6 +64,8 @@ python -m scripts.run_pipeline --stages silver                 # Bronze -> Silve
 python -m scripts.run_pipeline --stages gold                   # Silver -> 12 Gold tables (~1.5 min)
 python -m scripts.run_pipeline --stages ingest,silver,gold     # everything after generation
 python -m scripts.check_gold                                   # Gold completion report (reconciles with Silver)
+python -m scripts.run_pipeline --stages ml                     # forecasting + stockout risk + replenishment (~40 s, no Spark)
+python -m scripts.check_ml                                     # Phase 4 ML report (vs baselines, backtests)
 python -m scripts.export_flat_tables --layer gold              # data_sep_gold/ one CSV per Gold table
 
 python -m scripts.check_bronze                                 # Bronze completion report

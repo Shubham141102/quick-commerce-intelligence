@@ -19,7 +19,8 @@ def pipeline_env(small_run, spark, tmp_path_factory):
     root = tmp_path_factory.mktemp("pipeline")
     gen_root = Path(small_run.out_dir).parent
     paths = {"generation": str(gen_root), "bronze": str(root / "bronze"), "silver": str(root / "silver"),
-             "quarantine": str(root / "quarantine"), "gold": str(root / "gold"), "metadata": str(root / "metadata")}
+             "quarantine": str(root / "quarantine"), "gold": str(root / "gold"), "ml": str(root / "ml"),
+             "metadata": str(root / "metadata")}
     overrides = {"paths": paths}
     first = run_pipeline(["ingest"], small_run.run_id, gen_root, overrides=overrides, spark=spark)
     return {"root": root, "overrides": overrides, "paths": paths, "gen_root": gen_root, "first": first,
@@ -34,6 +35,15 @@ def silver_env(pipeline_env, small_run, spark):
     result = run_pipeline(["silver"], small_run.run_id, pipeline_env["gen_root"],
                           overrides=pipeline_env["overrides"], spark=spark)
     return {**pipeline_env, "result": result}
+
+
+@pytest.fixture(scope="session")
+def gold_env(silver_env, small_run, spark):
+    from src.orchestration.pipeline import run_pipeline
+
+    result = run_pipeline(["gold"], small_run.run_id, silver_env["gen_root"], overrides=silver_env["overrides"],
+                          spark=spark)
+    return {**silver_env, "gold_result": result}
 
 
 @pytest.fixture(scope="session")

@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import argparse
+import sys
 import time
 
 import pandas as pd
@@ -17,6 +18,7 @@ from src.orchestration.tracking import read_meta
 
 
 def main() -> None:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # Windows consoles default to cp1252
     parser = argparse.ArgumentParser(description="Run the quick-commerce pipeline.")
     parser.add_argument("--stages", default="ingest", help=f"comma-separated, from {STAGES}")
     parser.add_argument("--generation-run", default=None, help="generation run id (default: data/generation/LATEST)")

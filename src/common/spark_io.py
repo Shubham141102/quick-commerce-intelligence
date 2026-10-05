@@ -9,7 +9,6 @@ Rules enforced here:
 
 from __future__ import annotations
 
-import os
 import shutil
 from pathlib import Path
 
@@ -17,6 +16,7 @@ from pyspark.sql import Column, DataFrame, SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql import types as T
 
+from src.common.io import replace_with_retry
 from src.common.schemas import CORRUPT_RECORD, SOURCE_SCHEMAS, bronze_columns
 
 CSV_READ_OPTIONS = {
@@ -99,8 +99,8 @@ def write_csv_atomic(df: DataFrame, final_dir: Path, staging_dir: Path, single_f
         if previous.exists():
             shutil.rmtree(previous)
         previous.parent.mkdir(parents=True, exist_ok=True)
-        os.replace(final_dir, previous)
-    os.replace(staging_dir, final_dir)
+        replace_with_retry(final_dir, previous)
+    replace_with_retry(staging_dir, final_dir)
     return written
 
 

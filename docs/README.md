@@ -10,7 +10,9 @@ Documentation for the Quick-Commerce Intelligence Platform. Each completed proce
 | 2 | Bronze ingestion (landing CSV → raw tables + metadata) | [02_bronze_ingestion.md](02_bronze_ingestion.md) | Done |
 | 3 | Silver transformations (clean, validate, quarantine) | [03_silver_transformations.md](03_silver_transformations.md) | Done |
 | 4 | Gold (business tables, metrics, ML features) | [04_gold.md](04_gold.md) | Done |
-| 5 | Forecasting, stockout risk, replenishment, Inventory workspace | — | Next |
+| 5 | Demand forecasting (Phase 4B) | [05_demand_forecasting.md](05_demand_forecasting.md) | Done |
+| 6 | Stockout risk and replenishment (Phase 4C) | [06_stockout_replenishment.md](06_stockout_replenishment.md) | Done |
+| 7 | Inventory workspace — Streamlit app (Phase 4D) | — | Next |
 
 ## Reference documents (generated — do not edit by hand)
 
@@ -38,5 +40,7 @@ data/generation/<run>/        data/bronze/brz_<dataset>/       data/silver/slv_<
 
 Then **Gold** (PySpark): 12 business tables in `data/gold/<table>/` with shared metric definitions.
 
-Completion checks: `python -m scripts.check_bronze` (9 checks), `python -m scripts.check_silver` (10 checks), `python -m scripts.check_gold` (10 checks).
+Then the **ML stage** (Python / scikit-learn): demand forecasts, stockout risk and replenishment, written as Gold tables.
+
+Completion checks: `python -m scripts.check_bronze` (9 checks), `python -m scripts.check_silver` (10 checks), `python -m scripts.check_gold` (10 checks), `python -m scripts.check_ml` (10 checks).
 Overall design: [Project_Plan_v2.md](Project_Plan_v2.md).

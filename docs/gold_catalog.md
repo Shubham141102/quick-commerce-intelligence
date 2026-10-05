@@ -4,20 +4,29 @@
 
 Gold tables are business-ready: one fixed grain per table (what one row means), shared metric definitions, typed CSV in `data/gold/<table>/`, rebuilt in full from Silver on every run.
 
-| Table | Tier | Grain | Description |
-|---|:-:|---|---|
-| [`gld_daily_sales`](#gld_daily_sales) | 1 | store_id × business_date | Daily sales per store. Every store × day of the period has a row (days without orders are zeros). |
-| [`gld_daily_category_sales`](#gld_daily_category_sales) | 1 | store_id × category_id × business_date | Daily sales per store and category (completed orders); zero-filled. The demand-forecasting series. |
-| [`gld_product_performance`](#gld_product_performance) | 1 | product_id × month | Monthly performance per product (completed orders), with its rank inside its category. |
-| [`gld_inventory_daily`](#gld_inventory_daily) | 1 | store_id × product_id × business_date | Daily stock per store × focus SKU, rebuilt from weekly counts + stock events − sales; each count re-anchors the running stock and the difference is reported as reconciliation_gap. |
-| [`gld_demand_features`](#gld_demand_features) | 1 | store_id × category_id × business_date | Forecasting features per store × category × day. Lags and rolling statistics use only earlier days (no leakage); target_units is the value to predict. Train = up to the configured train_end, test = after. |
-| [`gld_customer_360`](#gld_customer_360) | 1 | customer_id | One row per customer with behaviour features (RFM, basket, timing, promotions, cancellations, reviews). Customers without orders are included with zeros. Input for segmentation and recommendations. |
-| [`gld_customer_category`](#gld_customer_category) | 1 | customer_id × category_id | Spend per customer and category (completed orders), for category-mix features and recommendations. |
-| [`gld_basket_pairs`](#gld_basket_pairs) | 1 | product_a × product_b | Products bought together in completed orders (pairs seen in ≥ 8 baskets), with support, confidence and lift. product_a < product_b. |
-| [`gld_delivery_metrics`](#gld_delivery_metrics) | 2 | store_id × business_date | Delivery performance per store and day (by pickup date); zero-filled. |
-| [`gld_cancellation_metrics`](#gld_cancellation_metrics) | 2 | store_id × week_start × stage × reason | Cancellations per store, week, stage and reason, with the share of that week's orders. |
-| [`gld_promotion_metrics`](#gld_promotion_metrics) | 2 | promotion_id | Per promotion: usage, discount cost and uplift (average daily category units, all stores, during the promotion vs days when the category had no promotion). |
-| [`gld_quality_summary`](#gld_quality_summary) | 1 | silver_run_id × dataset × check_type × rule × column | Silver data-quality results of the latest Silver run, ready for the Data Engineer workspace. |
+Built by the `gold` stage (PySpark) or, for model outputs, the `ml` stage (Python / scikit-learn).
+
+| Table | Built by | Tier | Grain | Description |
+|---|---|:-:|---|---|
+| [`gld_daily_sales`](#gld_daily_sales) | gold (Spark) | 1 | store_id × business_date | Daily sales per store. Every store × day of the period has a row (days without orders are zeros). |
+| [`gld_daily_category_sales`](#gld_daily_category_sales) | gold (Spark) | 1 | store_id × category_id × business_date | Daily sales per store and category (completed orders); zero-filled. The demand-forecasting series. |
+| [`gld_product_performance`](#gld_product_performance) | gold (Spark) | 1 | product_id × month | Monthly performance per product (completed orders), with its rank inside its category. |
+| [`gld_inventory_daily`](#gld_inventory_daily) | gold (Spark) | 1 | store_id × product_id × business_date | Daily stock per store × focus SKU, rebuilt from weekly counts + stock events − sales; each count re-anchors the running stock and the difference is reported as reconciliation_gap. |
+| [`gld_demand_features`](#gld_demand_features) | gold (Spark) | 1 | store_id × category_id × business_date | Forecasting features per store × category × day. Lags and rolling statistics use only earlier days (no leakage); target_units is the value to predict. Train = up to the configured train_end, test = after. |
+| [`gld_customer_360`](#gld_customer_360) | gold (Spark) | 1 | customer_id | One row per customer with behaviour features (RFM, basket, timing, promotions, cancellations, reviews). Customers without orders are included with zeros. Input for segmentation and recommendations. |
+| [`gld_customer_category`](#gld_customer_category) | gold (Spark) | 1 | customer_id × category_id | Spend per customer and category (completed orders), for category-mix features and recommendations. |
+| [`gld_basket_pairs`](#gld_basket_pairs) | gold (Spark) | 1 | product_a × product_b | Products bought together in completed orders (pairs seen in ≥ 8 baskets), with support, confidence and lift. product_a < product_b. |
+| [`gld_delivery_metrics`](#gld_delivery_metrics) | gold (Spark) | 2 | store_id × business_date | Delivery performance per store and day (by pickup date); zero-filled. |
+| [`gld_cancellation_metrics`](#gld_cancellation_metrics) | gold (Spark) | 2 | store_id × week_start × stage × reason | Cancellations per store, week, stage and reason, with the share of that week's orders. |
+| [`gld_promotion_metrics`](#gld_promotion_metrics) | gold (Spark) | 2 | promotion_id | Per promotion: usage, discount cost and uplift (average daily category units, all stores, during the promotion vs days when the category had no promotion). |
+| [`gld_quality_summary`](#gld_quality_summary) | gold (Spark) | 1 | silver_run_id × dataset × check_type × rule × column | Silver data-quality results of the latest Silver run, ready for the Data Engineer workspace. |
+| [`gld_demand_predictions`](#gld_demand_predictions) | ml (Python) | 1 | store_id × category_id × forecast_date × origin_date | Demand forecasts per store × category × day, 1–7 days ahead: September backtest (made every day from 1 to 30 Sep with a model trained on Apr–Aug, next to the actuals and both baselines) and the live 7-day forecast after the data ends. |
+| [`gld_forecast_metrics`](#gld_forecast_metrics) | ml (Python) | 1 | evaluation × model × horizon × segment | Backtest accuracy of the forecast and the baselines, overall and per category, by horizon. |
+| [`gld_forecast_feature_importance`](#gld_forecast_feature_importance) | ml (Python) | 1 | feature | Permutation importance of each forecasting feature on the September backtest (1 day ahead): how much the error grows when the feature is shuffled. |
+| [`gld_sku_demand_forecast`](#gld_sku_demand_forecast) | ml (Python) | 1 | store_id × product_id × forecast_date × origin_date | Daily stock-depleting demand per store × focus SKU, 1–7 days ahead: the category forecast split by the SKU's share of the category over the 28 days before the origin (top-down). |
+| [`gld_stockout_risk`](#gld_stockout_risk) | ml (Python) | 1 | as_of_date × store_id × product_id | Daily stockout-risk tier per store × focus SKU with reason codes (transparent rules on stock, reorder level, days of inventory and the SKU demand forecast). Advisory only. |
+| [`gld_replenishment`](#gld_replenishment) | ml (Python) | 1 | as_of_date × store_id × product_id | Suggested replenishment quantity per store × focus SKU: forecast demand over lead time + review period + safety stock − current stock. Assumptions are stored on every row. Advisory only — no order is placed. |
+| [`gld_stockout_backtest`](#gld_stockout_backtest) | ml (Python) | 1 | rule | September backtest of the risk rules on decisions taken while the SKU was still in stock: when a rule flags a SKU, does it actually stock out within the next 3 days? Compared with a naive reorder-level rule. |
 
 ## Lineage
 
@@ -35,6 +44,13 @@ Gold tables are business-ready: one fixed grain per table (what one row means), 
 | `gld_cancellation_metrics` | `slv_cancellations`, `slv_orders` |
 | `gld_promotion_metrics` | `slv_promotions`, `slv_order_promotions`, `slv_orders`, `gld_daily_category_sales` |
 | `gld_quality_summary` | `meta_quality_results`, `meta_table_runs` |
+| `gld_demand_predictions` | `gld_demand_features` |
+| `gld_forecast_metrics` | `gld_demand_predictions`, `gld_sku_demand_forecast` |
+| `gld_forecast_feature_importance` | `gld_demand_features` |
+| `gld_sku_demand_forecast` | `gld_demand_predictions`, `gld_inventory_daily`, `gld_daily_category_sales`, `slv_products` |
+| `gld_stockout_risk` | `gld_inventory_daily`, `gld_sku_demand_forecast` |
+| `gld_replenishment` | `gld_inventory_daily`, `gld_sku_demand_forecast` |
+| `gld_stockout_backtest` | `gld_stockout_risk`, `gld_inventory_daily` |
 
 ---
 
@@ -42,7 +58,7 @@ Gold tables are business-ready: one fixed grain per table (what one row means), 
 
 Daily sales per store. Every store × day of the period has a row (days without orders are zeros).
 
-**Grain:** `store_id`, `business_date` · **Tier:** 1 · **Sources:** `slv_orders`, `slv_order_items`, `slv_products`, `slv_order_promotions`, `slv_returns_refunds`, `slv_stores`
+**Grain:** `store_id`, `business_date` · **Tier:** 1 · **Built by:** gold stage (Spark) · **Sources:** `slv_orders`, `slv_order_items`, `slv_products`, `slv_order_promotions`, `slv_returns_refunds`, `slv_stores`
 
 | Column | Type | Description |
 |---|---|---|
@@ -68,7 +84,7 @@ Daily sales per store. Every store × day of the period has a row (days without 
 
 Daily sales per store and category (completed orders); zero-filled. The demand-forecasting series.
 
-**Grain:** `store_id`, `category_id`, `business_date` · **Tier:** 1 · **Sources:** `slv_orders`, `slv_order_items`, `slv_products`, `slv_promotions`, `slv_categories`, `slv_stores`
+**Grain:** `store_id`, `category_id`, `business_date` · **Tier:** 1 · **Built by:** gold stage (Spark) · **Sources:** `slv_orders`, `slv_order_items`, `slv_products`, `slv_promotions`, `slv_categories`, `slv_stores`
 
 | Column | Type | Description |
 |---|---|---|
@@ -87,7 +103,7 @@ Daily sales per store and category (completed orders); zero-filled. The demand-f
 
 Monthly performance per product (completed orders), with its rank inside its category.
 
-**Grain:** `product_id`, `month` · **Tier:** 1 · **Sources:** `slv_orders`, `slv_order_items`, `slv_products`
+**Grain:** `product_id`, `month` · **Tier:** 1 · **Built by:** gold stage (Spark) · **Sources:** `slv_orders`, `slv_order_items`, `slv_products`
 
 | Column | Type | Description |
 |---|---|---|
@@ -109,7 +125,7 @@ Monthly performance per product (completed orders), with its rank inside its cat
 
 Daily stock per store × focus SKU, rebuilt from weekly counts + stock events − sales; each count re-anchors the running stock and the difference is reported as reconciliation_gap.
 
-**Grain:** `store_id`, `product_id`, `business_date` · **Tier:** 1 · **Sources:** `slv_inventory_snapshots`, `slv_inventory_events`, `slv_order_items`, `slv_orders`, `slv_cancellations`, `slv_products`
+**Grain:** `store_id`, `product_id`, `business_date` · **Tier:** 1 · **Built by:** gold stage (Spark) · **Sources:** `slv_inventory_snapshots`, `slv_inventory_events`, `slv_order_items`, `slv_orders`, `slv_cancellations`, `slv_products`
 
 | Column | Type | Description |
 |---|---|---|
@@ -137,7 +153,7 @@ Daily stock per store × focus SKU, rebuilt from weekly counts + stock events �
 
 Forecasting features per store × category × day. Lags and rolling statistics use only earlier days (no leakage); target_units is the value to predict. Train = up to the configured train_end, test = after.
 
-**Grain:** `store_id`, `category_id`, `business_date` · **Tier:** 1 · **Sources:** `gld_daily_category_sales`, `gld_inventory_daily`, `slv_weather`, `slv_stores`, `slv_products`
+**Grain:** `store_id`, `category_id`, `business_date` · **Tier:** 1 · **Built by:** gold stage (Spark) · **Sources:** `gld_daily_category_sales`, `gld_inventory_daily`, `slv_weather`, `slv_stores`, `slv_products`
 
 | Column | Type | Description |
 |---|---|---|
@@ -172,7 +188,7 @@ Forecasting features per store × category × day. Lags and rolling statistics u
 
 One row per customer with behaviour features (RFM, basket, timing, promotions, cancellations, reviews). Customers without orders are included with zeros. Input for segmentation and recommendations.
 
-**Grain:** `customer_id` · **Tier:** 1 · **Sources:** `slv_customers`, `slv_orders`, `slv_order_items`, `slv_products`, `slv_order_promotions`, `slv_reviews`
+**Grain:** `customer_id` · **Tier:** 1 · **Built by:** gold stage (Spark) · **Sources:** `slv_customers`, `slv_orders`, `slv_order_items`, `slv_products`, `slv_order_promotions`, `slv_reviews`
 
 | Column | Type | Description |
 |---|---|---|
@@ -205,7 +221,7 @@ One row per customer with behaviour features (RFM, basket, timing, promotions, c
 
 Spend per customer and category (completed orders), for category-mix features and recommendations.
 
-**Grain:** `customer_id`, `category_id` · **Tier:** 1 · **Sources:** `slv_orders`, `slv_order_items`, `slv_products`
+**Grain:** `customer_id`, `category_id` · **Tier:** 1 · **Built by:** gold stage (Spark) · **Sources:** `slv_orders`, `slv_order_items`, `slv_products`
 
 | Column | Type | Description |
 |---|---|---|
@@ -221,7 +237,7 @@ Spend per customer and category (completed orders), for category-mix features an
 
 Products bought together in completed orders (pairs seen in ≥ 8 baskets), with support, confidence and lift. product_a < product_b.
 
-**Grain:** `product_a`, `product_b` · **Tier:** 1 · **Sources:** `slv_orders`, `slv_order_items`, `slv_products`
+**Grain:** `product_a`, `product_b` · **Tier:** 1 · **Built by:** gold stage (Spark) · **Sources:** `slv_orders`, `slv_order_items`, `slv_products`
 
 | Column | Type | Description |
 |---|---|---|
@@ -246,7 +262,7 @@ Products bought together in completed orders (pairs seen in ≥ 8 baskets), with
 
 Delivery performance per store and day (by pickup date); zero-filled.
 
-**Grain:** `store_id`, `business_date` · **Tier:** 2 · **Sources:** `slv_deliveries`, `slv_orders`, `slv_stores`
+**Grain:** `store_id`, `business_date` · **Tier:** 2 · **Built by:** gold stage (Spark) · **Sources:** `slv_deliveries`, `slv_orders`, `slv_stores`
 
 | Column | Type | Description |
 |---|---|---|
@@ -268,7 +284,7 @@ Delivery performance per store and day (by pickup date); zero-filled.
 
 Cancellations per store, week, stage and reason, with the share of that week's orders.
 
-**Grain:** `store_id`, `week_start`, `stage`, `reason` · **Tier:** 2 · **Sources:** `slv_cancellations`, `slv_orders`
+**Grain:** `store_id`, `week_start`, `stage`, `reason` · **Tier:** 2 · **Built by:** gold stage (Spark) · **Sources:** `slv_cancellations`, `slv_orders`
 
 | Column | Type | Description |
 |---|---|---|
@@ -286,7 +302,7 @@ Cancellations per store, week, stage and reason, with the share of that week's o
 
 Per promotion: usage, discount cost and uplift (average daily category units, all stores, during the promotion vs days when the category had no promotion).
 
-**Grain:** `promotion_id` · **Tier:** 2 · **Sources:** `slv_promotions`, `slv_order_promotions`, `slv_orders`, `gld_daily_category_sales`
+**Grain:** `promotion_id` · **Tier:** 2 · **Built by:** gold stage (Spark) · **Sources:** `slv_promotions`, `slv_order_promotions`, `slv_orders`, `gld_daily_category_sales`
 
 | Column | Type | Description |
 |---|---|---|
@@ -309,7 +325,7 @@ Per promotion: usage, discount cost and uplift (average daily category units, al
 
 Silver data-quality results of the latest Silver run, ready for the Data Engineer workspace.
 
-**Grain:** `silver_run_id`, `dataset`, `check_type`, `rule`, `column` · **Tier:** 1 · **Sources:** `meta_quality_results`, `meta_table_runs`
+**Grain:** `silver_run_id`, `dataset`, `check_type`, `rule`, `column` · **Tier:** 1 · **Built by:** gold stage (Spark) · **Sources:** `meta_quality_results`, `meta_table_runs`
 
 | Column | Type | Description |
 |---|---|---|
@@ -322,4 +338,161 @@ Silver data-quality results of the latest Silver run, ready for the Data Enginee
 | `rows_checked` | int | rows the check ran on |
 | `affected_pct` | double | rows_affected ÷ rows_checked × 100 |
 | `outcome` | string | removed / fixed / quarantined / cascade / flagged |
+
+---
+
+## gld_demand_predictions
+
+Demand forecasts per store × category × day, 1–7 days ahead: September backtest (made every day from 1 to 30 Sep with a model trained on Apr–Aug, next to the actuals and both baselines) and the live 7-day forecast after the data ends.
+
+**Grain:** `store_id`, `category_id`, `forecast_date`, `origin_date` · **Tier:** 1 · **Built by:** ml stage (Python) · **Sources:** `gld_demand_features`
+
+| Column | Type | Description |
+|---|---|---|
+| `store_id` 🔑 | string | store |
+| `category_id` 🔑 | string | category |
+| `forecast_date` 🔑 | date | day being forecast |
+| `origin_date` 🔑 | date | last day of known data when the forecast was made |
+| `horizon` | int | days ahead (forecast_date − origin_date) |
+| `run_type` | string | backtest (September, model trained on Apr–Aug) / future (after the data ends) |
+| `forecast_units` | double | model forecast (gradient boosting, Poisson loss) |
+| `lower_units` | double | 10th-percentile forecast (quantile model) |
+| `upper_units` | double | 90th-percentile forecast (quantile model) |
+| `baseline_seasonal_naive` | double | same weekday one week earlier |
+| `baseline_moving_avg` | double | mean of the 7 days up to origin_date |
+| `actual_units` | double | units actually sold (empty for future forecasts) |
+| `model_version` | string | model run that produced the row |
+
+---
+
+## gld_forecast_metrics
+
+Backtest accuracy of the forecast and the baselines, overall and per category, by horizon.
+
+**Grain:** `evaluation`, `model`, `horizon`, `segment` · **Tier:** 1 · **Built by:** ml stage (Python) · **Sources:** `gld_demand_predictions`, `gld_sku_demand_forecast`
+
+| Column | Type | Description |
+|---|---|---|
+| `evaluation` 🔑 | string | category_daily (store × category) / sku_daily (store × focus SKU) |
+| `model` 🔑 | string | model / baseline_seasonal_naive / baseline_moving_avg |
+| `horizon` 🔑 | int | days ahead; 0 = all horizons 1–7 pooled |
+| `segment` 🔑 | string | all, or a category_id |
+| `mae` | double | mean absolute error (units) |
+| `rmse` | double | root mean squared error |
+| `wape` | double | Σ\|error\| ÷ Σ actual (lower is better) |
+| `bias` | double | Σ(forecast − actual) ÷ Σ actual (+ = over-forecast) |
+| `interval_coverage` | double | share of actuals inside [lower, upper] (target ≈ 0.80); model only |
+| `rows` | int | forecasts evaluated |
+| `model_version` | string | model run |
+
+---
+
+## gld_forecast_feature_importance
+
+Permutation importance of each forecasting feature on the September backtest (1 day ahead): how much the error grows when the feature is shuffled.
+
+**Grain:** `feature` · **Tier:** 1 · **Built by:** ml stage (Python) · **Sources:** `gld_demand_features`
+
+| Column | Type | Description |
+|---|---|---|
+| `feature` 🔑 | string | feature name |
+| `rank` | int | 1 = most important |
+| `importance_mae` | double | increase in MAE when shuffled (units) |
+| `importance_std` | double | standard deviation over repeats |
+| `model_version` | string | model run |
+
+---
+
+## gld_sku_demand_forecast
+
+Daily stock-depleting demand per store × focus SKU, 1–7 days ahead: the category forecast split by the SKU's share of the category over the 28 days before the origin (top-down).
+
+**Grain:** `store_id`, `product_id`, `forecast_date`, `origin_date` · **Tier:** 1 · **Built by:** ml stage (Python) · **Sources:** `gld_demand_predictions`, `gld_inventory_daily`, `gld_daily_category_sales`, `slv_products`
+
+| Column | Type | Description |
+|---|---|---|
+| `store_id` 🔑 | string | store |
+| `product_id` 🔑 | string | focus SKU |
+| `category_id` | string | category of the SKU |
+| `forecast_date` 🔑 | date | day being forecast |
+| `origin_date` 🔑 | date | last day of known data when the forecast was made |
+| `horizon` | int | days ahead (forecast_date − origin_date) |
+| `run_type` | string | backtest (September, model trained on Apr–Aug) / future (after the data ends) |
+| `sku_share` | double | SKU units sold ÷ category units, 28 days before origin |
+| `forecast_units` | double | category forecast × sku_share |
+| `lower_units` | double | category lower bound × sku_share |
+| `upper_units` | double | category upper bound × sku_share |
+| `baseline_moving_avg` | double | SKU's mean daily units sold over the 7 days up to origin_date |
+| `actual_units` | double | units actually sold (empty for future forecasts) |
+| `model_version` | string | model run |
+
+---
+
+## gld_stockout_risk
+
+Daily stockout-risk tier per store × focus SKU with reason codes (transparent rules on stock, reorder level, days of inventory and the SKU demand forecast). Advisory only.
+
+**Grain:** `as_of_date`, `store_id`, `product_id` · **Tier:** 1 · **Built by:** ml stage (Python) · **Sources:** `gld_inventory_daily`, `gld_sku_demand_forecast`
+
+| Column | Type | Description |
+|---|---|---|
+| `as_of_date` 🔑 | date | decision date: end-of-day stock of this day is used |
+| `store_id` 🔑 | string | store |
+| `product_id` 🔑 | string | focus SKU |
+| `category_id` | string | category of the SKU |
+| `closing_stock` | int | end-of-day stock on as_of_date |
+| `reorder_level` | int | reorder level |
+| `days_of_inventory` | double | closing stock ÷ average daily units (last 14 days) |
+| `forecast_demand_3d` | double | forecast units over the next 3 days (lead time 2 + 1) |
+| `forecast_upper_3d` | double | 90th-percentile forecast over the next 3 days |
+| `days_of_cover` | double | closing stock ÷ forecast daily demand; empty when forecast is 0 |
+| `risk_tier` | string | High / Medium / Low |
+| `reason_codes` | string | \|-separated: ZERO_STOCK, DEMAND_EXCEEDS_STOCK, BELOW_REORDER, LOW_DAYS_COVER |
+| `run_type` | string | backtest (September) / current (last day of data) |
+| `model_version` | string | forecast model run used |
+
+---
+
+## gld_replenishment
+
+Suggested replenishment quantity per store × focus SKU: forecast demand over lead time + review period + safety stock − current stock. Assumptions are stored on every row. Advisory only — no order is placed.
+
+**Grain:** `as_of_date`, `store_id`, `product_id` · **Tier:** 1 · **Built by:** ml stage (Python) · **Sources:** `gld_inventory_daily`, `gld_sku_demand_forecast`
+
+| Column | Type | Description |
+|---|---|---|
+| `as_of_date` 🔑 | date | decision date: end-of-day stock of this day is used |
+| `store_id` 🔑 | string | store |
+| `product_id` 🔑 | string | focus SKU |
+| `closing_stock` | int | end-of-day stock on as_of_date |
+| `forecast_demand_protection` | double | forecast units over lead time + review period |
+| `demand_std_28d` | double | standard deviation of daily units sold, last 28 days |
+| `safety_stock` | double | z × demand_std_28d × √lead_time |
+| `suggested_qty` | int | ceil(max(0, forecast_demand_protection + safety_stock − closing_stock)) |
+| `risk_tier` | string | tier from gld_stockout_risk |
+| `lead_time_days` | int | assumed supplier lead time |
+| `review_days` | int | assumed review period |
+| `service_level` | double | target service level (z = 1.65 ≈ 95%) |
+| `run_type` | string | backtest / current |
+| `model_version` | string | forecast model run used |
+
+---
+
+## gld_stockout_backtest
+
+September backtest of the risk rules on decisions taken while the SKU was still in stock: when a rule flags a SKU, does it actually stock out within the next 3 days? Compared with a naive reorder-level rule.
+
+**Grain:** `rule` · **Tier:** 1 · **Built by:** ml stage (Python) · **Sources:** `gld_stockout_risk`, `gld_inventory_daily`
+
+| Column | Type | Description |
+|---|---|---|
+| `rule` 🔑 | string | risk rule evaluated |
+| `pair_days` | int | store × SKU × day decisions evaluated |
+| `flagged` | int | decisions flagged by the rule |
+| `stockouts_next_3d` | int | decisions followed by a stockout within 3 days |
+| `true_positives` | int | flagged and followed by a stockout |
+| `precision` | double | true_positives ÷ flagged |
+| `recall` | double | true_positives ÷ stockouts_next_3d |
+| `flag_rate` | double | flagged ÷ pair_days |
+| `model_version` | string | forecast model run used |
 

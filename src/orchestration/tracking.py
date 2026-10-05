@@ -30,6 +30,10 @@ META_TABLES = {
     "meta_file_loads": ["run_id", "batch_id", "generation_run_id", "dataset", "slice", "file", "size_bytes",
                         "sha256", "rows_read", "rows_corrupt", "status", "loaded_at", "message"],
     "meta_lineage_edges": ["run_id", "source", "target", "transform", "engine"],
+    "meta_model_runs": ["run_id", "model_name", "model_version", "method", "trained_at", "train_start", "train_end",
+                        "test_start", "test_end", "input_table", "train_rows", "features", "params", "metrics",
+                        "artifact_path", "status", "limitations"],
+    "meta_model_metrics": ["run_id", "model_version", "evaluation", "model", "horizon", "segment", "metric", "value"],
 }
 
 
@@ -76,6 +80,12 @@ class RunTracker:
 
     def file_load(self, **fields) -> None:
         self.rows["meta_file_loads"].append({"run_id": self.run_id, **fields})
+
+    def model_run(self, **fields) -> None:
+        self.rows["meta_model_runs"].append({"run_id": self.run_id, **fields})
+
+    def model_metric(self, **fields) -> None:
+        self.rows["meta_model_metrics"].append({"run_id": self.run_id, **fields})
 
     def quality(self, **fields) -> None:
         self.rows["meta_quality_results"].append({"run_id": self.run_id, **fields})

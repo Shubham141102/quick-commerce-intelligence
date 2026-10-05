@@ -14,7 +14,8 @@ from src.common.paths import resolve
 from src.generation.manifest import git_commit
 from src.orchestration.tracking import RunTracker
 
-STAGES = ("ingest", "silver", "gold")
+STAGES = ("ingest", "silver", "gold", "ml")
+SPARK_STAGES = {"ingest", "silver", "gold"}
 
 
 @dataclass
@@ -50,13 +51,14 @@ def run_pipeline(stages: list[str], generation_run: str | None = None, generatio
     if unknown:
         raise ValueError(f"unknown stages {sorted(unknown)}; available: {STAGES}")
 
-    owns_spark = spark is None
+    owns_spark = spark is None and bool(set(stages) & SPARK_STAGES)   # the ml stage runs without Spark
     if owns_spark:
         from src.common.spark import get_spark
         spark = get_spark()
         spark.sparkContext.setLogLevel("ERROR")
+    import pyspark
     tracker = RunTracker(metadata_root, "quick_commerce_pipeline", cfg.profile, generation_dir.name,
-                         spark_version=spark.version, git_commit=git_commit())
+                         spark_version=pyspark.__version__, git_commit=git_commit())
     result = PipelineResult(tracker.run_id, "running", generation_dir)
     try:
         if "ingest" in stages:
@@ -83,6 +85,18 @@ def run_pipeline(stages: list[str], generation_run: str | None = None, generatio
             with tracker.stage("gold"):
                 result.results["gold"] = run_gold(spark, tracker, cfg, silver_root, resolve(cfg.paths["gold"]),
                                                   metadata_root)
+        if "ml" in stages:
+            from src.ml.forecasting.run import run_forecasting
+            gold_root = resolve(cfg.paths["gold"])
+            if not (gold_root / "gld_demand_features").exists():
+                raise FileNotFoundError("Gold is empty; run the gold stage first")
+            from src.ml.stockout.run import run_stockout
+            with tracker.stage("ml"):
+                result.results["ml"] = {
+                    "forecast": run_forecasting(cfg, tracker, gold_root, resolve(cfg.paths["silver"]),
+                                                resolve(cfg.paths["ml"])),
+                    "stockout": run_stockout(tracker, gold_root),
+                }
         result.status = "success"
         tracker.finish("success")
     except BaseException as exc:
@@ -90,6 +104,6 @@ def run_pipeline(stages: list[str], generation_run: str | None = None, generatio
         tracker.finish("failed", exc)
         raise
     finally:
-        if owns_spark:
+        if owns_spark and spark is not None:
             spark.stop()
     return result

@@ -15,13 +15,6 @@ from src.orchestration.pipeline import run_pipeline  # noqa: E402
 from src.transformations.gold.run import GOLD_TABLES, read_gold  # noqa: E402
 
 
-@pytest.fixture(scope="module")
-def gold_env(silver_env, small_run, spark):
-    result = run_pipeline(["gold"], small_run.run_id, silver_env["gen_root"], overrides=silver_env["overrides"],
-                          spark=spark)
-    return {**silver_env, "gold_result": result}
-
-
 def _read(folder):
     return pd.concat([read_csv_strings(p) for p in folder.glob("*.csv")], ignore_index=True)
 
