@@ -1,0 +1,21 @@
+# Demo profile: ~298K source rows (Project_Plan_v2.md §3.4)
+profile: medium
+
+counts:
+  cities: 3
+  stores_per_city: 4          # 12 stores
+  categories: 20
+  products: 600
+  customers: 6000
+  promotions: 60
+  orders: 36000
+  inventory_events: 12000
+  application_events: 15000
+  application_logs: 5000
+  weather_readings_per_day: 8
+
+# Derived from ratios in default.yaml (shown here for reference; the generator computes them):
+#   order_items 122,400 | payments 37,800 | deliveries 34,000 | cancellations 2,520
+#   returns_refunds 1,800 | order_promotions 7,200 | reviews 5,400 | delivery_partners 120
+#   inventory_snapshots 7,800 (12 stores x 25 focus SKUs x 26 Mondays) | weather 4,392
+#   total 298,124

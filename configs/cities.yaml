@@ -1,0 +1,8 @@
+# Cities used by stores, customers, delivery partners and weather (joined on city_id)
+cities:
+  - { city_id: C01, city: Bengaluru, state: Karnataka,   lat: 12.9716, lon: 77.5946, base_temp_c: 26, monsoon_rain_mm_day: 6.0 }
+  - { city_id: C02, city: Mumbai,    state: Maharashtra, lat: 19.0760, lon: 72.8777, base_temp_c: 29, monsoon_rain_mm_day: 18.0 }
+  - { city_id: C03, city: Delhi,     state: Delhi,       lat: 28.7041, lon: 77.1025, base_temp_c: 33, monsoon_rain_mm_day: 7.0 }
+
+# Stores are placed within this radius of the city centre
+store_radius_km: 12

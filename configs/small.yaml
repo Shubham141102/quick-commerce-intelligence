@@ -1,0 +1,33 @@
+# Fast profile for unit/integration tests and CI (~13.5K rows, 30 days)
+profile: small
+
+calendar:
+  start_date: "2025-09-01"
+  end_date: "2025-09-30"
+
+ingestion_slices:
+  historical: { start: "2025-09-01", end: "2025-09-14", file_grain: month }
+  batch:      { start: "2025-09-15", end: "2025-09-26", file_grain: day }
+  stream:     { start: "2025-09-27", end: "2025-09-30", micro_batch_minutes: 60 }
+
+ml_split:
+  train_end: "2025-09-23"
+  test_start: "2025-09-24"
+
+counts:
+  cities: 3
+  stores_per_city: 1          # 3 stores, one per city so the weather join is exercised
+  categories: 20
+  products: 150
+  customers: 500
+  promotions: 10
+  orders: 1500
+  inventory_events: 480
+  application_events: 600
+  application_logs: 300
+  weather_readings_per_day: 8
+
+planted:
+  affinity_pairs: 5
+  anomalies: 3
+  stockout_episodes: 5

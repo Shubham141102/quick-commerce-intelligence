@@ -1,0 +1,42 @@
+# Documentation
+
+Documentation for the Quick-Commerce Intelligence Platform. Each completed process gets its own document as soon as it is finished; reference documents are generated from the code so they cannot drift from what the pipeline actually does.
+
+## Process documents (narrative: what, why, how, results)
+
+| # | Process | Document | Status |
+|---|---|---|---|
+| 1 | Synthetic data generation (19 datasets, 90% clean) | [01_data_generation.md](01_data_generation.md) | Done |
+| 2 | Bronze ingestion (landing CSV → raw tables + metadata) | [02_bronze_ingestion.md](02_bronze_ingestion.md) | Done |
+| 3 | Silver transformations (clean, validate, quarantine) | [03_silver_transformations.md](03_silver_transformations.md) | Done |
+| 4 | Gold (business tables, metrics, ML features) | [04_gold.md](04_gold.md) | Done |
+| 5 | Forecasting, stockout risk, replenishment, Inventory workspace | — | Next |
+
+## Reference documents (generated — do not edit by hand)
+
+| Document | Contents | Regenerate |
+|---|---|---|
+| [data_dictionary.md](data_dictionary.md) | Every source dataset and column: type, required, valid values, references, injected issues; Bronze metadata columns | `python -m scripts.build_docs` |
+| [transformation_catalog.md](transformation_catalog.md) | Every Bronze → Silver rule per dataset: standardisation, casts, validation rules, outcomes, derived columns, lineage | `python -m scripts.build_docs` |
+| [gold_catalog.md](gold_catalog.md) | Every Gold table: grain, sources, every column with type and meaning, lineage | `python -m scripts.build_docs` |
+| [metric_definitions.md](metric_definitions.md) | Every business metric: definition and formula (the single source of truth) | `python -m scripts.build_docs` |
+
+A unit test fails if a generated document is out of date.
+
+## Pipeline at a glance
+
+```
+Generator (Python)            Bronze (PySpark)                 Silver (PySpark)
+19 datasets, 90% clean   →    raw rows kept exactly       →    typed, standardised, de-duplicated
+landing CSVs:                 + ingestion metadata             rejected rows → quarantine (with reasons)
+historical / batch / stream   file-level load tracking         business-rule flags (dq_*)
+data/generation/<run>/        data/bronze/brz_<dataset>/       data/silver/slv_<dataset>/
+                                                               data/quarantine/qtn_records/<dataset>/
+        ↓                              ↓                                ↓
+   manifest + ground truth      run metadata (CSV) in data/metadata/: runs, stages, tables, files, quality, lineage
+```
+
+Then **Gold** (PySpark): 12 business tables in `data/gold/<table>/` with shared metric definitions.
+
+Completion checks: `python -m scripts.check_bronze` (9 checks), `python -m scripts.check_silver` (10 checks), `python -m scripts.check_gold` (10 checks).
+Overall design: [Project_Plan_v2.md](Project_Plan_v2.md).

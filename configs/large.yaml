@@ -1,0 +1,18 @@
+# Benchmark-only profile (~3M rows). Used to measure where Spark pays off (§17).
+profile: large
+
+counts:
+  cities: 3
+  stores_per_city: 10         # 30 stores
+  categories: 25
+  products: 2000
+  customers: 60000
+  promotions: 200
+  orders: 360000
+  inventory_events: 120000
+  application_events: 150000
+  application_logs: 50000
+  weather_readings_per_day: 8
+
+ratios:
+  partners_per_store: 12

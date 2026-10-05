@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Secrets
+.env
+.streamlit/secrets.toml
+
+# Generated data (only the published demo snapshot is committed)
+data/*
+!data/demo/
+logs/*
+!logs/.gitkeep
+
+# Spark (tools/ holds local Hadoop helpers for Windows: winutils.exe, hadoop.dll)
+tools/
+spark-warehouse/
+metastore_db/
+derby.log
+*checkpoint*/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Flat per-table exports (python -m scripts.export_flat_tables)
+data_sep/
+data_sep_silver/
+data_sep_gold/
+
+# Personal files / archives
+*.zip
+extra.txt

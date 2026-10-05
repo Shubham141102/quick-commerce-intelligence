@@ -1,0 +1,11 @@
+# App-only dependencies for Streamlit Community Cloud (no PySpark).
+# Pipeline/dev deps are in pyproject.toml extras: pip install -e ".[generation,pipeline,app,dev]"
+streamlit>=1.40
+duckdb>=1.0
+pandas>=2.2
+numpy>=1.26
+plotly>=5.20
+rank-bm25>=0.2.2
+bcrypt>=4.1
+pydantic>=2.6
+pyyaml>=6.0

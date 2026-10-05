@@ -1,0 +1,155 @@
+# Dirty-data budget (Project_Plan_v2.md §4.2)
+#
+# - Rates are a share of the rows in ONE source dataset.
+# - Each dirty row gets exactly one primary issue (mutually exclusive),
+#   so every dataset is exactly `clean_ratio` clean.
+# - Issue types that don't apply to a dataset hand their share to the
+#   applicable ones, proportionally, keeping the dataset's total at 10%.
+
+enabled: true
+clean_ratio: 0.90
+assignment: exclusive
+redistribute_unsupported: proportional
+
+budget:
+  DUP:  0.0250   # duplicate rows (split below into exact/conflicting)
+  MISS: 0.0200   # missing REQUIRED value
+  FMT:  0.0150   # inconsistent format (casing, whitespace, date formats)
+  NUM:  0.0100   # invalid numeric / out of range
+  BIZ:  0.0100   # business-rule violation
+  TYPE: 0.0075   # invalid data type (text in numeric field, etc.)
+  FK:   0.0075   # referential-integrity error
+  SEQ:  0.0050   # invalid temporal sequence
+  # total = 0.10
+
+duplicate_split:
+  exact: 0.5
+  conflicting: 0.5   # same business key, one non-key field changed
+
+# MALF (malformed payload) is not in the shared budget. Where it applies it
+# competes for the dataset's 10% using this base weight before normalisation.
+substitute_shares:
+  MALF: 0.0150
+
+# Which issue types may be injected into each dataset.
+# Dimension tables get correctable issues only (DUP, FMT), so a rejected
+# parent never cascades into thousands of orphaned child rows.
+applicability:
+  categories:          [DUP, FMT]
+  stores:              [DUP, FMT]
+  products:            [DUP, FMT]
+  customers:           [DUP, FMT]
+  delivery_partners:   [DUP, FMT]
+  orders:              [DUP, MISS, FMT, NUM, BIZ, TYPE, FK]
+  order_items:         [DUP, MISS, NUM, BIZ, TYPE, FK]
+  payments:            [DUP, MISS, FMT, NUM, BIZ, TYPE, FK]
+  deliveries:          [DUP, MISS, FMT, BIZ, FK, SEQ]
+  cancellations:       [DUP, MISS, FMT, FK, SEQ]
+  inventory_snapshots: [DUP, MISS, NUM, TYPE, FK]
+  inventory_events:    [DUP, MISS, FMT, NUM, FK]
+  promotions:          [DUP, MISS, FMT, NUM, SEQ]
+  order_promotions:    [DUP, NUM, BIZ, FK]
+  returns_refunds:     [DUP, MISS, BIZ, FK, SEQ]
+  reviews:             [DUP, FMT, NUM, BIZ, FK]
+  application_events:  [DUP, MISS, FMT, FK, MALF]
+  weather:             [DUP, MISS, FMT, NUM, TYPE]
+  application_logs:    [DUP, MISS, FMT, MALF]
+
+# Concrete mutations per dataset and issue. The generator picks one at random
+# (seeded) for each dirty row.
+mutations:
+  orders:
+    MISS: [order_id, customer_id, store_id, order_ts]
+    FMT:  [status_casing, status_whitespace, order_ts_alt_format]
+    NUM:  [negative_total_amount]
+    BIZ:  [total_amount_mismatch]
+    TYPE: [total_amount_text]
+    FK:   [unknown_customer_id, unknown_store_id]
+  order_items:
+    MISS: [order_id, product_id, quantity]
+    NUM:  [zero_quantity, negative_quantity, negative_unit_price]
+    BIZ:  [unit_price_mismatch_vs_catalog]
+    TYPE: [quantity_text]
+    FK:   [unknown_product_id, unknown_order_id]
+  payments:
+    MISS: [order_id, amount]
+    FMT:  [method_casing, status_casing]
+    NUM:  [negative_amount]
+    BIZ:  [amount_mismatch_vs_order]
+    TYPE: [amount_text]
+    FK:   [unknown_order_id]
+  deliveries:
+    MISS: [delivered_ts_on_delivered, partner_id]
+    FMT:  [status_casing, pickup_ts_alt_format]
+    BIZ:  [delivery_partner_wrong_city]
+    FK:   [unknown_order_id, unknown_partner_id]
+    SEQ:  [delivered_before_pickup]
+  cancellations:
+    MISS: [order_id, reason]
+    FMT:  [reason_casing]
+    FK:   [unknown_order_id]
+    SEQ:  [cancelled_before_order]
+  inventory_snapshots:
+    MISS: [stock_quantity]
+    NUM:  [negative_stock]
+    TYPE: [stock_quantity_text]
+    FK:   [unknown_product_id]
+  inventory_events:
+    MISS: [event_ts, quantity]
+    FMT:  [event_type_casing]
+    NUM:  [quantity_sign_mismatch]
+    FK:   [unknown_store_id]
+  promotions:
+    MISS: [start_date]
+    FMT:  [name_whitespace]
+    NUM:  [discount_over_100]
+    SEQ:  [end_before_start]
+  order_promotions:
+    NUM:  [negative_discount_amount]
+    BIZ:  [promotion_not_active_on_order_date]
+    FK:   [unknown_promotion_id]
+  returns_refunds:
+    MISS: [payment_id]
+    BIZ:  [refund_exceeds_payment]
+    FK:   [unknown_payment_id]
+    SEQ:  [refund_before_payment]
+  reviews:
+    FMT:  [comment_whitespace]
+    NUM:  [rating_out_of_range]
+    BIZ:  [review_for_unpurchased_product]
+    FK:   [unknown_customer_id]
+  application_events:
+    MISS: [event_name]
+    FMT:  [event_name_casing]
+    FK:   [unknown_customer_id]
+    MALF: [invalid_json_metadata]
+  weather:
+    MISS: [rainfall_mm]
+    FMT:  [observation_ts_alt_format]
+    NUM:  [humidity_over_100]
+    TYPE: [temperature_text]
+  application_logs:
+    MISS: [service]
+    FMT:  [log_level_casing]
+    MALF: [wrong_column_count, truncated_row]
+  # Dimension tables: DUP + FMT (casing / whitespace in names and cities)
+  categories:        { FMT: [name_casing] }
+  stores:            { FMT: [city_casing, name_whitespace] }
+  products:          { FMT: [name_whitespace, brand_casing] }
+  customers:         { FMT: [email_casing, name_whitespace] }
+  delivery_partners: { FMT: [availability_casing] }
+
+# Valid behaviour that does NOT count against the 10% budget
+outside_budget:
+  late_arrival:
+    stream_share: 0.03
+    stream_max_delay_hours: 6
+    batch_next_day_share: 0.01
+  out_of_order_arrival:
+    stream_share: 0.02
+  missing_optional:
+    reviews.comment: 0.30
+    customers.email: 0.03
+    application_events.customer_id: 0.15
+  outliers:
+    orders.large_order: 0.002

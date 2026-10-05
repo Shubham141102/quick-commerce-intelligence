@@ -1,0 +1,109 @@
+# Shared settings for every profile. Profile files (small/medium/large.yaml)
+# override only what they need. See Project_Plan_v2.md §3 for the rationale.
+
+project:
+  name: quick-commerce-intelligence
+  generator_version: "0.1.0"
+
+seed: 42
+
+calendar:
+  start_date: "2025-04-01"
+  end_date: "2025-09-30"
+  storage_timezone: "UTC"          # all timestamps written as ISO-8601 UTC with 'Z'
+  business_timezone: "Asia/Kolkata" # business_date is derived in IST
+
+# How the business period is split across ingestion patterns (§3.1)
+ingestion_slices:
+  historical: { start: "2025-04-01", end: "2025-06-30", file_grain: month }
+  batch:      { start: "2025-07-01", end: "2025-09-23", file_grain: day }
+  stream:     { start: "2025-09-24", end: "2025-09-30", micro_batch_minutes: 60 }
+
+ml_split:
+  train_end: "2025-08-31"
+  test_start: "2025-09-01"
+
+paths:
+  data_root: data
+  generation: data/generation   # each run writes generation/<run_id>/{landing,manifest,ground_truth}
+  bronze: data/bronze
+  silver: data/silver
+  quarantine: data/quarantine
+  gold: data/gold
+  ml: data/ml
+  rag: data/rag
+  metadata: data/metadata
+  demo: data/demo
+  logs: logs
+  policies: policies
+
+# CSV conventions (§2.1). Every data table uses these.
+storage:
+  format: csv
+  encoding: utf-8
+  delimiter: ","
+  quote: '"'
+  escape: '"'
+  header: true
+  null_value: ""
+  timestamp_format: "yyyy-MM-dd'T'HH:mm:ss'Z'"
+  date_format: "yyyy-MM-dd"
+  list_separator: "|"
+  single_file_max_rows: 200000   # tables smaller than this are written with coalesce(1)
+
+# Ratios used to derive downstream dataset sizes from the order count
+ratios:
+  avg_items_per_order: 3.4
+  payment_retry_rate: 0.05          # extra failed attempts, as a share of orders
+  cancellation_rate: 0.07
+  pre_dispatch_cancel_share: 0.7937 # share of cancellations that happen before dispatch (no delivery)
+  refund_rate: 0.05
+  order_promotion_rate: 0.20
+  review_rate: 0.15
+  partners_per_store: 10
+
+# Demand model (§3.6)
+demand:
+  product_popularity_zipf_s: 1.1
+  focus_skus_per_store: 25
+  snapshot_weekday: mon
+  snapshot_hour_ist: 6
+  day_of_week_factors: { mon: 0.92, tue: 0.90, wed: 0.93, thu: 0.97, fri: 1.05, sat: 1.15, sun: 1.08 }
+  rain_uplift_per_10mm: 0.06
+  monthly_trend: 0.015              # +1.5% orders per month
+  restock_lead_time_days: [1, 2]
+  delivery_minutes_lognormal: { median: 14, sigma: 0.35 }
+  delivery_sla_minutes: 15
+  # Prices are constant in Tier 1 (price history / SCD2 is a Tier 2 option)
+
+personas:   # latent customer types; labels go to ground truth only
+  daily_essentials:  { share: 0.30, orders_per_month: 3.0, avg_basket: 3.8, night_share: 0.05, promo_sensitivity: 0.2 }
+  weekend_stock_up:  { share: 0.20, orders_per_month: 1.5, avg_basket: 5.5, night_share: 0.05, promo_sensitivity: 0.3 }
+  snacks_at_night:   { share: 0.20, orders_per_month: 2.0, avg_basket: 2.4, night_share: 0.60, promo_sensitivity: 0.3 }
+  premium:           { share: 0.10, orders_per_month: 1.8, avg_basket: 3.2, night_share: 0.10, promo_sensitivity: 0.05 }
+  deal_seeker:       { share: 0.20, orders_per_month: 0.8, avg_basket: 2.8, night_share: 0.10, promo_sensitivity: 0.9 }
+
+planted:    # ground truth used only by evaluation and tests
+  affinity_pairs: 25
+  affinity_attach_probability: [0.15, 0.35]
+  anomalies: 15
+  stockout_episodes: 40
+  outlier_order_rate: 0.002
+
+# Indian public holidays / festivals in the period, used as a forecasting feature (Gold).
+# Lunar-calendar dates are approximate. The generator does not plant holiday effects.
+holidays:
+  - { date: "2025-04-06", name: "Ram Navami" }
+  - { date: "2025-04-10", name: "Mahavir Jayanti" }
+  - { date: "2025-04-18", name: "Good Friday" }
+  - { date: "2025-05-12", name: "Buddha Purnima" }
+  - { date: "2025-06-07", name: "Eid al-Adha" }
+  - { date: "2025-07-06", name: "Muharram" }
+  - { date: "2025-08-09", name: "Raksha Bandhan" }
+  - { date: "2025-08-15", name: "Independence Day" }
+  - { date: "2025-08-16", name: "Janmashtami" }
+  - { date: "2025-08-27", name: "Ganesh Chaturthi" }
+  - { date: "2025-09-05", name: "Milad-un-Nabi" }
+
+dirty_data_config: configs/dirty_data.yaml
+cities_config: configs/cities.yaml
