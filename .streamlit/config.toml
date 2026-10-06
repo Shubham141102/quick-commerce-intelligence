@@ -1,0 +1,19 @@
+# Streamlit settings for the app (committed; secrets live in secrets.toml, which is git-ignored).
+
+[theme]
+base = "light"
+primaryColor = "#0F766E"            # teal: buttons, links, active tab
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F3F6F8" # sidebar, inputs, cards
+textColor = "#1F2937"
+font = "sans serif"
+baseRadius = "medium"
+
+[client]
+toolbarMode = "minimal"
+
+[server]
+runOnSave = false
+
+[browser]
+gatherUsageStats = false

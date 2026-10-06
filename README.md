@@ -12,7 +12,7 @@ The full design is in [`docs/Project_Plan_v2.md`](docs/Project_Plan_v2.md); all 
 | 2 | Bronze / Silver | Done (Bronze 9/9, Silver 10/10 completion checks) |
 | 3 | Gold | Done (10/10 completion checks) |
 | 4 | Inventory vertical slice | Done (forecasting, stockout risk, Inventory workspace app; check_ml 12/12) |
-| 5 | Segmentation + basket analysis | Not started |
+| 5 | Inventory explorer, Business and Marketing workspaces | Done (lost sales, anomalies, segmentation, basket rules, recommendations, retention; check_phase5 18 pass, 2 known limitations, 0 failed) |
 | 6 | RAG assistant | Not started |
 | 7 | Data Engineer workspace | Not started |
 | 8 | Hardening + deployment | Not started |
@@ -76,7 +76,9 @@ python -m scripts.create_demo_secrets      # once: .streamlit/secrets.toml with 
 streamlit run app/Home.py                  # http://localhost:8501  — e.g. login: inventory / inventory-demo
 ```
 
-The app reads only `data/demo/` through DuckDB (no Spark needed). Details and all demo logins:
+The app opens on the login page; each demo account lands directly in its own workspace (`inventory`,
+`business`, `marketing`; `admin` sees all; the Data Engineer workspace is on hold). It reads only `data/demo/`
+through DuckDB (no Spark needed). Details: [docs/12_frontend.md](docs/12_frontend.md); demo logins:
 [docs/07_inventory_workspace.md](docs/07_inventory_workspace.md).
 
 ```bash

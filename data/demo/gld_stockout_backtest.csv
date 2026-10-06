@@ -1,4 +1,4 @@
 rule,pair_days,flagged,stockouts_next_3d,true_positives,precision,recall,flag_rate,model_version
-High or Medium tier,8200,1179,360,135,0.1145,0.375,0.1438,demand_forecast_run_20261005T130920538
-High tier (forecast-based),8200,341,360,70,0.2053,0.1944,0.0416,demand_forecast_run_20261005T130920538
-Naive: stock <= reorder level,8200,1168,360,135,0.1156,0.375,0.1424,demand_forecast_run_20261005T130920538
+High or Medium tier,8200,1179,360,135,0.1145,0.375,0.1438,demand_forecast_run_20261005T135746863
+High tier (forecast-based),8200,341,360,70,0.2053,0.1944,0.0416,demand_forecast_run_20261005T135746863
+Naive: stock <= reorder level,8200,1168,360,135,0.1156,0.375,0.1424,demand_forecast_run_20261005T135746863

@@ -143,8 +143,131 @@ LOST_SALES = GoldTable(
      Col("model_version", "string", "pipeline run that produced the estimate")),
     None, engine="python")
 
+SALES_ANOMALIES = GoldTable(
+    "gld_sales_anomalies", ("anomaly_id",),
+    "Unusual events found by three statistical detectors (store outage, demand spike, payment failure): what was "
+    "observed vs what is normal for that store / hour / product over the previous 28 days, and how unlikely it is. "
+    "A signal to investigate, not proof of a problem.",
+    ("slv_orders", "slv_order_items", "slv_payments", "slv_application_logs"),
+    (Col("anomaly_id", "string", "A0001…"),
+     Col("detector", "string", "store_outage / demand_spike / payment_failure"),
+     Col("store_id", "string", "store (empty for network-wide payment failures)"),
+     Col("product_id", "string", "product (demand spikes only)"),
+     Col("business_date", "date", "day the anomaly starts (IST)"),
+     Col("start_ts", "timestamp", "start (UTC)"), Col("end_ts", "timestamp", "end (UTC)"),
+     Col("observed", "double", "observed count over the anomaly (orders / failed payments)"),
+     Col("expected", "double", "expected count from the previous 28 days"),
+     Col("p_value", "double", "Poisson probability of a count at least this extreme"),
+     Col("score", "double", "−log10(p_value), capped at 20 (higher = more unusual)"),
+     Col("severity", "string", "High (score ≥ 8) / Medium"),
+     Col("description", "string", "plain-language summary"),
+     Col("model_version", "string", "pipeline run that produced it")),
+    None, engine="python")
+
+ANOMALY_SERIES = GoldTable(
+    "gld_anomaly_series", ("anomaly_id", "ts"),
+    "Context series for each anomaly (observed vs expected): hourly for the anomaly day (outages, payment failures), "
+    "daily for ±14 days (demand spikes). Used by the anomaly chart.",
+    ("gld_sales_anomalies",),
+    (Col("anomaly_id", "string", "anomaly"), Col("ts", "timestamp", "hour or day (UTC)"),
+     Col("observed", "double", "observed count"), Col("expected", "double", "expected count")),
+    None, engine="python")
+
+_MKT = ("gld_customer_360", "gld_customer_category")
+
+CUSTOMER_SEGMENTS = GoldTable(
+    "gld_customer_segments", ("customer_id",),
+    "Segment of every customer with at least one completed order (K-means on behaviour and category mix).",
+    _MKT, (Col("customer_id", "string", "customer"), Col("segment_id", "int", "segment number"),
+           Col("segment_label", "string", "name generated from the segment's measured traits"),
+           Col("model_version", "string", "model run")), None, engine="python")
+
+SEGMENT_PROFILES = GoldTable(
+    "gld_segment_profiles", ("segment_id",),
+    "What each segment looks like (original-scale averages, top categories) and a suggested campaign.",
+    _MKT, (Col("segment_id", "int", "segment number"), Col("segment_label", "string", "generated name"),
+           Col("customers", "int", "customers in the segment"), Col("share", "double", "share of segmented customers"),
+           Col("avg_spend", "double", "average total spend (₹)"), Col("avg_orders", "double", "average completed orders"),
+           Col("avg_order_value", "double", "average order value (₹)"),
+           Col("avg_items_per_order", "double", "average distinct products per order"),
+           Col("avg_recency_days", "double", "average days since last completed order"),
+           Col("night_order_share", "double", "share of orders 21:00–01:59 IST"),
+           Col("weekend_order_share", "double", "share of orders on weekends"),
+           Col("promo_order_share", "double", "share of completed orders with a promotion"),
+           Col("top_categories", "string", "top 3 categories by share of spend"),
+           Col("campaign_idea", "string", "suggested campaign, from the profile (an idea, not a tested result)"),
+           Col("model_version", "string", "model run")), None, engine="python")
+
+SEGMENTATION_SELECTION = GoldTable(
+    "gld_segmentation_selection", ("k",),
+    "How the number of segments was chosen: silhouette and inertia for k = 3…8; stability for the chosen k.",
+    _MKT, (Col("k", "int", "number of segments tried"), Col("silhouette", "double", "silhouette score (higher = better separated)"),
+           Col("inertia", "double", "within-segment sum of squares"), Col("chosen", "boolean", "k used"),
+           Col("stability_ari", "double", "mean adjusted Rand index vs 5 other seeds (chosen k only)"),
+           Col("model_version", "string", "model run")), None, engine="python")
+
+BASKET_RULES = GoldTable(
+    "gld_basket_rules", ("antecedent_id", "consequent_id"),
+    "Association rules A → B from completed baskets (confidence ≥ 10%, lift ≥ 2): when A is bought, B often is too.",
+    ("gld_basket_pairs",),
+    (Col("antecedent_id", "string", "product A"), Col("antecedent", "string", "name of A"),
+     Col("antecedent_category", "string", "category of A"), Col("consequent_id", "string", "product B"),
+     Col("consequent", "string", "name of B"), Col("consequent_category", "string", "category of B"),
+     Col("baskets_both", "int", "completed baskets with both"), Col("support", "double", "baskets_both ÷ all baskets"),
+     Col("confidence", "double", "baskets_both ÷ baskets with A"), Col("lift", "double", "confidence ÷ support of B"),
+     Col("model_version", "string", "pipeline run")), None, engine="python")
+
+RECOMMENDATIONS = GoldTable(
+    "gld_recommendations", ("customer_id", "rank"),
+    "Top-10 product recommendations per customer (buy again + often bought with + popularity), with the reason.",
+    ("slv_orders", "slv_order_items"),
+    (Col("customer_id", "string", "customer"), Col("rank", "int", "1 = best"), Col("product_id", "string", "product"),
+     Col("score", "double", "combined score"), Col("reason", "string", "you buy this often / often bought with your "
+         "items / popular"), Col("model_version", "string", "model run")), None, engine="python")
+
+RECOMMENDATION_METRICS = GoldTable(
+    "gld_recommendation_metrics", ("method",),
+    "September backtest of recommendations (trained on Apr–Aug; hybrid weights chosen on August): Precision@10, "
+    "Recall@10, hit rate, coverage.",
+    ("slv_orders", "slv_order_items"),
+    (Col("method", "string", "hybrid (used) / repeat (buy again only) / popularity"),
+     Col("weights", "string", "hybrid weights chosen on the August validation month"),
+     Col("precision_at_10", "double", "share of the 10 recommendations bought in September"),
+     Col("recall_at_10", "double", "share of September products that were recommended"),
+     Col("hit_rate", "double", "customers with at least one recommended product bought"),
+     Col("coverage", "double", "distinct products recommended ÷ catalog"),
+     Col("customers", "int", "customers evaluated"), Col("model_version", "string", "model run")),
+    None, engine="python")
+
+RETENTION_COHORTS = GoldTable(
+    "gld_retention_cohorts", ("cohort_month", "month_offset"),
+    "Cohort retention: customers grouped by the month of their first completed order; share who ordered again "
+    "in each later month. Descriptive (the synthetic data has no planted churn).",
+    ("slv_orders",),
+    (Col("cohort_month", "date", "month of first completed order"), Col("month_offset", "int", "months after the first"),
+     Col("cohort_size", "int", "customers in the cohort"), Col("active_customers", "int", "with a completed order that month"),
+     Col("retention_rate", "double", "active ÷ cohort size")), None, engine="python")
+
+CUSTOMER_RETENTION = GoldTable(
+    "gld_customer_retention", ("customer_id",),
+    "Retention status of every customer at the end of the data: active / cooling / at risk / lapsed / never ordered, "
+    "value tier, and whether their next order is overdue against their own rhythm.",
+    ("slv_orders", "slv_customers"),
+    (Col("customer_id", "string", "customer"), Col("first_order_date", "date", "first completed order"),
+     Col("last_order_date", "date", "last completed order"), Col("orders_completed", "int", "completed orders"),
+     Col("total_spend", "decimal", "order value of completed orders (₹)"),
+     Col("days_since_last", "int", "days from last completed order to the end of the data"),
+     Col("avg_days_between", "double", "average gap between completed orders"),
+     Col("status", "string", "active (≤ 14 days) / cooling (15–30) / at_risk (31–60) / lapsed (> 60) / never_ordered"),
+     Col("value_tier", "string", "High / Medium / Low by total spend (thirds)"),
+     Col("overdue", "boolean", "days since last order > 2 × their average gap")), None, engine="python")
+
+MARKETING_TABLES = (CUSTOMER_SEGMENTS, SEGMENT_PROFILES, SEGMENTATION_SELECTION, BASKET_RULES, RECOMMENDATIONS,
+                    RECOMMENDATION_METRICS, RETENTION_COHORTS, CUSTOMER_RETENTION)
+
 ML_TABLES: tuple[GoldTable, ...] = (DEMAND_PREDICTIONS, FORECAST_METRICS, FEATURE_IMPORTANCE, SKU_FORECAST,
-                                    STOCKOUT_RISK, REPLENISHMENT, STOCKOUT_BACKTEST, LOST_SALES)
+                                    STOCKOUT_RISK, REPLENISHMENT, STOCKOUT_BACKTEST, LOST_SALES,
+                                    SALES_ANOMALIES, ANOMALY_SERIES, *MARKETING_TABLES)
 
 
 def read_table(gold_root: Path, table: GoldTable) -> pd.DataFrame:

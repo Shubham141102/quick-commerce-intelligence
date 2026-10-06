@@ -1,0 +1,353 @@
+antecedent_id,antecedent,antecedent_category,consequent_id,consequent,consequent_category,baskets_both,support,confidence,lift,model_version
+P0002,PawPals Baby Food 100 g,CAT15,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,8,0.0003,0.381,4.533,marketing_run_20261005T135746863
+P0008,VitaBoost Detergent Powder 100 g,CAT14,P0206,UrbanPantry Diapers 1 L,CAT15,9,0.0003,0.2368,3.966,marketing_run_20261005T135746863
+P0008,VitaBoost Detergent Powder 100 g,CAT14,P0563,ChillZone Deodorant Pack of 4,CAT13,8,0.0003,0.2105,3.41,marketing_run_20261005T135746863
+P0013,UrbanPantry Baby Lotion 1 kg,CAT15,P0206,UrbanPantry Diapers 1 L,CAT15,16,0.0005,0.1509,2.528,marketing_run_20261005T135746863
+P0013,UrbanPantry Baby Lotion 1 kg,CAT15,P0316,FreshFarm Baby Wipes 1 L,CAT15,13,0.0004,0.1226,4.456,marketing_run_20261005T135746863
+P0013,UrbanPantry Baby Lotion 1 kg,CAT15,P0325,PureNest Baby Wipes 500 ml,CAT15,11,0.0004,0.1038,7.345,marketing_run_20261005T135746863
+P0013,UrbanPantry Baby Lotion 1 kg,CAT15,P0410,Organica Dog Food 500 ml,CAT16,13,0.0004,0.1226,60.338,marketing_run_20261005T135746863
+P0013,UrbanPantry Baby Lotion 1 kg,CAT15,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,31,0.001,0.2925,3.48,marketing_run_20261005T135746863
+P0013,UrbanPantry Baby Lotion 1 kg,CAT15,P0510,NutriKart Besan 200 ml,CAT05,11,0.0004,0.1038,2.836,marketing_run_20261005T135746863
+P0014,SaucyChef Filter Coffee Pack of 2,CAT11,P0003,MorningGlow Apple 500 ml,CAT03,9,0.0003,0.1475,2.516,marketing_run_20261005T135746863
+P0015,Crunchies Muesli Pack of 6,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,41,0.0014,0.168,2.814,marketing_run_20261005T135746863
+P0015,Crunchies Muesli Pack of 6,CAT10,P0288,VitaBoost Toilet Cleaner 500 g,CAT14,29,0.001,0.1189,3.494,marketing_run_20261005T135746863
+P0015,Crunchies Muesli Pack of 6,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,49,0.0016,0.2008,2.39,marketing_run_20261005T135746863
+P0015,Crunchies Muesli Pack of 6,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,31,0.001,0.127,2.058,marketing_run_20261005T135746863
+P0030,SpiceRoute Basmati Rice 200 g,CAT05,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,21,0.0007,0.2258,2.687,marketing_run_20261005T135746863
+P0033,GoldenDrop Corn Flakes 1 L,CAT10,P0022,MorningGlow Whole Wheat Atta 500 g,CAT05,11,0.0004,0.1122,2.101,marketing_run_20261005T135746863
+P0033,GoldenDrop Corn Flakes 1 L,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,12,0.0004,0.1224,2.051,marketing_run_20261005T135746863
+P0033,GoldenDrop Corn Flakes 1 L,CAT10,P0272,PawPals Shampoo Pack of 4,CAT13,11,0.0004,0.1122,4.468,marketing_run_20261005T135746863
+P0033,GoldenDrop Corn Flakes 1 L,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,20,0.0007,0.2041,2.429,marketing_run_20261005T135746863
+P0038,GoldenDrop Brownie Pack of 2,CAT08,P0215,MorningGlow Moong Dal 100 g,CAT05,53,0.0018,0.2284,27.87,marketing_run_20261005T135746863
+P0046,SparkleHome Coconut Water 200 ml,CAT07,P0369,Shubh Pooja Frozen Fries 500 g,CAT09,13,0.0004,0.1781,2.013,marketing_run_20261005T135746863
+P0051,SaucyChef Fish Fillet 200 ml,CAT18,P0279,SunMeadow Milk Chocolate 500 g,CAT12,9,0.0003,0.2432,77.659,marketing_run_20261005T135746863
+P0052,GoldenDrop Detergent Powder 200 g,CAT14,P0206,UrbanPantry Diapers 1 L,CAT15,11,0.0004,0.1667,2.791,marketing_run_20261005T135746863
+P0052,GoldenDrop Detergent Powder 200 g,CAT14,P0252,TinyToes Mutton Curry Cut 200 ml,CAT18,12,0.0004,0.1818,2.318,marketing_run_20261005T135746863
+P0052,GoldenDrop Detergent Powder 200 g,CAT14,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,21,0.0007,0.3182,3.786,marketing_run_20261005T135746863
+P0052,GoldenDrop Detergent Powder 200 g,CAT14,P0563,ChillZone Deodorant Pack of 4,CAT13,10,0.0003,0.1515,2.454,marketing_run_20261005T135746863
+P0056,BlueRiver Dog Food Pack of 4,CAT16,P0032,GreenLeaf Filter Coffee 1 kg,CAT11,9,0.0003,0.4091,2.113,marketing_run_20261005T135746863
+P0057,KhetSe Honey 1 L,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,79,0.0026,0.1894,3.173,marketing_run_20261005T135746863
+P0057,KhetSe Honey 1 L,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,98,0.0033,0.235,2.797,marketing_run_20261005T135746863
+P0057,KhetSe Honey 1 L,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,58,0.0019,0.1391,2.253,marketing_run_20261005T135746863
+P0060,Annapurna Foods Protein Bar Pack of 6,CAT19,P0221,PureNest Balloons 200 g,CAT20,97,0.0032,0.305,30.014,marketing_run_20261005T135746863
+P0061,MorningGlow Instant Noodles 200 g,CAT09,P0420,SparkleHome Wafer Bar 100 g,CAT12,17,0.0006,0.1097,15.825,marketing_run_20261005T135746863
+P0064,SeaCatch Moong Dal 200 g,CAT05,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,11,0.0004,0.2245,2.671,marketing_run_20261005T135746863
+P0067,PureNest Coriander Pack of 2,CAT04,P0255,PaperTrail Eggs 500 ml,CAT01,10,0.0003,0.1538,3.018,marketing_run_20261005T135746863
+P0070,GreenLeaf Muesli 200 g,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,12,0.0004,0.1412,2.364,marketing_run_20261005T135746863
+P0070,GreenLeaf Muesli 200 g,CAT10,P0287,NutriKart Moong Dal 200 g,CAT05,11,0.0004,0.1294,3.137,marketing_run_20261005T135746863
+P0070,GreenLeaf Muesli 200 g,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,20,0.0007,0.2353,2.8,marketing_run_20261005T135746863
+P0071,NutriKart Basmati Rice Pack of 4,CAT05,P0255,PaperTrail Eggs 500 ml,CAT01,8,0.0003,0.1067,2.092,marketing_run_20261005T135746863
+P0071,NutriKart Basmati Rice Pack of 4,CAT05,P0589,VitaBoost Orange 1 L,CAT03,8,0.0003,0.1067,2.603,marketing_run_20261005T135746863
+P0073,TinyToes Body Wash 200 ml,CAT13,P0206,UrbanPantry Diapers 1 L,CAT15,78,0.0026,0.1359,2.276,marketing_run_20261005T135746863
+P0073,TinyToes Body Wash 200 ml,CAT13,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,121,0.004,0.2108,2.508,marketing_run_20261005T135746863
+P0073,TinyToes Body Wash 200 ml,CAT13,P0563,ChillZone Deodorant Pack of 4,CAT13,74,0.0025,0.1289,2.088,marketing_run_20261005T135746863
+P0075,SunMeadow Pet Treats 100 g,CAT16,P0452,PawPals Shampoo 100 g,CAT13,14,0.0005,0.1386,12.761,marketing_run_20261005T135746863
+P0077,SparkleHome Milk Chocolate 200 ml,CAT12,P0369,Shubh Pooja Frozen Fries 500 g,CAT09,8,0.0003,0.1951,2.206,marketing_run_20261005T135746863
+P0078,GoldenDrop Kulfi 1 kg,CAT08,P0409,SunMeadow Wafer Bar 1 L,CAT12,10,0.0003,0.1176,2.743,marketing_run_20261005T135746863
+P0079,NutriKart Cashews Pack of 6,CAT17,P0252,TinyToes Mutton Curry Cut 200 ml,CAT18,9,0.0003,0.1607,2.049,marketing_run_20261005T135746863
+P0079,NutriKart Cashews Pack of 6,CAT17,P0563,ChillZone Deodorant Pack of 4,CAT13,8,0.0003,0.1429,2.314,marketing_run_20261005T135746863
+P0085,GreenLeaf Corn Flakes 1 kg,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,49,0.0016,0.1696,2.839,marketing_run_20261005T135746863
+P0085,GreenLeaf Corn Flakes 1 kg,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,65,0.0022,0.2249,2.676,marketing_run_20261005T135746863
+P0085,GreenLeaf Corn Flakes 1 kg,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,49,0.0016,0.1696,2.746,marketing_run_20261005T135746863
+P0087,NutriKart Poha Pack of 4,CAT05,P0531,PaperTrail Curd 1 L,CAT01,9,0.0003,0.1139,3.16,marketing_run_20261005T135746863
+P0087,NutriKart Poha Pack of 4,CAT05,P0589,VitaBoost Orange 1 L,CAT03,8,0.0003,0.1013,2.471,marketing_run_20261005T135746863
+P0090,DesiHarvest Chicken Sausages 200 ml,CAT18,P0247,TinyToes Filter Coffee 100 g,CAT11,8,0.0003,0.2222,68.052,marketing_run_20261005T135746863
+P0093,PureNest Carrot 100 g,CAT04,P0507,Swadeshi Select Whole Wheat Bread 100 g,CAT02,26,0.0009,0.3714,2.071,marketing_run_20261005T135746863
+P0098,Shubh Pooja Ghee Pack of 2,CAT01,P0003,MorningGlow Apple 500 ml,CAT03,9,0.0003,0.1233,2.102,marketing_run_20261005T135746863
+P0098,Shubh Pooja Ghee Pack of 2,CAT01,P0287,NutriKart Moong Dal 200 g,CAT05,8,0.0003,0.1096,2.657,marketing_run_20261005T135746863
+P0098,Shubh Pooja Ghee Pack of 2,CAT01,P0589,VitaBoost Orange 1 L,CAT03,8,0.0003,0.1096,2.674,marketing_run_20261005T135746863
+P0099,SeaCatch Basmati Rice 1 kg,CAT05,P0255,PaperTrail Eggs 500 ml,CAT01,9,0.0003,0.1023,2.006,marketing_run_20261005T135746863
+P0099,SeaCatch Basmati Rice 1 kg,CAT05,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,16,0.0005,0.1818,2.164,marketing_run_20261005T135746863
+P0099,SeaCatch Basmati Rice 1 kg,CAT05,P0563,ChillZone Deodorant Pack of 4,CAT13,11,0.0004,0.125,2.024,marketing_run_20261005T135746863
+P0100,SeaCatch Whole Wheat Atta 1 L,CAT05,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,31,0.001,0.1879,2.236,marketing_run_20261005T135746863
+P0102,VitaBoost Papaya Pack of 2,CAT03,P0032,GreenLeaf Filter Coffee 1 kg,CAT11,14,0.0005,0.4667,2.41,marketing_run_20261005T135746863
+P0109,PureNest Carrot 1 kg,CAT04,P0003,MorningGlow Apple 500 ml,CAT03,9,0.0003,0.1286,2.192,marketing_run_20261005T135746863
+P0111,SaucyChef Buttermilk Pack of 2,CAT01,P0022,MorningGlow Whole Wheat Atta 500 g,CAT05,16,0.0005,0.1231,2.304,marketing_run_20261005T135746863
+P0116,TinyToes Filter Coffee Pack of 2,CAT11,P0032,GreenLeaf Filter Coffee 1 kg,CAT11,8,0.0003,0.4444,2.295,marketing_run_20261005T135746863
+P0121,PureNest Balloons Pack of 4,CAT20,P0325,PureNest Baby Wipes 500 ml,CAT15,21,0.0007,0.1654,11.704,marketing_run_20261005T135746863
+P0122,Crunchies Muesli Pack of 4,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,22,0.0007,0.141,2.362,marketing_run_20261005T135746863
+P0122,Crunchies Muesli Pack of 4,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,39,0.0013,0.25,2.975,marketing_run_20261005T135746863
+P0122,Crunchies Muesli Pack of 4,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,24,0.0008,0.1538,2.492,marketing_run_20261005T135746863
+P0125,UrbanPantry Whole Wheat Bread 100 g,CAT02,P0507,Swadeshi Select Whole Wheat Bread 100 g,CAT02,8,0.0003,0.4,2.23,marketing_run_20261005T135746863
+P0126,SaucyChef Assam Tea 200 ml,CAT11,P0404,NutriKart Organic Honey 200 g,CAT17,55,0.0018,0.3846,59.807,marketing_run_20261005T135746863
+P0128,PureNest Baby Food 200 g,CAT15,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,11,0.0004,0.3438,4.091,marketing_run_20261005T135746863
+P0133,PaperTrail Curd 100 g,CAT01,P0589,VitaBoost Orange 1 L,CAT03,14,0.0005,0.1061,2.588,marketing_run_20261005T135746863
+P0134,KhetSe Chyawanprash 100 g,CAT19,P0252,TinyToes Mutton Curry Cut 200 ml,CAT18,8,0.0003,0.1667,2.125,marketing_run_20261005T135746863
+P0139,Crunchies Capsicum 1 L,CAT04,P0003,MorningGlow Apple 500 ml,CAT03,14,0.0005,0.1186,2.023,marketing_run_20261005T135746863
+P0139,Crunchies Capsicum 1 L,CAT04,P0531,PaperTrail Curd 1 L,CAT01,12,0.0004,0.1017,2.821,marketing_run_20261005T135746863
+P0141,Swadeshi Select Potato 500 ml,CAT04,P0003,MorningGlow Apple 500 ml,CAT03,12,0.0004,0.1176,2.006,marketing_run_20261005T135746863
+P0141,Swadeshi Select Potato 500 ml,CAT04,P0022,MorningGlow Whole Wheat Atta 500 g,CAT05,12,0.0004,0.1176,2.203,marketing_run_20261005T135746863
+P0142,PaperTrail Face Wash 1 L,CAT13,P0206,UrbanPantry Diapers 1 L,CAT15,11,0.0004,0.1594,2.67,marketing_run_20261005T135746863
+P0142,PaperTrail Face Wash 1 L,CAT13,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,12,0.0004,0.1739,2.07,marketing_run_20261005T135746863
+P0142,PaperTrail Face Wash 1 L,CAT13,P0563,ChillZone Deodorant Pack of 4,CAT13,9,0.0003,0.1304,2.113,marketing_run_20261005T135746863
+P0143,SaucyChef Fish Fillet Pack of 4,CAT18,P0559,GoldenDrop Chocolate Cone Pack of 6,CAT08,16,0.0005,0.2667,35.411,marketing_run_20261005T135746863
+P0154,KhetSe Honey 1 kg,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,13,0.0004,0.2203,3.69,marketing_run_20261005T135746863
+P0154,KhetSe Honey 1 kg,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,11,0.0004,0.1864,2.219,marketing_run_20261005T135746863
+P0154,KhetSe Honey 1 kg,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,10,0.0003,0.1695,2.745,marketing_run_20261005T135746863
+P0155,PawPals Baby Lotion Pack of 2,CAT15,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,9,0.0003,0.3214,3.825,marketing_run_20261005T135746863
+P0156,Crunchies Rolled Oats 1 L,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,40,0.0013,0.1724,2.887,marketing_run_20261005T135746863
+P0156,Crunchies Rolled Oats 1 L,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,48,0.0016,0.2069,2.462,marketing_run_20261005T135746863
+P0156,Crunchies Rolled Oats 1 L,CAT10,P0530,SparkleHome Protein Bar 1 L,CAT19,56,0.0019,0.2414,50.306,marketing_run_20261005T135746863
+P0156,Crunchies Rolled Oats 1 L,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,34,0.0011,0.1466,2.374,marketing_run_20261005T135746863
+P0157,NutriKart Whole Wheat Atta Pack of 4,CAT05,P0206,UrbanPantry Diapers 1 L,CAT15,12,0.0004,0.1319,2.208,marketing_run_20261005T135746863
+P0157,NutriKart Whole Wheat Atta Pack of 4,CAT05,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,17,0.0006,0.1868,2.223,marketing_run_20261005T135746863
+P0160,KhetSe Mixed Fruit Jam 500 ml,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,29,0.001,0.1457,2.441,marketing_run_20261005T135746863
+P0160,KhetSe Mixed Fruit Jam 500 ml,CAT10,P0316,FreshFarm Baby Wipes 1 L,CAT15,20,0.0007,0.1005,3.652,marketing_run_20261005T135746863
+P0160,KhetSe Mixed Fruit Jam 500 ml,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,40,0.0013,0.201,2.392,marketing_run_20261005T135746863
+P0160,KhetSe Mixed Fruit Jam 500 ml,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,27,0.0009,0.1357,2.197,marketing_run_20261005T135746863
+P0162,Swadeshi Select Dishwash Liquid 200 g,CAT14,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,12,0.0004,0.2143,2.55,marketing_run_20261005T135746863
+P0166,GoldenDrop Garbage Bags 1 L,CAT14,P0206,UrbanPantry Diapers 1 L,CAT15,15,0.0005,0.1786,2.991,marketing_run_20261005T135746863
+P0166,GoldenDrop Garbage Bags 1 L,CAT14,P0288,VitaBoost Toilet Cleaner 500 g,CAT14,9,0.0003,0.1071,3.149,marketing_run_20261005T135746863
+P0166,GoldenDrop Garbage Bags 1 L,CAT14,P0563,ChillZone Deodorant Pack of 4,CAT13,12,0.0004,0.1429,2.314,marketing_run_20261005T135746863
+P0168,KhetSe Mixed Fruit Jam Pack of 2,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,16,0.0005,0.3077,3.661,marketing_run_20261005T135746863
+P0168,KhetSe Mixed Fruit Jam Pack of 2,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,10,0.0003,0.1923,3.115,marketing_run_20261005T135746863
+P0172,Annapurna Foods Brownie Pack of 2,CAT08,P0213,SaucyChef Soda 1 L,CAT07,17,0.0006,0.1076,2.215,marketing_run_20261005T135746863
+P0173,UrbanPantry Pav 200 g,CAT02,P0507,Swadeshi Select Whole Wheat Bread 100 g,CAT02,13,0.0004,0.3611,2.013,marketing_run_20261005T135746863
+P0174,SpiceRoute Organic Honey 500 g,CAT17,P0252,TinyToes Mutton Curry Cut 200 ml,CAT18,8,0.0003,0.2162,2.757,marketing_run_20261005T135746863
+P0177,PaperTrail Paneer 1 L,CAT01,P0531,PaperTrail Curd 1 L,CAT01,8,0.0003,0.1,2.774,marketing_run_20261005T135746863
+P0182,KhetSe Peanut Butter 500 ml,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,25,0.0008,0.1825,3.056,marketing_run_20261005T135746863
+P0182,KhetSe Peanut Butter 500 ml,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,28,0.0009,0.2044,2.432,marketing_run_20261005T135746863
+P0182,KhetSe Peanut Butter 500 ml,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,20,0.0007,0.146,2.364,marketing_run_20261005T135746863
+P0185,GoldenDrop Rolled Oats Pack of 4,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,34,0.0011,0.2073,3.472,marketing_run_20261005T135746863
+P0185,GoldenDrop Rolled Oats Pack of 4,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,40,0.0013,0.2439,2.902,marketing_run_20261005T135746863
+P0185,GoldenDrop Rolled Oats Pack of 4,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,24,0.0008,0.1463,2.37,marketing_run_20261005T135746863
+P0190,PawPals Baby Lotion 200 g,CAT15,P0206,UrbanPantry Diapers 1 L,CAT15,10,0.0003,0.1389,2.326,marketing_run_20261005T135746863
+P0190,PawPals Baby Lotion 200 g,CAT15,P0287,NutriKart Moong Dal 200 g,CAT05,9,0.0003,0.125,3.03,marketing_run_20261005T135746863
+P0190,PawPals Baby Lotion 200 g,CAT15,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,15,0.0005,0.2083,2.479,marketing_run_20261005T135746863
+P0190,PawPals Baby Lotion 200 g,CAT15,P0563,ChillZone Deodorant Pack of 4,CAT13,12,0.0004,0.1667,2.699,marketing_run_20261005T135746863
+P0191,TinyToes Toothpaste 500 ml,CAT13,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,9,0.0003,0.2093,2.491,marketing_run_20261005T135746863
+P0202,Crunchies Muesli 100 g,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,12,0.0004,0.2069,3.465,marketing_run_20261005T135746863
+P0202,Crunchies Muesli 100 g,CAT10,P0272,PawPals Shampoo Pack of 4,CAT13,8,0.0003,0.1379,5.49,marketing_run_20261005T135746863
+P0202,Crunchies Muesli 100 g,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,15,0.0005,0.2586,3.078,marketing_run_20261005T135746863
+P0202,Crunchies Muesli 100 g,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,9,0.0003,0.1552,2.513,marketing_run_20261005T135746863
+P0206,UrbanPantry Diapers 1 L,CAT15,P0288,VitaBoost Toilet Cleaner 500 g,CAT14,183,0.0061,0.1021,3.002,marketing_run_20261005T135746863
+P0206,UrbanPantry Diapers 1 L,CAT15,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,384,0.0128,0.2143,2.55,marketing_run_20261005T135746863
+P0206,UrbanPantry Diapers 1 L,CAT15,P0563,ChillZone Deodorant Pack of 4,CAT13,247,0.0082,0.1378,2.232,marketing_run_20261005T135746863
+P0208,SparkleHome Iced Tea 200 g,CAT07,P0494,ChillZone Deodorant 500 g,CAT13,58,0.0019,0.2555,46.473,marketing_run_20261005T135746863
+P0209,SunMeadow Pomegranate 1 kg,CAT03,P0507,Swadeshi Select Whole Wheat Bread 100 g,CAT02,12,0.0004,0.4138,2.307,marketing_run_20261005T135746863
+P0215,MorningGlow Moong Dal 100 g,CAT05,P0038,GoldenDrop Brownie Pack of 2,CAT08,53,0.0018,0.2154,27.87,marketing_run_20261005T135746863
+P0218,TinyToes Muffin 200 g,CAT02,P0328,SaucyChef Roasted Peanuts Pack of 4,CAT06,34,0.0011,0.2024,62.615,marketing_run_20261005T135746863
+P0219,UrbanPantry Diapers 1 kg,CAT15,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,8,0.0003,0.32,3.808,marketing_run_20261005T135746863
+P0221,PureNest Balloons 200 g,CAT20,P0060,Annapurna Foods Protein Bar Pack of 6,CAT19,97,0.0032,0.318,30.014,marketing_run_20261005T135746863
+P0229,Annapurna Foods Electrolyte Drink 500 g,CAT19,P0289,PureNest Potato 200 ml,CAT04,92,0.0031,0.2667,20.841,marketing_run_20261005T135746863
+P0240,PaperTrail Body Wash Pack of 4,CAT13,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,16,0.0005,0.2667,3.173,marketing_run_20261005T135746863
+P0240,PaperTrail Body Wash Pack of 4,CAT13,P0563,ChillZone Deodorant Pack of 4,CAT13,8,0.0003,0.1333,2.159,marketing_run_20261005T135746863
+P0245,PawPals Toothpaste 500 ml,CAT13,P0206,UrbanPantry Diapers 1 L,CAT15,8,0.0003,0.2222,3.722,marketing_run_20261005T135746863
+P0245,PawPals Toothpaste 500 ml,CAT13,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,9,0.0003,0.25,2.975,marketing_run_20261005T135746863
+P0247,TinyToes Filter Coffee 100 g,CAT11,P0255,PaperTrail Eggs 500 ml,CAT01,10,0.0003,0.102,2.002,marketing_run_20261005T135746863
+P0250,PaperTrail Shampoo 500 g,CAT13,P0206,UrbanPantry Diapers 1 L,CAT15,28,0.0009,0.1728,2.895,marketing_run_20261005T135746863
+P0250,PaperTrail Shampoo 500 g,CAT13,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,35,0.0012,0.216,2.571,marketing_run_20261005T135746863
+P0251,GreenLeaf Corn Flakes 200 ml,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,19,0.0006,0.1301,2.179,marketing_run_20261005T135746863
+P0251,GreenLeaf Corn Flakes 200 ml,CAT10,P0288,VitaBoost Toilet Cleaner 500 g,CAT14,21,0.0007,0.1438,4.228,marketing_run_20261005T135746863
+P0251,GreenLeaf Corn Flakes 200 ml,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,33,0.0011,0.226,2.69,marketing_run_20261005T135746863
+P0253,Crunchies Muesli 1 kg,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,92,0.0031,0.1303,2.182,marketing_run_20261005T135746863
+P0253,Crunchies Muesli 1 kg,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,134,0.0045,0.1898,2.259,marketing_run_20261005T135746863
+P0253,Crunchies Muesli 1 kg,CAT10,P0492,Crunchies Spinach 200 ml,CAT04,117,0.0039,0.1657,12.311,marketing_run_20261005T135746863
+P0253,Crunchies Muesli 1 kg,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,99,0.0033,0.1402,2.271,marketing_run_20261005T135746863
+P0254,NutriKart Vanilla Tub Pack of 2,CAT08,P0282,GreenLeaf Instant Coffee 1 L,CAT11,30,0.001,0.1754,22.405,marketing_run_20261005T135746863
+P0263,PaperTrail Curd 500 ml,CAT01,P0589,VitaBoost Orange 1 L,CAT03,8,0.0003,0.1818,4.436,marketing_run_20261005T135746863
+P0269,PawPals Deodorant 200 g,CAT13,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,8,0.0003,0.2222,2.644,marketing_run_20261005T135746863
+P0271,FreshFarm Diapers 100 g,CAT15,P0206,UrbanPantry Diapers 1 L,CAT15,12,0.0004,0.1538,2.576,marketing_run_20261005T135746863
+P0271,FreshFarm Diapers 100 g,CAT15,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,19,0.0006,0.2436,2.899,marketing_run_20261005T135746863
+P0271,FreshFarm Diapers 100 g,CAT15,P0563,ChillZone Deodorant Pack of 4,CAT13,12,0.0004,0.1538,2.492,marketing_run_20261005T135746863
+P0272,PawPals Shampoo Pack of 4,CAT13,P0206,UrbanPantry Diapers 1 L,CAT15,118,0.0039,0.1565,2.621,marketing_run_20261005T135746863
+P0272,PawPals Shampoo Pack of 4,CAT13,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,156,0.0052,0.2069,2.462,marketing_run_20261005T135746863
+P0272,PawPals Shampoo Pack of 4,CAT13,P0563,ChillZone Deodorant Pack of 4,CAT13,114,0.0038,0.1512,2.449,marketing_run_20261005T135746863
+P0273,GreenLeaf Assam Tea 500 g,CAT11,P0507,Swadeshi Select Whole Wheat Bread 100 g,CAT02,14,0.0005,0.4,2.23,marketing_run_20261005T135746863
+P0277,PawPals Notebook 1 kg,CAT20,P0198,PaperTrail Toned Milk 200 g,CAT01,11,0.0004,0.1864,18.527,marketing_run_20261005T135746863
+P0278,KhetSe Peanut Butter 500 g,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,26,0.0009,0.1884,3.155,marketing_run_20261005T135746863
+P0278,KhetSe Peanut Butter 500 g,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,28,0.0009,0.2029,2.414,marketing_run_20261005T135746863
+P0278,KhetSe Peanut Butter 500 g,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,20,0.0007,0.1449,2.347,marketing_run_20261005T135746863
+P0282,GreenLeaf Instant Coffee 1 L,CAT11,P0254,NutriKart Vanilla Tub Pack of 2,CAT08,30,0.001,0.1277,22.405,marketing_run_20261005T135746863
+P0285,BlueRiver Potato Chips Pack of 4,CAT06,P0367,Annapurna Foods Electrolyte Drink Pack of 4,CAT19,13,0.0004,0.2321,39.584,marketing_run_20261005T135746863
+P0286,PaperTrail Curd 100 g,CAT01,P0003,MorningGlow Apple 500 ml,CAT03,16,0.0005,0.1311,2.236,marketing_run_20261005T135746863
+P0288,VitaBoost Toilet Cleaner 500 g,CAT14,P0206,UrbanPantry Diapers 1 L,CAT15,183,0.0061,0.1792,3.002,marketing_run_20261005T135746863
+P0288,VitaBoost Toilet Cleaner 500 g,CAT14,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,228,0.0076,0.2233,2.657,marketing_run_20261005T135746863
+P0288,VitaBoost Toilet Cleaner 500 g,CAT14,P0563,ChillZone Deodorant Pack of 4,CAT13,132,0.0044,0.1293,2.094,marketing_run_20261005T135746863
+P0289,PureNest Potato 200 ml,CAT04,P0229,Annapurna Foods Electrolyte Drink 500 g,CAT19,92,0.0031,0.2396,20.841,marketing_run_20261005T135746863
+P0291,KhetSe Protein Bar 1 L,CAT19,P0252,TinyToes Mutton Curry Cut 200 ml,CAT18,10,0.0003,0.1667,2.125,marketing_run_20261005T135746863
+P0297,KhetSe Mixed Fruit Jam Pack of 2,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,90,0.003,0.1648,2.761,marketing_run_20261005T135746863
+P0297,KhetSe Mixed Fruit Jam Pack of 2,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,111,0.0037,0.2033,2.419,marketing_run_20261005T135746863
+P0297,KhetSe Mixed Fruit Jam Pack of 2,CAT10,P0478,MorningGlow Frozen Fries Pack of 6,CAT09,66,0.0022,0.1209,14.747,marketing_run_20261005T135746863
+P0298,SunMeadow Mango 500 ml,CAT03,P0255,PaperTrail Eggs 500 ml,CAT01,24,0.0008,0.1111,2.179,marketing_run_20261005T135746863
+P0305,UrbanPantry Cold Coffee 500 g,CAT07,P0409,SunMeadow Wafer Bar 1 L,CAT12,12,0.0004,0.1395,3.254,marketing_run_20261005T135746863
+P0309,SeaCatch Poha Pack of 4,CAT05,P0206,UrbanPantry Diapers 1 L,CAT15,8,0.0003,0.127,2.127,marketing_run_20261005T135746863
+P0311,SparkleHome Frozen Fries 200 g,CAT09,P0252,TinyToes Mutton Curry Cut 200 ml,CAT18,9,0.0003,0.1636,2.086,marketing_run_20261005T135746863
+P0315,SpiceRoute Floor Cleaner 1 L,CAT14,P0206,UrbanPantry Diapers 1 L,CAT15,8,0.0003,0.1951,3.268,marketing_run_20261005T135746863
+P0315,SpiceRoute Floor Cleaner 1 L,CAT14,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,10,0.0003,0.2439,2.902,marketing_run_20261005T135746863
+P0315,SpiceRoute Floor Cleaner 1 L,CAT14,P0563,ChillZone Deodorant Pack of 4,CAT13,8,0.0003,0.1951,3.16,marketing_run_20261005T135746863
+P0316,FreshFarm Baby Wipes 1 L,CAT15,P0206,UrbanPantry Diapers 1 L,CAT15,122,0.0041,0.1477,2.474,marketing_run_20261005T135746863
+P0316,FreshFarm Baby Wipes 1 L,CAT15,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,179,0.006,0.2167,2.579,marketing_run_20261005T135746863
+P0316,FreshFarm Baby Wipes 1 L,CAT15,P0563,ChillZone Deodorant Pack of 4,CAT13,113,0.0038,0.1368,2.216,marketing_run_20261005T135746863
+P0318,Crunchies Peanut Butter 100 g,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,17,0.0006,0.2787,4.667,marketing_run_20261005T135746863
+P0318,Crunchies Peanut Butter 100 g,CAT10,P0288,VitaBoost Toilet Cleaner 500 g,CAT14,8,0.0003,0.1311,3.855,marketing_run_20261005T135746863
+P0318,Crunchies Peanut Butter 100 g,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,13,0.0004,0.2131,2.536,marketing_run_20261005T135746863
+P0318,Crunchies Peanut Butter 100 g,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,11,0.0004,0.1803,2.921,marketing_run_20261005T135746863
+P0319,BlueRiver Pet Treats 200 ml,CAT16,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,10,0.0003,0.1852,2.204,marketing_run_20261005T135746863
+P0320,PureNest Potato Pack of 2,CAT04,P0003,MorningGlow Apple 500 ml,CAT03,8,0.0003,0.1429,2.436,marketing_run_20261005T135746863
+P0323,UrbanPantry Diapers 1 L,CAT15,P0206,UrbanPantry Diapers 1 L,CAT15,17,0.0006,0.1504,2.519,marketing_run_20261005T135746863
+P0325,PureNest Baby Wipes 500 ml,CAT15,P0206,UrbanPantry Diapers 1 L,CAT15,63,0.0021,0.1486,2.488,marketing_run_20261005T135746863
+P0325,PureNest Baby Wipes 500 ml,CAT15,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,84,0.0028,0.1981,2.357,marketing_run_20261005T135746863
+P0325,PureNest Baby Wipes 500 ml,CAT15,P0563,ChillZone Deodorant Pack of 4,CAT13,62,0.0021,0.1462,2.368,marketing_run_20261005T135746863
+P0326,SunMeadow Dog Food Pack of 2,CAT16,P0507,Swadeshi Select Whole Wheat Bread 100 g,CAT02,11,0.0004,0.3929,2.19,marketing_run_20261005T135746863
+P0328,SaucyChef Roasted Peanuts Pack of 4,CAT06,P0218,TinyToes Muffin 200 g,CAT02,34,0.0011,0.3505,62.615,marketing_run_20261005T135746863
+P0331,FreshFarm Baby Food 500 g,CAT15,P0206,UrbanPantry Diapers 1 L,CAT15,78,0.0026,0.1385,2.32,marketing_run_20261005T135746863
+P0331,FreshFarm Baby Food 500 g,CAT15,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,133,0.0044,0.2362,2.811,marketing_run_20261005T135746863
+P0331,FreshFarm Baby Food 500 g,CAT15,P0500,KhetSe Balloons Pack of 2,CAT20,134,0.0045,0.238,40.356,marketing_run_20261005T135746863
+P0335,Crunchies Muesli 200 ml,CAT10,P0022,MorningGlow Whole Wheat Atta 500 g,CAT05,8,0.0003,0.1096,2.052,marketing_run_20261005T135746863
+P0335,Crunchies Muesli 200 ml,CAT10,P0213,SaucyChef Soda 1 L,CAT07,8,0.0003,0.1096,2.256,marketing_run_20261005T135746863
+P0335,Crunchies Muesli 200 ml,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,23,0.0008,0.3151,3.749,marketing_run_20261005T135746863
+P0335,Crunchies Muesli 200 ml,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,11,0.0004,0.1507,2.44,marketing_run_20261005T135746863
+P0336,PureNest Baby Lotion 200 ml,CAT15,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,10,0.0003,0.3448,4.103,marketing_run_20261005T135746863
+P0338,SunMeadow Capsicum 200 g,CAT04,P0003,MorningGlow Apple 500 ml,CAT03,18,0.0006,0.1304,2.224,marketing_run_20261005T135746863
+P0338,SunMeadow Capsicum 200 g,CAT04,P0321,Crunchies Cucumber 200 g,CAT04,14,0.0005,0.1014,2.622,marketing_run_20261005T135746863
+P0343,FreshFarm Candles 200 ml,CAT20,P0495,Swadeshi Select Grapes 1 kg,CAT03,50,0.0017,0.2747,31.349,marketing_run_20261005T135746863
+P0345,UrbanPantry Baby Wipes Pack of 2,CAT15,P0563,ChillZone Deodorant Pack of 4,CAT13,8,0.0003,0.1509,2.445,marketing_run_20261005T135746863
+P0348,PawPals Baby Wipes Pack of 6,CAT15,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,8,0.0003,0.3077,3.661,marketing_run_20261005T135746863
+P0364,VitaBoost Orange Pack of 2,CAT03,P0255,PaperTrail Eggs 500 ml,CAT01,8,0.0003,0.1081,2.121,marketing_run_20261005T135746863
+P0366,SparkleHome Protein Bar 500 g,CAT19,P0252,TinyToes Mutton Curry Cut 200 ml,CAT18,9,0.0003,0.1837,2.342,marketing_run_20261005T135746863
+P0367,Annapurna Foods Electrolyte Drink Pack of 4,CAT19,P0252,TinyToes Mutton Curry Cut 200 ml,CAT18,29,0.001,0.1648,2.101,marketing_run_20261005T135746863
+P0371,Annapurna Foods Chyawanprash Pack of 6,CAT19,P0252,TinyToes Mutton Curry Cut 200 ml,CAT18,10,0.0003,0.2381,3.035,marketing_run_20261005T135746863
+P0379,PaperTrail Hand Wash Pack of 6,CAT13,P0288,VitaBoost Toilet Cleaner 500 g,CAT14,20,0.0007,0.1075,3.161,marketing_run_20261005T135746863
+P0379,PaperTrail Hand Wash Pack of 6,CAT13,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,33,0.0011,0.1774,2.111,marketing_run_20261005T135746863
+P0379,PaperTrail Hand Wash Pack of 6,CAT13,P0563,ChillZone Deodorant Pack of 4,CAT13,29,0.001,0.1559,2.525,marketing_run_20261005T135746863
+P0380,PureNest Notebook Pack of 4,CAT20,P0022,MorningGlow Whole Wheat Atta 500 g,CAT05,12,0.0004,0.1224,2.292,marketing_run_20261005T135746863
+P0381,ChillZone Shampoo 200 ml,CAT13,P0206,UrbanPantry Diapers 1 L,CAT15,110,0.0037,0.1394,2.335,marketing_run_20261005T135746863
+P0381,ChillZone Shampoo 200 ml,CAT13,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,162,0.0054,0.2053,2.443,marketing_run_20261005T135746863
+P0381,ChillZone Shampoo 200 ml,CAT13,P0563,ChillZone Deodorant Pack of 4,CAT13,103,0.0034,0.1305,2.114,marketing_run_20261005T135746863
+P0383,PawPals Shampoo 200 g,CAT13,P0206,UrbanPantry Diapers 1 L,CAT15,8,0.0003,0.1429,2.392,marketing_run_20261005T135746863
+P0383,PawPals Shampoo 200 g,CAT13,P0252,TinyToes Mutton Curry Cut 200 ml,CAT18,9,0.0003,0.1607,2.049,marketing_run_20261005T135746863
+P0383,PawPals Shampoo 200 g,CAT13,P0563,ChillZone Deodorant Pack of 4,CAT13,10,0.0003,0.1786,2.892,marketing_run_20261005T135746863
+P0389,Shubh Pooja Toned Milk 1 kg,CAT01,P0255,PaperTrail Eggs 500 ml,CAT01,10,0.0003,0.1124,2.204,marketing_run_20261005T135746863
+P0393,BlueRiver Cheese Slices 500 ml,CAT01,P0255,PaperTrail Eggs 500 ml,CAT01,8,0.0003,0.1053,2.065,marketing_run_20261005T135746863
+P0396,DesiHarvest Pasta 1 kg,CAT09,P0359,SpiceRoute Basmati Rice 500 g,CAT05,21,0.0007,0.2471,7.341,marketing_run_20261005T135746863
+P0397,Crunchies Corn Flakes Pack of 4,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,10,0.0003,0.1389,2.326,marketing_run_20261005T135746863
+P0397,Crunchies Corn Flakes Pack of 4,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,20,0.0007,0.2778,3.305,marketing_run_20261005T135746863
+P0400,GoldenDrop Toilet Cleaner Pack of 6,CAT14,P0206,UrbanPantry Diapers 1 L,CAT15,14,0.0005,0.1944,3.256,marketing_run_20261005T135746863
+P0400,GoldenDrop Toilet Cleaner Pack of 6,CAT14,P0287,NutriKart Moong Dal 200 g,CAT05,8,0.0003,0.1111,2.694,marketing_run_20261005T135746863
+P0400,GoldenDrop Toilet Cleaner Pack of 6,CAT14,P0288,VitaBoost Toilet Cleaner 500 g,CAT14,8,0.0003,0.1111,3.266,marketing_run_20261005T135746863
+P0400,GoldenDrop Toilet Cleaner Pack of 6,CAT14,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,16,0.0005,0.2222,2.644,marketing_run_20261005T135746863
+P0401,Annapurna Foods Protein Bar 1 L,CAT19,P0032,GreenLeaf Filter Coffee 1 kg,CAT11,8,0.0003,0.4,2.066,marketing_run_20261005T135746863
+P0403,VitaBoost Toilet Cleaner Pack of 4,CAT14,P0022,MorningGlow Whole Wheat Atta 500 g,CAT05,9,0.0003,0.125,2.34,marketing_run_20261005T135746863
+P0403,VitaBoost Toilet Cleaner Pack of 4,CAT14,P0206,UrbanPantry Diapers 1 L,CAT15,11,0.0004,0.1528,2.559,marketing_run_20261005T135746863
+P0403,VitaBoost Toilet Cleaner Pack of 4,CAT14,P0288,VitaBoost Toilet Cleaner 500 g,CAT14,9,0.0003,0.125,3.674,marketing_run_20261005T135746863
+P0403,VitaBoost Toilet Cleaner Pack of 4,CAT14,P0359,SpiceRoute Basmati Rice 500 g,CAT05,8,0.0003,0.1111,3.302,marketing_run_20261005T135746863
+P0403,VitaBoost Toilet Cleaner Pack of 4,CAT14,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,15,0.0005,0.2083,2.479,marketing_run_20261005T135746863
+P0403,VitaBoost Toilet Cleaner Pack of 4,CAT14,P0510,NutriKart Besan 200 ml,CAT05,10,0.0003,0.1389,3.796,marketing_run_20261005T135746863
+P0403,VitaBoost Toilet Cleaner Pack of 4,CAT14,P0563,ChillZone Deodorant Pack of 4,CAT13,10,0.0003,0.1389,2.249,marketing_run_20261005T135746863
+P0404,NutriKart Organic Honey 200 g,CAT17,P0126,SaucyChef Assam Tea 200 ml,CAT11,55,0.0018,0.285,59.807,marketing_run_20261005T135746863
+P0410,Organica Dog Food 500 ml,CAT16,P0013,UrbanPantry Baby Lotion 1 kg,CAT15,13,0.0004,0.2131,60.338,marketing_run_20261005T135746863
+P0414,Crunchies Corn Flakes Pack of 2,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,14,0.0005,0.1522,2.548,marketing_run_20261005T135746863
+P0414,Crunchies Corn Flakes Pack of 2,CAT10,P0288,VitaBoost Toilet Cleaner 500 g,CAT14,11,0.0004,0.1196,3.514,marketing_run_20261005T135746863
+P0414,Crunchies Corn Flakes Pack of 2,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,18,0.0006,0.1957,2.328,marketing_run_20261005T135746863
+P0414,Crunchies Corn Flakes Pack of 2,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,14,0.0005,0.1522,2.465,marketing_run_20261005T135746863
+P0416,TinyToes Pav 200 g,CAT02,P0507,Swadeshi Select Whole Wheat Bread 100 g,CAT02,8,0.0003,0.3636,2.027,marketing_run_20261005T135746863
+P0423,PureNest Diapers 500 ml,CAT15,P0206,UrbanPantry Diapers 1 L,CAT15,54,0.0018,0.1812,3.035,marketing_run_20261005T135746863
+P0423,PureNest Diapers 500 ml,CAT15,P0288,VitaBoost Toilet Cleaner 500 g,CAT14,31,0.001,0.104,3.058,marketing_run_20261005T135746863
+P0423,PureNest Diapers 500 ml,CAT15,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,60,0.002,0.2013,2.396,marketing_run_20261005T135746863
+P0423,PureNest Diapers 500 ml,CAT15,P0563,ChillZone Deodorant Pack of 4,CAT13,37,0.0012,0.1242,2.011,marketing_run_20261005T135746863
+P0425,PawPals Baby Food 200 ml,CAT15,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,10,0.0003,0.25,2.975,marketing_run_20261005T135746863
+P0426,SunMeadow Spinach 200 ml,CAT04,P0003,MorningGlow Apple 500 ml,CAT03,15,0.0005,0.1563,2.664,marketing_run_20261005T135746863
+P0434,VitaBoost Garbage Bags Pack of 6,CAT14,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,12,0.0004,0.3243,3.859,marketing_run_20261005T135746863
+P0435,SpiceRoute Garbage Bags 500 ml,CAT14,P0206,UrbanPantry Diapers 1 L,CAT15,384,0.0128,0.1523,2.55,marketing_run_20261005T135746863
+P0435,SpiceRoute Garbage Bags 500 ml,CAT14,P0563,ChillZone Deodorant Pack of 4,CAT13,338,0.0113,0.134,2.171,marketing_run_20261005T135746863
+P0439,GoldenDrop Toilet Cleaner 1 L,CAT14,P0206,UrbanPantry Diapers 1 L,CAT15,8,0.0003,0.16,2.68,marketing_run_20261005T135746863
+P0442,GreenLeaf Honey 200 ml,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,10,0.0003,0.1563,2.617,marketing_run_20261005T135746863
+P0442,GreenLeaf Honey 200 ml,CAT10,P0316,FreshFarm Baby Wipes 1 L,CAT15,9,0.0003,0.1406,5.109,marketing_run_20261005T135746863
+P0442,GreenLeaf Honey 200 ml,CAT10,P0381,ChillZone Shampoo 200 ml,CAT13,12,0.0004,0.1875,7.132,marketing_run_20261005T135746863
+P0442,GreenLeaf Honey 200 ml,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,15,0.0005,0.2344,2.789,marketing_run_20261005T135746863
+P0442,GreenLeaf Honey 200 ml,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,8,0.0003,0.125,2.024,marketing_run_20261005T135746863
+P0446,Crunchies Rolled Oats Pack of 4,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,9,0.0003,0.1765,2.955,marketing_run_20261005T135746863
+P0446,Crunchies Rolled Oats Pack of 4,CAT10,P0381,ChillZone Shampoo 200 ml,CAT13,8,0.0003,0.1569,5.967,marketing_run_20261005T135746863
+P0446,Crunchies Rolled Oats Pack of 4,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,9,0.0003,0.1765,2.1,marketing_run_20261005T135746863
+P0446,Crunchies Rolled Oats Pack of 4,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,8,0.0003,0.1569,2.541,marketing_run_20261005T135746863
+P0447,GreenLeaf Mixed Fruit Jam 200 g,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,18,0.0006,0.2,3.349,marketing_run_20261005T135746863
+P0447,GreenLeaf Mixed Fruit Jam 200 g,CAT10,P0287,NutriKart Moong Dal 200 g,CAT05,10,0.0003,0.1111,2.694,marketing_run_20261005T135746863
+P0447,GreenLeaf Mixed Fruit Jam 200 g,CAT10,P0288,VitaBoost Toilet Cleaner 500 g,CAT14,12,0.0004,0.1333,3.919,marketing_run_20261005T135746863
+P0447,GreenLeaf Mixed Fruit Jam 200 g,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,17,0.0006,0.1889,2.248,marketing_run_20261005T135746863
+P0447,GreenLeaf Mixed Fruit Jam 200 g,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,12,0.0004,0.1333,2.159,marketing_run_20261005T135746863
+P0448,SpiceRoute Besan 1 kg,CAT05,P0287,NutriKart Moong Dal 200 g,CAT05,9,0.0003,0.1154,2.797,marketing_run_20261005T135746863
+P0448,SpiceRoute Besan 1 kg,CAT05,P0510,NutriKart Besan 200 ml,CAT05,9,0.0003,0.1154,3.154,marketing_run_20261005T135746863
+P0451,GreenLeaf Corn Flakes Pack of 6,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,45,0.0015,0.1515,2.537,marketing_run_20261005T135746863
+P0451,GreenLeaf Corn Flakes Pack of 6,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,75,0.0025,0.2525,3.005,marketing_run_20261005T135746863
+P0451,GreenLeaf Corn Flakes Pack of 6,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,38,0.0013,0.1279,2.072,marketing_run_20261005T135746863
+P0452,PawPals Shampoo 100 g,CAT13,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,67,0.0022,0.2055,2.446,marketing_run_20261005T135746863
+P0452,PawPals Shampoo 100 g,CAT13,P0563,ChillZone Deodorant Pack of 4,CAT13,43,0.0014,0.1319,2.136,marketing_run_20261005T135746863
+P0460,SunMeadow Toffees 500 g,CAT12,P0300,SpiceRoute Toor Dal 500 ml,CAT05,13,0.0004,0.197,12.795,marketing_run_20261005T135746863
+P0461,SunMeadow Tomato Pack of 4,CAT04,P0003,MorningGlow Apple 500 ml,CAT03,9,0.0003,0.12,2.046,marketing_run_20261005T135746863
+P0461,SunMeadow Tomato Pack of 4,CAT04,P0589,VitaBoost Orange 1 L,CAT03,10,0.0003,0.1333,3.253,marketing_run_20261005T135746863
+P0469,ChillZone Body Wash 200 ml,CAT13,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,9,0.0003,0.2571,3.06,marketing_run_20261005T135746863
+P0478,MorningGlow Frozen Fries Pack of 6,CAT09,P0297,KhetSe Mixed Fruit Jam Pack of 2,CAT10,66,0.0022,0.2683,14.747,marketing_run_20261005T135746863
+P0479,GreenLeaf Filter Coffee 500 ml,CAT11,P0578,SunMeadow Tomato 1 kg,CAT04,12,0.0004,0.1212,4.143,marketing_run_20261005T135746863
+P0483,GoldenDrop Peanut Butter 200 ml,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,9,0.0003,0.1552,2.599,marketing_run_20261005T135746863
+P0483,GoldenDrop Peanut Butter 200 ml,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,15,0.0005,0.2586,3.078,marketing_run_20261005T135746863
+P0483,GoldenDrop Peanut Butter 200 ml,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,15,0.0005,0.2586,4.189,marketing_run_20261005T135746863
+P0489,FreshFarm Diapers 100 g,CAT15,P0022,MorningGlow Whole Wheat Atta 500 g,CAT05,12,0.0004,0.12,2.247,marketing_run_20261005T135746863
+P0489,FreshFarm Diapers 100 g,CAT15,P0206,UrbanPantry Diapers 1 L,CAT15,19,0.0006,0.19,3.182,marketing_run_20261005T135746863
+P0489,FreshFarm Diapers 100 g,CAT15,P0253,Crunchies Muesli 1 kg,CAT10,11,0.0004,0.11,4.676,marketing_run_20261005T135746863
+P0489,FreshFarm Diapers 100 g,CAT15,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,21,0.0007,0.21,2.499,marketing_run_20261005T135746863
+P0489,FreshFarm Diapers 100 g,CAT15,P0563,ChillZone Deodorant Pack of 4,CAT13,21,0.0007,0.21,3.401,marketing_run_20261005T135746863
+P0490,PawPals Shampoo 200 g,CAT13,P0206,UrbanPantry Diapers 1 L,CAT15,8,0.0003,0.1194,2,marketing_run_20261005T135746863
+P0490,PawPals Shampoo 200 g,CAT13,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,19,0.0006,0.2836,3.375,marketing_run_20261005T135746863
+P0490,PawPals Shampoo 200 g,CAT13,P0563,ChillZone Deodorant Pack of 4,CAT13,11,0.0004,0.1642,2.659,marketing_run_20261005T135746863
+P0491,KhetSe Honey Pack of 2,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,16,0.0005,0.1524,2.552,marketing_run_20261005T135746863
+P0491,KhetSe Honey Pack of 2,CAT10,P0316,FreshFarm Baby Wipes 1 L,CAT15,12,0.0004,0.1143,4.152,marketing_run_20261005T135746863
+P0491,KhetSe Honey Pack of 2,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,21,0.0007,0.2,2.38,marketing_run_20261005T135746863
+P0491,KhetSe Honey Pack of 2,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,22,0.0007,0.2095,3.393,marketing_run_20261005T135746863
+P0492,Crunchies Spinach 200 ml,CAT04,P0253,Crunchies Muesli 1 kg,CAT10,117,0.0039,0.2896,12.311,marketing_run_20261005T135746863
+P0493,SpiceRoute Garbage Bags 200 g,CAT14,P0206,UrbanPantry Diapers 1 L,CAT15,9,0.0003,0.18,3.014,marketing_run_20261005T135746863
+P0494,ChillZone Deodorant 500 g,CAT13,P0208,SparkleHome Iced Tea 200 g,CAT07,58,0.0019,0.3515,46.473,marketing_run_20261005T135746863
+P0494,ChillZone Deodorant 500 g,CAT13,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,37,0.0012,0.2242,2.668,marketing_run_20261005T135746863
+P0494,ChillZone Deodorant 500 g,CAT13,P0563,ChillZone Deodorant Pack of 4,CAT13,23,0.0008,0.1394,2.258,marketing_run_20261005T135746863
+P0495,Swadeshi Select Grapes 1 kg,CAT03,P0343,FreshFarm Candles 200 ml,CAT20,50,0.0017,0.1901,31.349,marketing_run_20261005T135746863
+P0500,KhetSe Balloons Pack of 2,CAT20,P0206,UrbanPantry Diapers 1 L,CAT15,23,0.0008,0.1299,2.176,marketing_run_20261005T135746863
+P0500,KhetSe Balloons Pack of 2,CAT20,P0331,FreshFarm Baby Food 500 g,CAT15,134,0.0045,0.7571,40.356,marketing_run_20261005T135746863
+P0500,KhetSe Balloons Pack of 2,CAT20,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,34,0.0011,0.1921,2.286,marketing_run_20261005T135746863
+P0500,KhetSe Balloons Pack of 2,CAT20,P0563,ChillZone Deodorant Pack of 4,CAT13,22,0.0007,0.1243,2.013,marketing_run_20261005T135746863
+P0501,DailyDelight Coconut Water 1 kg,CAT07,P0369,Shubh Pooja Frozen Fries 500 g,CAT09,10,0.0003,0.1923,2.174,marketing_run_20261005T135746863
+P0512,KhetSe Muesli 1 kg,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,10,0.0003,0.2,3.349,marketing_run_20261005T135746863
+P0512,KhetSe Muesli 1 kg,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,13,0.0004,0.26,3.094,marketing_run_20261005T135746863
+P0512,KhetSe Muesli 1 kg,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,9,0.0003,0.18,2.915,marketing_run_20261005T135746863
+P0513,UrbanPantry Diapers 200 ml,CAT15,P0206,UrbanPantry Diapers 1 L,CAT15,8,0.0003,0.129,2.161,marketing_run_20261005T135746863
+P0513,UrbanPantry Diapers 200 ml,CAT15,P0253,Crunchies Muesli 1 kg,CAT10,8,0.0003,0.129,5.485,marketing_run_20261005T135746863
+P0513,UrbanPantry Diapers 200 ml,CAT15,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,13,0.0004,0.2097,2.495,marketing_run_20261005T135746863
+P0513,UrbanPantry Diapers 200 ml,CAT15,P0563,ChillZone Deodorant Pack of 4,CAT13,14,0.0005,0.2258,3.657,marketing_run_20261005T135746863
+P0514,PawPals Baby Lotion 500 g,CAT15,P0206,UrbanPantry Diapers 1 L,CAT15,8,0.0003,0.1818,3.045,marketing_run_20261005T135746863
+P0514,PawPals Baby Lotion 500 g,CAT15,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,8,0.0003,0.1818,2.164,marketing_run_20261005T135746863
+P0519,SaucyChef Cheese Slices 500 g,CAT01,P0507,Swadeshi Select Whole Wheat Bread 100 g,CAT02,26,0.0009,0.3881,2.163,marketing_run_20261005T135746863
+P0522,NutriKart Whole Wheat Atta 100 g,CAT05,P0287,NutriKart Moong Dal 200 g,CAT05,20,0.0007,0.1111,2.694,marketing_run_20261005T135746863
+P0522,NutriKart Whole Wheat Atta 100 g,CAT05,P0563,ChillZone Deodorant Pack of 4,CAT13,23,0.0008,0.1278,2.069,marketing_run_20261005T135746863
+P0524,MorningGlow Toor Dal 500 ml,CAT05,P0206,UrbanPantry Diapers 1 L,CAT15,16,0.0005,0.1221,2.045,marketing_run_20261005T135746863
+P0526,SeaCatch Poha 1 L,CAT05,P0287,NutriKart Moong Dal 200 g,CAT05,9,0.0003,0.1268,3.073,marketing_run_20261005T135746863
+P0527,MorningGlow Besan 1 L,CAT05,P0022,MorningGlow Whole Wheat Atta 500 g,CAT05,9,0.0003,0.1084,2.03,marketing_run_20261005T135746863
+P0527,MorningGlow Besan 1 L,CAT05,P0287,NutriKart Moong Dal 200 g,CAT05,9,0.0003,0.1084,2.629,marketing_run_20261005T135746863
+P0527,MorningGlow Besan 1 L,CAT05,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,15,0.0005,0.1807,2.151,marketing_run_20261005T135746863
+P0530,SparkleHome Protein Bar 1 L,CAT19,P0156,Crunchies Rolled Oats 1 L,CAT10,56,0.0019,0.3889,50.306,marketing_run_20261005T135746863
+P0530,SparkleHome Protein Bar 1 L,CAT19,P0206,UrbanPantry Diapers 1 L,CAT15,18,0.0006,0.125,2.093,marketing_run_20261005T135746863
+P0536,Swadeshi Select Garbage Bags 500 ml,CAT14,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,8,0.0003,0.2424,2.885,marketing_run_20261005T135746863
+P0542,SpiceRoute Floor Cleaner 200 ml,CAT14,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,9,0.0003,0.2308,2.746,marketing_run_20261005T135746863
+P0547,SpiceRoute Almonds 500 g,CAT17,P0252,TinyToes Mutton Curry Cut 200 ml,CAT18,23,0.0008,0.1966,2.506,marketing_run_20261005T135746863
+P0547,SpiceRoute Almonds 500 g,CAT17,P0563,ChillZone Deodorant Pack of 4,CAT13,15,0.0005,0.1282,2.076,marketing_run_20261005T135746863
+P0555,MorningGlow Poha Pack of 4,CAT05,P0321,Crunchies Cucumber 200 g,CAT04,8,0.0003,0.1951,5.044,marketing_run_20261005T135746863
+P0555,MorningGlow Poha Pack of 4,CAT05,P0563,ChillZone Deodorant Pack of 4,CAT13,10,0.0003,0.2439,3.95,marketing_run_20261005T135746863
+P0557,KhetSe Honey 1 kg,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,28,0.0009,0.2029,3.398,marketing_run_20261005T135746863
+P0557,KhetSe Honey 1 kg,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,33,0.0011,0.2391,2.846,marketing_run_20261005T135746863
+P0558,GreenLeaf Muesli 200 ml,CAT10,P0206,UrbanPantry Diapers 1 L,CAT15,88,0.0029,0.1552,2.599,marketing_run_20261005T135746863
+P0558,GreenLeaf Muesli 200 ml,CAT10,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,113,0.0038,0.1993,2.372,marketing_run_20261005T135746863
+P0558,GreenLeaf Muesli 200 ml,CAT10,P0563,ChillZone Deodorant Pack of 4,CAT13,77,0.0026,0.1358,2.199,marketing_run_20261005T135746863
+P0563,ChillZone Deodorant Pack of 4,CAT13,P0206,UrbanPantry Diapers 1 L,CAT15,247,0.0082,0.1333,2.232,marketing_run_20261005T135746863
+P0563,ChillZone Deodorant Pack of 4,CAT13,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,338,0.0113,0.1824,2.171,marketing_run_20261005T135746863
+P0564,PawPals Baby Food 500 g,CAT15,P0206,UrbanPantry Diapers 1 L,CAT15,13,0.0004,0.2,3.349,marketing_run_20261005T135746863
+P0564,PawPals Baby Food 500 g,CAT15,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,17,0.0006,0.2615,3.112,marketing_run_20261005T135746863
+P0564,PawPals Baby Food 500 g,CAT15,P0563,ChillZone Deodorant Pack of 4,CAT13,9,0.0003,0.1385,2.243,marketing_run_20261005T135746863
+P0568,Annapurna Foods Vanilla Tub 1 L,CAT08,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,13,0.0004,0.1757,2.09,marketing_run_20261005T135746863
+P0569,GreenLeaf Mutton Curry Cut 200 g,CAT18,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,9,0.0003,0.1837,2.186,marketing_run_20261005T135746863
+P0570,Swadeshi Select Floor Cleaner 1 kg,CAT14,P0206,UrbanPantry Diapers 1 L,CAT15,16,0.0005,0.1951,3.268,marketing_run_20261005T135746863
+P0570,Swadeshi Select Floor Cleaner 1 kg,CAT14,P0287,NutriKart Moong Dal 200 g,CAT05,9,0.0003,0.1098,2.661,marketing_run_20261005T135746863
+P0570,Swadeshi Select Floor Cleaner 1 kg,CAT14,P0563,ChillZone Deodorant Pack of 4,CAT13,11,0.0004,0.1341,2.173,marketing_run_20261005T135746863
+P0575,SunMeadow Toffees Pack of 4,CAT12,P0391,HomeEase Bhujia 100 g,CAT06,8,0.0003,0.125,2.041,marketing_run_20261005T135746863
+P0580,Shubh Pooja Eggs 100 g,CAT01,P0255,PaperTrail Eggs 500 ml,CAT01,15,0.0005,0.1351,2.651,marketing_run_20261005T135746863
+P0582,GoldenDrop Gulab Jamun Tin 200 ml,CAT08,P0213,SaucyChef Soda 1 L,CAT07,16,0.0005,0.1143,2.352,marketing_run_20261005T135746863
+P0587,GreenLeaf Fish Fillet Pack of 2,CAT18,P0252,TinyToes Mutton Curry Cut 200 ml,CAT18,11,0.0004,0.1719,2.191,marketing_run_20261005T135746863
+P0590,PaperTrail Cheese Slices 500 ml,CAT01,P0589,VitaBoost Orange 1 L,CAT03,9,0.0003,0.1023,2.495,marketing_run_20261005T135746863
+P0595,ChillZone Toothpaste 1 L,CAT13,P0435,SpiceRoute Garbage Bags 500 ml,CAT14,9,0.0003,0.3,3.57,marketing_run_20261005T135746863

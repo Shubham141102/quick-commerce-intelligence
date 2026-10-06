@@ -20,17 +20,26 @@ from app.components.charts import (  # noqa: E402
     importance_chart,
     stock_chart,
 )
-from app.components.ui import advisory_note, freshness_banner, require_workspace  # noqa: E402
+from app.components.insights import (  # noqa: E402
+    RELIABILITY_ACTION,
+    accuracy_headline,
+    forecast_summary,
+    reliability,
+    stock_summary,
+    style_reliability,
+    style_tiers,
+)
+from app.components.ui import advisory_note, page_header, require_workspace, tab_intro  # noqa: E402
 from src.serving import queries as q  # noqa: E402
 
 role = require_workspace("inventory")
-st.title("📦 Inventory & Supply Chain")
-freshness_banner()
+page_header("inventory")
 overview, forecasting, stockout, explorer = st.tabs(
     ["Overview", "Demand forecasting", "Stockout risk & replenishment", "Inventory explorer"])
 
 # ------------------------------------------------------------------------------------------- overview
 with overview:
+    tab_intro("Where do we stand today: which SKUs are at risk and what should be reordered?")
     k = q.inventory_kpis(role)
     st.caption(f"Stock position at the end of **{k['as_of']:%d %b %Y}** for {k['skus']} store × focus-SKU pairs.")
     c = st.columns(5)
@@ -41,53 +50,91 @@ with overview:
     c[4].metric("Forecast, next 7 days", f"{k['forecast_units_7d']:,.0f} units",
                 help=f"All stores and categories, {k['forecast_first_day']:%d %b}–{k['forecast_last_day']:%d %b}")
     st.subheader("Stock health by store")
-    st.dataframe(q.stock_health_by_store(role), hide_index=True, width="stretch",
+    st.dataframe(style_tiers(q.stock_health_by_store(role), count_columns={"high": "High", "medium": "Medium",
+                                                                           "low": "Low"}), hide_index=True, width="stretch",
                  column_config={"median_days_of_cover": st.column_config.NumberColumn("median days of cover",
                                 help="closing stock ÷ forecast daily demand")})
     advisory_note()
 
 # ------------------------------------------------------------------------------------------- forecasting
 with forecasting:
+    tab_intro("How many units will each category sell in the next 7 days, and how far can we trust it?")
     stores, cats = q.stores(role), q.categories(role)
     a, b = st.columns(2)
     store = a.selectbox("Store", stores["store_id"], format_func=dict(zip(stores["store_id"], stores["store_name"])).get)
     cat = b.selectbox("Category", cats["category_id"], format_func=dict(zip(cats["category_id"], cats["category_name"])).get)
-    st.plotly_chart(forecast_chart(q.category_forecast(role, store, cat)), width="stretch")
-    st.caption("Blue: units actually sold (completed orders). Orange dotted: what the model (trained on Apr–Aug) "
-               "forecast one day ahead during September. Red: the forecast for the 7 days after the data ends, "
-               "with its 10–90% range.")
-
+    fc = q.category_forecast(role, store, cat)
+    full = st.toggle("Show full history (April–September)", value=False)
+    st.plotly_chart(forecast_chart(fc, days_back=None if full else 30), width="stretch")
+    st.caption("Blue bars: units actually sold. Orange line: what the model (trained on April–August only) forecast "
+               "for each September day, the day before — compare it with the bars to see how close it gets. "
+               "Red line: the forecast for the 7 days after the data ends; the shaded band is the likely range "
+               "(8 days in 10 should fall inside it).")
     acc = q.forecast_accuracy(role)
     cat_acc = acc[acc["evaluation"] == "category_daily"]
     pooled = cat_acc[cat_acc["horizon"] == 0].set_index("model")["wape"]
-    st.subheader("How accurate is it? (September backtest)")
-    m = st.columns(3)
-    m[0].metric("Model WAPE", f"{pooled['model']:.3f}")
-    m[1].metric("Moving average", f"{pooled['baseline_moving_avg']:.3f}",
-                delta=f"{pooled['baseline_moving_avg'] - pooled['model']:+.3f} worse", delta_color="off")
-    m[2].metric("Seasonal naive", f"{pooled['baseline_seasonal_naive']:.3f}",
-                delta=f"{pooled['baseline_seasonal_naive'] - pooled['model']:+.3f} worse", delta_color="off")
     by_h = (cat_acc[cat_acc["horizon"] > 0].pivot_table(index="horizon", columns="model", values="wape")
-            .rename(columns={"model": "model", "baseline_moving_avg": "moving average",
-                             "baseline_seasonal_naive": "seasonal naive"}).round(3))
-    left, right = st.columns(2)
-    left.markdown("**WAPE by days ahead** (lower is better)")
-    left.dataframe(by_h, width="stretch")
-    right.markdown("**WAPE by category** (all horizons)")
-    right.dataframe(q.accuracy_by_category(role).round(3), hide_index=True, width="stretch", height=260)
-    st.markdown("**What drives the forecast** (permutation importance)")
-    st.plotly_chart(importance_chart(q.feature_importance(role)), width="stretch")
-    with st.expander("Limitations and how to read WAPE"):
+            .reindex(columns=["model", "baseline_moving_avg", "baseline_seasonal_naive"]))
+    by_cat = q.accuracy_by_category(role)
+    by_cat["reliability"] = by_cat["model_wape"].map(reliability)
+    cat_names = dict(zip(cats["category_id"], cats["category_name"]))
+    picked = by_cat[by_cat["category"] == cat_names.get(cat)]
+
+    lines, table = forecast_summary(fc)
+    if len(picked):
+        level = picked["reliability"].iloc[0]
+        icon = {"High": "🟩", "Medium": "🟨", "Low": "🟥"}[level]
+        lines.append(f"**Forecast reliability for {cat_names[cat]}: {icon} {level}** — {RELIABILITY_ACTION[level]}")
+    with st.container(border=True):
+        st.markdown("**What the chart says**")
+        st.markdown("\n".join(f"- {line}" for line in lines))
+        if len(table):
+            st.dataframe(table, hide_index=True, width="stretch")
+
+    st.subheader("Can I trust the forecast?")
+    st.markdown(accuracy_headline(pooled, by_h))
+    groups = (by_cat.groupby("reliability", sort=False)["category"].apply(lambda c: " · ".join(c))
+              .reindex(["High", "Medium", "Low"]).dropna().reset_index())
+    groups["what to do"] = groups["reliability"].map(RELIABILITY_ACTION)
+    st.dataframe(style_reliability(groups.rename(columns={"category": "categories"})), hide_index=True,
+                 width="stretch", column_config={"categories": st.column_config.TextColumn(width="large")})
+    st.caption("Reliability comes from each category's error in the September test: High when the error is below 55% "
+               "of units sold, Medium up to 70%, Low above. Staples sell steadily and are easy to forecast; occasional "
+               "purchases are not.")
+
+    with st.expander("Technical details (for analysts)"):
+        m = st.columns(3)
+        m[0].metric("Model WAPE", f"{pooled['model']:.3f}")
+        m[1].metric("Moving average", f"{pooled['baseline_moving_avg']:.3f}",
+                    delta=f"{pooled['baseline_moving_avg'] - pooled['model']:+.3f} worse", delta_color="off")
+        m[2].metric("Seasonal naive", f"{pooled['baseline_seasonal_naive']:.3f}",
+                    delta=f"{pooled['baseline_seasonal_naive'] - pooled['model']:+.3f} worse", delta_color="off")
+        wape_cols = {"model": st.column_config.NumberColumn("model", format="%.3f"),
+                     "baseline_moving_avg": st.column_config.NumberColumn("moving average", format="%.3f"),
+                     "baseline_seasonal_naive": st.column_config.NumberColumn("seasonal naive", format="%.3f"),
+                     "model_wape": st.column_config.NumberColumn("model", format="%.3f"),
+                     "moving_avg_wape": st.column_config.NumberColumn("moving average", format="%.3f"),
+                     "seasonal_naive_wape": st.column_config.NumberColumn("seasonal naive", format="%.3f")}
+        st.markdown("**WAPE by days ahead** (lower is better)")
+        st.dataframe(by_h.reset_index(), hide_index=True, width="stretch", column_config=wape_cols)
+        st.markdown("**WAPE by category** (all horizons)")
+        st.dataframe(style_reliability(by_cat[["category", "reliability", "model_wape", "moving_avg_wape",
+                                               "seasonal_naive_wape"]]),
+                     hide_index=True, width="stretch", column_config=wape_cols)
+        st.markdown("**What drives the forecast** (permutation importance)")
+        st.plotly_chart(importance_chart(q.feature_importance(role)), width="stretch")
         st.markdown(
             "- WAPE = total absolute error ÷ total units sold. A store-category sells only ~3 units a day, so much of "
             "the error is randomness no model can remove: a *perfect* model would still score about 0.58 on this "
             "data (see docs/05_demand_forecasting.md).\n"
+            "- Moving average = average of the last 7 days; seasonal naive = same weekday last week.\n"
             "- Future weather is assumed equal to the last 7-day average; no promotions are assumed after the data ends.\n"
             "- Holiday dates are approximate and the synthetic data has no holiday effect.\n"
             "- The model slightly under-forecasts (about −7%).")
 
 # ------------------------------------------------------------------------------------------- stockout
 with stockout:
+    tab_intro("Which SKUs will run out before the next delivery, and how much should we order?")
     advisory_note()
     stores = q.stores(role)
     names = dict(zip(stores["store_id"], stores["store_name"]))
@@ -96,7 +143,8 @@ with stockout:
     tiers = f2.multiselect("Risk tier", ["High", "Medium", "Low"], default=["High", "Medium"])
     risks = q.risk_list(role, picked_stores or None, tiers or None)
     st.markdown(f"**{len(risks)} SKUs** — sorted by tier, then fewest days of cover")
-    st.dataframe(risks.drop(columns=["store_id", "product_id"]), hide_index=True, width="stretch",
+    st.dataframe(style_tiers(risks.drop(columns=["store_id", "product_id"]), ["risk_tier"]), hide_index=True,
+                 width="stretch",
                  column_config={
                      "risk_tier": "tier", "forecast_3d": st.column_config.NumberColumn("forecast 3 days"),
                      "days_of_cover": st.column_config.NumberColumn("days of cover", format="%.1f"),
@@ -115,7 +163,16 @@ with stockout:
     default = list(products["product_id"]).index(first.iloc[0]) if len(first) else 0
     product = s2.selectbox("Focus SKU", products["product_id"], index=default,
                            format_func=dict(zip(products["product_id"], products["product_name"])).get)
-    st.plotly_chart(stock_chart(q.sku_timeline(role, sku_store, product)), width="stretch")
+    timeline_sku = q.sku_timeline(role, sku_store, product)
+    st.plotly_chart(stock_chart(timeline_sku), width="stretch")
+    st.caption("Green steps: units on the shelf at the end of each day. Blue bars: units sold that day. Dashed line: "
+               "the reorder level. Red bars after the last day: forecast demand for the next 7 days (whiskers = likely "
+               "range). When the green line approaches the dashed line while sales stay high, a stockout is coming.")
+    row = q.risk_list(role, [sku_store])
+    row = row[row["product_id"] == product]
+    with st.container(border=True):
+        st.markdown("**What the chart says**")
+        st.markdown("\n".join(f"- {line}" for line in stock_summary(timeline_sku, row.iloc[0] if len(row) else None)))
 
     assumptions = q.replenishment_assumptions(role)
     with st.expander("How the suggested order is calculated"):
@@ -135,6 +192,7 @@ with stockout:
 
 # ------------------------------------------------------------------------------------------- explorer
 with explorer:
+    tab_intro("What did empty shelves cost us, and why did a SKU run out?")
     st.markdown("Drill into one store × focus SKU: every stock movement, the weekly counts against the calculated "
                 "stock, stockout days and the sales they cost.")
     lost_by_store = q.lost_sales_by_store(role)

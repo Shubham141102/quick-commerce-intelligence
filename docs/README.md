@@ -14,7 +14,11 @@ Documentation for the Quick-Commerce Intelligence Platform. Each completed proce
 | 6 | Stockout risk and replenishment (Phase 4C) | [06_stockout_replenishment.md](06_stockout_replenishment.md) | Done |
 | 7 | Inventory workspace — Streamlit app (Phase 4D) | [07_inventory_workspace.md](07_inventory_workspace.md) | Done |
 | 8 | Inventory explorer + lost-sales estimate (Phase 5A) | [08_inventory_explorer_lost_sales.md](08_inventory_explorer_lost_sales.md) | Done (1 known limitation) |
-| 9 | Business workspace: sales performance, delivery & operations (Phase 5B) | — | Next |
+| 9 | Business workspace: sales, delivery & operations, anomaly detection (Phases 5B, 5C) | [09_business_workspace.md](09_business_workspace.md) | Done (1 known limitation) |
+| 10 | Marketing analytics — model cards: segmentation, basket rules, recommendations, retention (Phase 5D) | [10_marketing_analytics.md](10_marketing_analytics.md) | Done |
+| 11 | Customer Growth & Marketing workspace (Phase 5E) | [11_marketing_workspace.md](11_marketing_workspace.md) | Done |
+| 12 | Frontend: login page, persona landing, page design | [12_frontend.md](12_frontend.md) | Done (Data Engineer workspace on hold) |
+| 13 | Business assistant — RAG (Phase 6) | — | Next |
 
 ## Reference documents (generated — do not edit by hand)
 
@@ -24,6 +28,7 @@ Documentation for the Quick-Commerce Intelligence Platform. Each completed proce
 | [transformation_catalog.md](transformation_catalog.md) | Every Bronze → Silver rule per dataset: standardisation, casts, validation rules, outcomes, derived columns, lineage | `python -m scripts.build_docs` |
 | [gold_catalog.md](gold_catalog.md) | Every Gold table: grain, sources, every column with type and meaning, lineage | `python -m scripts.build_docs` |
 | [metric_definitions.md](metric_definitions.md) | Every business metric: definition and formula (the single source of truth) | `python -m scripts.build_docs` |
+| [file_registry.md](file_registry.md) | Every project file: purpose, inputs, outputs, who uses it, how to run it | `python -m scripts.build_docs` |
 
 A unit test fails if a generated document is out of date.
 

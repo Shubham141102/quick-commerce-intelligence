@@ -28,6 +28,16 @@ Built by the `gold` stage (PySpark) or, for model outputs, the `ml` stage (Pytho
 | [`gld_replenishment`](#gld_replenishment) | ml (Python) | 1 | as_of_date × store_id × product_id | Suggested replenishment quantity per store × focus SKU: forecast demand over lead time + review period + safety stock − current stock. Assumptions are stored on every row. Advisory only — no order is placed. |
 | [`gld_stockout_backtest`](#gld_stockout_backtest) | ml (Python) | 1 | rule | September backtest of the risk rules on decisions taken while the SKU was still in stock: when a rule flags a SKU, does it actually stock out within the next 3 days? Compared with a naive reorder-level rule. |
 | [`gld_lost_sales`](#gld_lost_sales) | ml (Python) | 1 | store_id × product_id × business_date | Estimated sales lost on stockout days per store × focus SKU: expected demand (average daily units on the SKU's in-stock days in the previous 28 days) minus units actually sold, valued at the catalog price. Only stockout days have rows. Revenue lost for that SKU, before any substitute the customer bought. |
+| [`gld_sales_anomalies`](#gld_sales_anomalies) | ml (Python) | 1 | anomaly_id | Unusual events found by three statistical detectors (store outage, demand spike, payment failure): what was observed vs what is normal for that store / hour / product over the previous 28 days, and how unlikely it is. A signal to investigate, not proof of a problem. |
+| [`gld_anomaly_series`](#gld_anomaly_series) | ml (Python) | 1 | anomaly_id × ts | Context series for each anomaly (observed vs expected): hourly for the anomaly day (outages, payment failures), daily for ±14 days (demand spikes). Used by the anomaly chart. |
+| [`gld_customer_segments`](#gld_customer_segments) | ml (Python) | 1 | customer_id | Segment of every customer with at least one completed order (K-means on behaviour and category mix). |
+| [`gld_segment_profiles`](#gld_segment_profiles) | ml (Python) | 1 | segment_id | What each segment looks like (original-scale averages, top categories) and a suggested campaign. |
+| [`gld_segmentation_selection`](#gld_segmentation_selection) | ml (Python) | 1 | k | How the number of segments was chosen: silhouette and inertia for k = 3…8; stability for the chosen k. |
+| [`gld_basket_rules`](#gld_basket_rules) | ml (Python) | 1 | antecedent_id × consequent_id | Association rules A → B from completed baskets (confidence ≥ 10%, lift ≥ 2): when A is bought, B often is too. |
+| [`gld_recommendations`](#gld_recommendations) | ml (Python) | 1 | customer_id × rank | Top-10 product recommendations per customer (buy again + often bought with + popularity), with the reason. |
+| [`gld_recommendation_metrics`](#gld_recommendation_metrics) | ml (Python) | 1 | method | September backtest of recommendations (trained on Apr–Aug; hybrid weights chosen on August): Precision@10, Recall@10, hit rate, coverage. |
+| [`gld_retention_cohorts`](#gld_retention_cohorts) | ml (Python) | 1 | cohort_month × month_offset | Cohort retention: customers grouped by the month of their first completed order; share who ordered again in each later month. Descriptive (the synthetic data has no planted churn). |
+| [`gld_customer_retention`](#gld_customer_retention) | ml (Python) | 1 | customer_id | Retention status of every customer at the end of the data: active / cooling / at risk / lapsed / never ordered, value tier, and whether their next order is overdue against their own rhythm. |
 
 ## Lineage
 
@@ -53,6 +63,16 @@ Built by the `gold` stage (PySpark) or, for model outputs, the `ml` stage (Pytho
 | `gld_replenishment` | `gld_inventory_daily`, `gld_sku_demand_forecast` |
 | `gld_stockout_backtest` | `gld_stockout_risk`, `gld_inventory_daily` |
 | `gld_lost_sales` | `gld_inventory_daily`, `slv_products` |
+| `gld_sales_anomalies` | `slv_orders`, `slv_order_items`, `slv_payments`, `slv_application_logs` |
+| `gld_anomaly_series` | `gld_sales_anomalies` |
+| `gld_customer_segments` | `gld_customer_360`, `gld_customer_category` |
+| `gld_segment_profiles` | `gld_customer_360`, `gld_customer_category` |
+| `gld_segmentation_selection` | `gld_customer_360`, `gld_customer_category` |
+| `gld_basket_rules` | `gld_basket_pairs` |
+| `gld_recommendations` | `slv_orders`, `slv_order_items` |
+| `gld_recommendation_metrics` | `slv_orders`, `slv_order_items` |
+| `gld_retention_cohorts` | `slv_orders` |
+| `gld_customer_retention` | `slv_orders`, `slv_customers` |
 
 ---
 
@@ -518,4 +538,197 @@ Estimated sales lost on stockout days per store × focus SKU: expected demand (a
 | `unit_price` | decimal | catalog price |
 | `lost_revenue` | decimal | lost_units × unit_price |
 | `model_version` | string | pipeline run that produced the estimate |
+
+---
+
+## gld_sales_anomalies
+
+Unusual events found by three statistical detectors (store outage, demand spike, payment failure): what was observed vs what is normal for that store / hour / product over the previous 28 days, and how unlikely it is. A signal to investigate, not proof of a problem.
+
+**Grain:** `anomaly_id` · **Tier:** 1 · **Built by:** ml stage (Python) · **Sources:** `slv_orders`, `slv_order_items`, `slv_payments`, `slv_application_logs`
+
+| Column | Type | Description |
+|---|---|---|
+| `anomaly_id` 🔑 | string | A0001… |
+| `detector` | string | store_outage / demand_spike / payment_failure |
+| `store_id` | string | store (empty for network-wide payment failures) |
+| `product_id` | string | product (demand spikes only) |
+| `business_date` | date | day the anomaly starts (IST) |
+| `start_ts` | timestamp | start (UTC) |
+| `end_ts` | timestamp | end (UTC) |
+| `observed` | double | observed count over the anomaly (orders / failed payments) |
+| `expected` | double | expected count from the previous 28 days |
+| `p_value` | double | Poisson probability of a count at least this extreme |
+| `score` | double | −log10(p_value), capped at 20 (higher = more unusual) |
+| `severity` | string | High (score ≥ 8) / Medium |
+| `description` | string | plain-language summary |
+| `model_version` | string | pipeline run that produced it |
+
+---
+
+## gld_anomaly_series
+
+Context series for each anomaly (observed vs expected): hourly for the anomaly day (outages, payment failures), daily for ±14 days (demand spikes). Used by the anomaly chart.
+
+**Grain:** `anomaly_id`, `ts` · **Tier:** 1 · **Built by:** ml stage (Python) · **Sources:** `gld_sales_anomalies`
+
+| Column | Type | Description |
+|---|---|---|
+| `anomaly_id` 🔑 | string | anomaly |
+| `ts` 🔑 | timestamp | hour or day (UTC) |
+| `observed` | double | observed count |
+| `expected` | double | expected count |
+
+---
+
+## gld_customer_segments
+
+Segment of every customer with at least one completed order (K-means on behaviour and category mix).
+
+**Grain:** `customer_id` · **Tier:** 1 · **Built by:** ml stage (Python) · **Sources:** `gld_customer_360`, `gld_customer_category`
+
+| Column | Type | Description |
+|---|---|---|
+| `customer_id` 🔑 | string | customer |
+| `segment_id` | int | segment number |
+| `segment_label` | string | name generated from the segment's measured traits |
+| `model_version` | string | model run |
+
+---
+
+## gld_segment_profiles
+
+What each segment looks like (original-scale averages, top categories) and a suggested campaign.
+
+**Grain:** `segment_id` · **Tier:** 1 · **Built by:** ml stage (Python) · **Sources:** `gld_customer_360`, `gld_customer_category`
+
+| Column | Type | Description |
+|---|---|---|
+| `segment_id` 🔑 | int | segment number |
+| `segment_label` | string | generated name |
+| `customers` | int | customers in the segment |
+| `share` | double | share of segmented customers |
+| `avg_spend` | double | average total spend (₹) |
+| `avg_orders` | double | average completed orders |
+| `avg_order_value` | double | average order value (₹) |
+| `avg_items_per_order` | double | average distinct products per order |
+| `avg_recency_days` | double | average days since last completed order |
+| `night_order_share` | double | share of orders 21:00–01:59 IST |
+| `weekend_order_share` | double | share of orders on weekends |
+| `promo_order_share` | double | share of completed orders with a promotion |
+| `top_categories` | string | top 3 categories by share of spend |
+| `campaign_idea` | string | suggested campaign, from the profile (an idea, not a tested result) |
+| `model_version` | string | model run |
+
+---
+
+## gld_segmentation_selection
+
+How the number of segments was chosen: silhouette and inertia for k = 3…8; stability for the chosen k.
+
+**Grain:** `k` · **Tier:** 1 · **Built by:** ml stage (Python) · **Sources:** `gld_customer_360`, `gld_customer_category`
+
+| Column | Type | Description |
+|---|---|---|
+| `k` 🔑 | int | number of segments tried |
+| `silhouette` | double | silhouette score (higher = better separated) |
+| `inertia` | double | within-segment sum of squares |
+| `chosen` | boolean | k used |
+| `stability_ari` | double | mean adjusted Rand index vs 5 other seeds (chosen k only) |
+| `model_version` | string | model run |
+
+---
+
+## gld_basket_rules
+
+Association rules A → B from completed baskets (confidence ≥ 10%, lift ≥ 2): when A is bought, B often is too.
+
+**Grain:** `antecedent_id`, `consequent_id` · **Tier:** 1 · **Built by:** ml stage (Python) · **Sources:** `gld_basket_pairs`
+
+| Column | Type | Description |
+|---|---|---|
+| `antecedent_id` 🔑 | string | product A |
+| `antecedent` | string | name of A |
+| `antecedent_category` | string | category of A |
+| `consequent_id` 🔑 | string | product B |
+| `consequent` | string | name of B |
+| `consequent_category` | string | category of B |
+| `baskets_both` | int | completed baskets with both |
+| `support` | double | baskets_both ÷ all baskets |
+| `confidence` | double | baskets_both ÷ baskets with A |
+| `lift` | double | confidence ÷ support of B |
+| `model_version` | string | pipeline run |
+
+---
+
+## gld_recommendations
+
+Top-10 product recommendations per customer (buy again + often bought with + popularity), with the reason.
+
+**Grain:** `customer_id`, `rank` · **Tier:** 1 · **Built by:** ml stage (Python) · **Sources:** `slv_orders`, `slv_order_items`
+
+| Column | Type | Description |
+|---|---|---|
+| `customer_id` 🔑 | string | customer |
+| `rank` 🔑 | int | 1 = best |
+| `product_id` | string | product |
+| `score` | double | combined score |
+| `reason` | string | you buy this often / often bought with your items / popular |
+| `model_version` | string | model run |
+
+---
+
+## gld_recommendation_metrics
+
+September backtest of recommendations (trained on Apr–Aug; hybrid weights chosen on August): Precision@10, Recall@10, hit rate, coverage.
+
+**Grain:** `method` · **Tier:** 1 · **Built by:** ml stage (Python) · **Sources:** `slv_orders`, `slv_order_items`
+
+| Column | Type | Description |
+|---|---|---|
+| `method` 🔑 | string | hybrid (used) / repeat (buy again only) / popularity |
+| `weights` | string | hybrid weights chosen on the August validation month |
+| `precision_at_10` | double | share of the 10 recommendations bought in September |
+| `recall_at_10` | double | share of September products that were recommended |
+| `hit_rate` | double | customers with at least one recommended product bought |
+| `coverage` | double | distinct products recommended ÷ catalog |
+| `customers` | int | customers evaluated |
+| `model_version` | string | model run |
+
+---
+
+## gld_retention_cohorts
+
+Cohort retention: customers grouped by the month of their first completed order; share who ordered again in each later month. Descriptive (the synthetic data has no planted churn).
+
+**Grain:** `cohort_month`, `month_offset` · **Tier:** 1 · **Built by:** ml stage (Python) · **Sources:** `slv_orders`
+
+| Column | Type | Description |
+|---|---|---|
+| `cohort_month` 🔑 | date | month of first completed order |
+| `month_offset` 🔑 | int | months after the first |
+| `cohort_size` | int | customers in the cohort |
+| `active_customers` | int | with a completed order that month |
+| `retention_rate` | double | active ÷ cohort size |
+
+---
+
+## gld_customer_retention
+
+Retention status of every customer at the end of the data: active / cooling / at risk / lapsed / never ordered, value tier, and whether their next order is overdue against their own rhythm.
+
+**Grain:** `customer_id` · **Tier:** 1 · **Built by:** ml stage (Python) · **Sources:** `slv_orders`, `slv_customers`
+
+| Column | Type | Description |
+|---|---|---|
+| `customer_id` 🔑 | string | customer |
+| `first_order_date` | date | first completed order |
+| `last_order_date` | date | last completed order |
+| `orders_completed` | int | completed orders |
+| `total_spend` | decimal | order value of completed orders (₹) |
+| `days_since_last` | int | days from last completed order to the end of the data |
+| `avg_days_between` | double | average gap between completed orders |
+| `status` | string | active (≤ 14 days) / cooling (15–30) / at_risk (31–60) / lapsed (> 60) / never_ordered |
+| `value_tier` | string | High / Medium / Low by total spend (thirds) |
+| `overdue` | boolean | days since last order > 2 × their average gap |
 

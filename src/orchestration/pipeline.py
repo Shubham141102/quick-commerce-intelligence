@@ -90,14 +90,19 @@ def run_pipeline(stages: list[str], generation_run: str | None = None, generatio
             gold_root = resolve(cfg.paths["gold"])
             if not (gold_root / "gld_demand_features").exists():
                 raise FileNotFoundError("Gold is empty; run the gold stage first")
+            from src.ml.anomaly import run_anomalies
             from src.ml.lost_sales import run_lost_sales
+            from src.ml.marketing import run_marketing
             from src.ml.stockout.run import run_stockout
+            silver_root = resolve(cfg.paths["silver"])
             with tracker.stage("ml"):
                 result.results["ml"] = {
-                    "forecast": run_forecasting(cfg, tracker, gold_root, resolve(cfg.paths["silver"]),
-                                                resolve(cfg.paths["ml"])),
+                    "forecast": run_forecasting(cfg, tracker, gold_root, silver_root, resolve(cfg.paths["ml"])),
                     "stockout": run_stockout(tracker, gold_root),
-                    "lost_sales": run_lost_sales(tracker, gold_root, resolve(cfg.paths["silver"])),
+                    "lost_sales": run_lost_sales(tracker, gold_root, silver_root),
+                    "anomalies": run_anomalies(tracker, silver_root, gold_root, cfg.calendar.start_date,
+                                               cfg.calendar.end_date),
+                    "marketing": run_marketing(cfg, tracker, gold_root, silver_root),
                 }
         if "publish" in stages:
             from src.orchestration.publish import run_publish

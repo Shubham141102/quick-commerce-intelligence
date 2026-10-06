@@ -113,7 +113,8 @@ def _app_checks(paths: dict, model_version: str) -> list[tuple[str, bool, str]]:
     os.environ["QCI_DEMO_DIR"] = str(demo)
     get_snapshot.cache_clear()
     try:
-        functions = [q.stores, q.categories, q.inventory_kpis, q.stock_health_by_store, q.forecast_accuracy,
+        # stores() / categories() are shared filters since Phase 5B (inventory, business, marketing) — not listed here
+        functions = [q.inventory_kpis, q.stock_health_by_store, q.forecast_accuracy,
                      q.accuracy_by_category, q.feature_importance, q.risk_list, q.replenishment_assumptions,
                      q.stockout_backtest]
         works = all(f("inventory_manager") is not None for f in functions)

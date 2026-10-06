@@ -1,0 +1,4 @@
+method,weights,precision_at_10,recall_at_10,hit_rate,coverage,customers,model_version
+hybrid,repeat 0.5 · co-purchase 1 · popular 1,0.1479,0.2802,0.7311,0.3417,2670,marketing_run_20261005T135746863
+popularity,top sellers,0.1396,0.2649,0.7184,0.0167,2670,marketing_run_20261005T135746863
+repeat,buy again only,0.1265,0.24,0.6884,0.9117,2670,marketing_run_20261005T135746863

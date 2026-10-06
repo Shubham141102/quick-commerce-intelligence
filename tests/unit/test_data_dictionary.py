@@ -34,7 +34,7 @@ def test_every_silver_rule_and_derived_column_is_described():
 
 
 @pytest.mark.parametrize("name", ["data_dictionary.md", "transformation_catalog.md", "gold_catalog.md",
-                                  "metric_definitions.md"])
+                                  "metric_definitions.md", "file_registry.md"])
 def test_generated_docs_are_up_to_date(name):
     pytest.importorskip("pyspark")
     expected = generated_docs()[name]

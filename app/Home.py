@@ -2,7 +2,10 @@
 
     streamlit run app/Home.py
 
-Shows the login page until a demo user signs in, then only the workspaces that user's role may open.
+Before sign-in only the login page exists. After sign-in the menu is built from the user's role and the
+user's own workspace is the default page, so each persona lands directly in its workspace:
+inventory → Inventory & Supply Chain, business → Business & Revenue, marketing → Customer Growth & Marketing,
+engineer → Data Engineer (on hold), admin → an overview linking every workspace.
 The app reads the published snapshot in data/demo/ through DuckDB; it never runs Spark or the pipeline.
 """
 
@@ -17,25 +20,30 @@ if str(ROOT) not in sys.path:
 
 import streamlit as st  # noqa: E402
 
-from app.components.auth import current_user, login_page, logout  # noqa: E402
-from src.serving.permissions import ROLE_LABELS, allowed_workspaces  # noqa: E402
+from app.components.auth import current_user, login_page  # noqa: E402
+from app.components.personas import PERSONAS  # noqa: E402
+from app.components.ui import sidebar_profile  # noqa: E402
+from src.serving.permissions import allowed_workspaces  # noqa: E402
 
 st.set_page_config(page_title="Quick-Commerce Intelligence", page_icon="🛒", layout="wide")
 
 VIEWS = ROOT / "app" / "views"
-WORKSPACE_PAGES = {
-    "inventory": st.Page(VIEWS / "inventory.py", title="Inventory & Supply Chain", icon="📦", url_path="inventory"),
-}
+
+
+def workspace_page(ws: str, default: bool = False) -> st.Page:
+    p = PERSONAS[ws]
+    return st.Page(ROOT / "app" / p["page"], title=p["title"], icon=p["icon"], url_path=ws, default=default)
+
 
 user = current_user()
 if not user:
-    page = st.navigation([st.Page(login_page, title="Sign in", icon="🔐")])
+    page = st.navigation([st.Page(login_page, title="Sign in", icon="🔐")], position="hidden")
 else:
-    home = st.Page(VIEWS / "welcome.py", title="Home", icon="🏠", default=True)
-    workspaces = [WORKSPACE_PAGES[w] for w in allowed_workspaces(user["role"]) if w in WORKSPACE_PAGES]
-    page = st.navigation({"": [home], "Workspaces": workspaces} if workspaces else [home])
-    with st.sidebar:
-        st.markdown(f"**{user['name']}**  \n{ROLE_LABELS.get(user['role'], user['role'])}")
-        if st.button("Sign out"):
-            logout()
+    mine = allowed_workspaces(user["role"])
+    if len(mine) == 1:      # a persona: its workspace is the landing page, no menu needed
+        page = st.navigation([workspace_page(mine[0], default=True)], position="hidden")
+    else:                   # admin: overview first, then every workspace
+        overview = st.Page(VIEWS / "welcome.py", title="Overview", icon="🏠", default=True)
+        page = st.navigation({"": [overview], "Workspaces": [workspace_page(w) for w in mine]})
+    sidebar_profile()
 page.run()

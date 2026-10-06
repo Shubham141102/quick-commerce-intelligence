@@ -20,12 +20,14 @@ DOCS = PROJECT_ROOT / "docs"
 
 
 def generated_docs() -> dict[str, str]:
+    from src.common.file_registry import render_file_registry
     from src.transformations.gold.catalog import render_gold_catalog, render_metric_definitions
     from src.transformations.silver.catalog import render_catalog
 
     cfg = load_config("medium")
     return {"data_dictionary.md": render_markdown(cfg) + "\n", "transformation_catalog.md": render_catalog(cfg) + "\n",
-            "gold_catalog.md": render_gold_catalog() + "\n", "metric_definitions.md": render_metric_definitions() + "\n"}
+            "gold_catalog.md": render_gold_catalog() + "\n", "metric_definitions.md": render_metric_definitions() + "\n",
+            "file_registry.md": render_file_registry() + "\n"}
 
 
 def main() -> None:
