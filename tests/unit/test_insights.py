@@ -39,7 +39,7 @@ def test_stock_summary_predicts_run_out_day():
 def test_tier_colours():
     df = pd.DataFrame({"risk_tier": ["High", "Medium", "Low"], "high": [2, 0, 1]})
     html = style_tiers(df, ["risk_tier"], {"high": "High"}).to_html()
-    assert "#FDE2E1" in html and "#FEF3C7" in html and "#DCFCE7" in html
+    assert "#FEF3F2" in html and "#FFFAEB" in html and "#ECFDF3" in html
 
 
 def test_reliability_bands_and_headline():

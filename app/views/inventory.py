@@ -29,16 +29,34 @@ from app.components.insights import (  # noqa: E402
     style_reliability,
     style_tiers,
 )
-from app.components.ui import advisory_note, page_header, require_workspace, tab_intro  # noqa: E402
+from app.components.ui import (  # noqa: E402
+    advisory_note,
+    label,
+    page_header,
+    require_workspace,
+    tab_intro,
+)
 from src.serving import queries as q  # noqa: E402
 
-role = require_workspace("inventory")
-page_header("inventory")
-overview, forecasting, stockout, explorer = st.tabs(
-    ["Overview", "Demand forecasting", "Stockout risk & replenishment", "Inventory explorer"])
+WS = "inventory"
+SECTIONS = [  # (function, sidebar title, icon) — each is a page in the sidebar
+    ("overview", "Overview", ":material/space_dashboard:"),
+    ("forecasting", "Demand forecasting", ":material/trending_up:"),
+    ("stockout", "Stockout risk & replenishment", ":material/production_quantity_limits:"),
+    ("explorer", "Inventory explorer", ":material/manage_search:"),
+]
+_TITLES = {key: title for key, title, _ in SECTIONS}
+
+
+def _open(key: str) -> str:
+    """Guard + header for one section page; returns the role."""
+    role = require_workspace(WS)
+    page_header(WS, _TITLES[key])
+    return role
 
 # ------------------------------------------------------------------------------------------- overview
-with overview:
+def overview() -> None:
+    role = _open("overview")
     tab_intro("Where do we stand today: which SKUs are at risk and what should be reordered?")
     k = q.inventory_kpis(role)
     st.caption(f"Stock position at the end of **{k['as_of']:%d %b %Y}** for {k['skus']} store × focus-SKU pairs.")
@@ -57,7 +75,8 @@ with overview:
     advisory_note()
 
 # ------------------------------------------------------------------------------------------- forecasting
-with forecasting:
+def forecasting() -> None:
+    role = _open("forecasting")
     tab_intro("How many units will each category sell in the next 7 days, and how far can we trust it?")
     stores, cats = q.stores(role), q.categories(role)
     a, b = st.columns(2)
@@ -83,10 +102,10 @@ with forecasting:
     lines, table = forecast_summary(fc)
     if len(picked):
         level = picked["reliability"].iloc[0]
-        icon = {"High": "🟩", "Medium": "🟨", "Low": "🟥"}[level]
-        lines.append(f"**Forecast reliability for {cat_names[cat]}: {icon} {level}** — {RELIABILITY_ACTION[level]}")
+        badge = {"High": ":green-badge[High]", "Medium": ":orange-badge[Medium]", "Low": ":red-badge[Low]"}[level]
+        lines.append(f"**Forecast reliability for {cat_names[cat]}:** {badge} {RELIABILITY_ACTION[level]}")
     with st.container(border=True):
-        st.markdown("**What the chart says**")
+        label("Key takeaways")
         st.markdown("\n".join(f"- {line}" for line in lines))
         if len(table):
             st.dataframe(table, hide_index=True, width="stretch")
@@ -133,7 +152,8 @@ with forecasting:
             "- The model slightly under-forecasts (about −7%).")
 
 # ------------------------------------------------------------------------------------------- stockout
-with stockout:
+def stockout() -> None:
+    role = _open("stockout")
     tab_intro("Which SKUs will run out before the next delivery, and how much should we order?")
     advisory_note()
     stores = q.stores(role)
@@ -171,7 +191,7 @@ with stockout:
     row = q.risk_list(role, [sku_store])
     row = row[row["product_id"] == product]
     with st.container(border=True):
-        st.markdown("**What the chart says**")
+        label("Key takeaways")
         st.markdown("\n".join(f"- {line}" for line in stock_summary(timeline_sku, row.iloc[0] if len(row) else None)))
 
     assumptions = q.replenishment_assumptions(role)
@@ -191,7 +211,8 @@ with stockout:
                                 "flag_rate": st.column_config.NumberColumn("flag rate", format="percent")})
 
 # ------------------------------------------------------------------------------------------- explorer
-with explorer:
+def explorer() -> None:
+    role = _open("explorer")
     tab_intro("What did empty shelves cost us, and why did a SKU run out?")
     st.markdown("Drill into one store × focus SKU: every stock movement, the weekly counts against the calculated "
                 "stock, stockout days and the sales they cost.")
@@ -218,7 +239,7 @@ with explorer:
     st.warning("**How far to trust this:** the total and the biggest losers are reliable (total within 1% of the "
                "simulator's true lost units). Rankings among SKUs that lost only a unit or two are not: stockout days "
                "come from the rebuilt daily stock, which misses about a third of real stockout days. "
-               "Details: docs/08_inventory_explorer_lost_sales.md.", icon="⚠️")
+               "Details: docs/08_inventory_explorer_lost_sales.md.", icon=":material/warning:")
 
     st.subheader("One SKU in detail")
     stores = q.stores(role)
@@ -245,3 +266,10 @@ with explorer:
     st.plotly_chart(explorer_chart(timeline), width="stretch")
     with st.expander("Daily rows (latest first)"):
         st.dataframe(timeline.sort_values("day", ascending=False), hide_index=True, width="stretch", height=320)
+
+
+PAGES = [(key, title, icon, globals()[key]) for key, title, icon in SECTIONS]
+
+if __name__ == "__main__":   # run as a script (tests): every section on one page
+    for *_, render in PAGES:
+        render()

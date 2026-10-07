@@ -23,6 +23,24 @@ streamlit run app/Home.py
  admin      → 🏠 Overview → links to every workspace (sidebar menu)
 ```
 
+## Sidebar navigation (2026-10-07)
+
+Each workspace is a **group in the left sidebar** and each of its sections is a page with its own URL
+(the former tabs). A persona sees only its own group and lands on its first section; the admin sees the
+Overview plus every group.
+
+| Workspace | Sidebar pages (URL) |
+|---|---|
+| Inventory & Supply Chain | Overview (`/`), Demand forecasting (`/inventory-forecasting`), Stockout risk & replenishment (`/inventory-stockout`), Inventory explorer (`/inventory-explorer`) |
+| Business & Revenue | Sales & revenue performance, Delivery & operations, Anomaly detection (`/business-…`) |
+| Customer Growth & Marketing | Segments, Basket & affinity, Recommendations, Retention, Promotion effectiveness (`/marketing-…`) |
+| Data Engineer | one page (on hold) |
+
+How it is built: each view file defines one function per section plus a `PAGES` list; `app/Home.py` registers
+those functions as `st.Page`s. Every section page shows the breadcrumb (app › workspace) and the section as
+its title. The Business period and store filters appear on each Business page and keep their values when
+moving between them. Running a view file directly (as the tests do) still renders all its sections.
+
 ## How "land directly in your persona" works
 
 `app/Home.py` builds the page list **from the signed-in user's role** on every run:
@@ -34,6 +52,27 @@ streamlit run app/Home.py
 | Admin (all workspaces) | Overview + all workspaces (sidebar menu) | Overview |
 
 A persona's workspace is registered as Streamlit's **default page**, so after sign-in the app opens it directly. Other workspaces are **not registered at all** for that user, so typing their URL cannot open them. Every data function also checks the role again (`@workspace(...)` in `src/serving/queries.py`).
+
+## Design system (enterprise dashboard, 2026-10-07)
+
+Standard business-software practice: clean grid, minimal functional colour, high scannability, professional
+typography, a clear hierarchy. Theme values are real Streamlit theme settings in `.streamlit/config.toml`;
+`app/components/ui.py` adds light CSS for components the theme does not cover.
+
+| Element | Rule |
+|---|---|
+| Typography | Inter for text and headings; heading scale 1.6 / 1.25 / 1.05 rem; base 14 px; KPI values 1.6 rem, weight 600, **tabular numbers** so digits line up |
+| Colour | Slate neutrals for structure (text #0F172A, secondary #475569 / #64748B, borders #E2E8F0, canvas #F5F7FA, panels white). **One accent blue #1D4ED8** for interaction and primary data. Red / amber / green **only for status** (risk tier, severity, reliability, live / on hold) |
+| Navigation | Dark navy sidebar (#0F172A) with the QC wordmark (`app/assets/logo.svg`), signed-in profile card, Sign out, "About this snapshot"; Material icons instead of emojis |
+| Page header | Breadcrumb (APP › WORKSPACE), title, one-line purpose; right-aligned status: "Snapshot current", data period and profile, publish time; hairline divider |
+| Tabs | Underline navigation, medium-weight labels, the active tab in dark text |
+| Business question | Each tab opens with a white callout, blue left rule, "BUSINESS QUESTION" overline |
+| KPI cards | White, 1 px border, 8 px radius, faint shadow, uppercase grey label, large value |
+| Panels | Bordered containers are white on the grey canvas; "KEY TAKEAWAYS" overline above chart summaries |
+| Tables | Slate header row (#F1F5F9 / #475569), light borders; status cells as soft badges (High #FEF3F2/#B42318, Medium #FFFAEB/#B54708, Low #ECFDF3/#067647) |
+| Charts | One shared style (`charts._base`): white plot, faint horizontal grid only, Inter 12 px, legend top-left. History in light slate, the model's past forecast in slate, forecast / primary series in the accent blue with a light-blue band, thresholds (reorder level, SLA) in amber, problem periods (stockouts, anomaly windows) as a faint red wash |
+| Login | Dark brand panel (facts: 12 stores, 3 cities, 6 months; the four workspaces with codes INV / BIZ / MKT / ENG) beside a plain sign-in form |
+| Admin overview | Snapshot KPI strip, then a two-column grid of workspace cards with a Live / On hold badge and an "Open" link |
 
 ## Page design
 

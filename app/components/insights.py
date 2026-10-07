@@ -7,10 +7,10 @@ import math
 
 import pandas as pd
 
-TIER_COLOURS = {  # background, text
-    "High": ("#FDE2E1", "#B42318"),
-    "Medium": ("#FEF3C7", "#92400E"),
-    "Low": ("#DCFCE7", "#166534"),
+TIER_COLOURS = {  # background, text — soft status badges; colour is used only for status
+    "High": ("#FEF3F2", "#B42318"),
+    "Medium": ("#FFFAEB", "#B54708"),
+    "Low": ("#ECFDF3", "#067647"),
 }
 
 

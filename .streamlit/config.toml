@@ -1,13 +1,34 @@
 # Streamlit settings for the app (committed; secrets live in secrets.toml, which is git-ignored).
+# Enterprise design system: neutral slate structure, one accent blue, status colours only for status.
 
 [theme]
 base = "light"
-primaryColor = "#0F766E"            # teal: buttons, links, active tab
-backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#F3F6F8" # sidebar, inputs, cards
-textColor = "#1F2937"
-font = "sans serif"
-baseRadius = "medium"
+primaryColor = "#1D4ED8"               # accent blue: buttons, links, active tab, primary data
+backgroundColor = "#F5F7FA"            # light-grey canvas
+secondaryBackgroundColor = "#FFFFFF"   # inputs, panels
+textColor = "#0F172A"
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+headingFont = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+headingFontSizes = ["1.6rem", "1.25rem", "1.05rem", "0.95rem", "0.875rem", "0.8rem"]
+headingFontWeights = [700, 600, 600, 600, 600, 600]
+baseFontSize = 14
+metricValueFontSize = "1.6rem"
+metricValueFontWeight = 600
+baseRadius = "small"
+borderColor = "#E2E8F0"
+showWidgetBorder = true
+dataframeBorderColor = "#E2E8F0"
+dataframeHeaderBackgroundColor = "#F1F5F9"
+dataframeHeaderTextColor = "#475569"
+linkColor = "#1D4ED8"
+chartCategoricalColors = ["#1D4ED8", "#64748B", "#F59E0B", "#0EA5E9", "#94A3B8", "#10B981", "#E11D48", "#7C3AED"]
+
+[theme.sidebar]
+backgroundColor = "#0F172A"            # dark navy navigation
+secondaryBackgroundColor = "#1E293B"
+textColor = "#CBD5E1"
+borderColor = "#1E293B"
+primaryColor = "#60A5FA"
 
 [client]
 toolbarMode = "minimal"

@@ -22,22 +22,44 @@ from app.components.insights import style_tiers  # noqa: E402
 from app.components.ui import page_header, require_workspace, tab_intro  # noqa: E402
 from src.serving import queries as q  # noqa: E402
 
-role = require_workspace("business")
-page_header("business")
+WS = "business"
+SECTIONS = [  # (function, sidebar title, icon) — each is a page in the sidebar
+    ("sales", "Sales & revenue performance", ":material/payments:"),
+    ("delivery", "Delivery & operations", ":material/local_shipping:"),
+    ("anomalies", "Anomaly detection", ":material/troubleshoot:"),
+]
+_TITLES = {key: title for key, title, _ in SECTIONS}
 
-bounds = q.period_bounds(role)
-first, last = bounds["first_day"].date(), bounds["last_day"].date()
-stores = q.stores(role)
-names = dict(zip(stores["store_id"], stores["store_name"]))
-f1, f2 = st.columns([1, 2])
-picked = f1.date_input("Period", value=(first, last), min_value=first, max_value=last)
-start, end = (picked if isinstance(picked, tuple) and len(picked) == 2 else (first, last))
-store_ids = f2.multiselect("Stores", stores["store_id"], format_func=names.get, placeholder="All stores") or None
 
-sales, delivery, anomalies = st.tabs(["Sales & revenue performance", "Delivery & operations", "Anomaly detection"])
+def _open(key: str) -> str:
+    """Guard + header for one section page; returns the role."""
+    role = require_workspace(WS)
+    page_header(WS, _TITLES[key])
+    return role
+
+
+def _filters(role: str) -> tuple:
+    """Period and store filters, shown on every Business page. Values are kept in session state so they carry
+    over when moving between the Business pages."""
+    bounds = q.period_bounds(role)
+    first, last = bounds["first_day"].date(), bounds["last_day"].date()
+    stores = q.stores(role)
+    names = dict(zip(stores["store_id"], stores["store_name"]))
+    for key, default in (("biz_period", (first, last)), ("biz_stores", [])):
+        if key not in st.session_state:
+            st.session_state[key] = st.session_state.get(f"_{key}", default)
+    f1, f2 = st.columns([1, 2])
+    picked = f1.date_input("Period", min_value=first, max_value=last, key="biz_period")
+    store_ids = f2.multiselect("Stores", stores["store_id"], format_func=names.get, placeholder="All stores",
+                               key="biz_stores")
+    st.session_state["_biz_period"], st.session_state["_biz_stores"] = picked, store_ids
+    start, end = (picked if isinstance(picked, tuple) and len(picked) == 2 else (first, last))
+    return start, end, (store_ids or None)
 
 # ------------------------------------------------------------------------------------------- sales
-with sales:
+def sales(filters: tuple | None = None) -> None:
+    role = _open("sales")
+    start, end, store_ids = filters or _filters(role)
     tab_intro("How are we selling compared with the previous period, and where does revenue come from?")
     k = q.sales_kpis(role, start, end, store_ids)
     cur, prev = k["current"], k["previous"]
@@ -84,7 +106,9 @@ with sales:
                     "- Full list: docs/metric_definitions.md")
 
 # ------------------------------------------------------------------------------------------- delivery
-with delivery:
+def delivery(filters: tuple | None = None) -> None:
+    role = _open("delivery")
+    start, end, store_ids = filters or _filters(role)
     tab_intro("Are we keeping the delivery promise, and why are orders cancelled?")
     d = q.delivery_kpis(role, start, end, store_ids)
     c = st.columns(5)
@@ -108,10 +132,12 @@ with delivery:
                "matched by week.")
 
 # ------------------------------------------------------------------------------------------- anomalies
-with anomalies:
+def anomalies(filters: tuple | None = None) -> None:
+    role = _open("anomalies")
+    start, end, store_ids = filters or _filters(role)
     tab_intro("Did something unusual happen that needs investigating?")
     st.info("An anomaly is a **signal to investigate**, not proof of fraud or failure. Each one compares what happened "
-            "with what is normal for that store, hour or product over the previous 28 days.", icon="🔎")
+            "with what is normal for that store, hour or product over the previous 28 days.", icon=":material/search:")
     summary = q.anomaly_summary(role)
     labels = {"store_outage": "Store outage (experimental)", "demand_spike": "Demand spike",
               "payment_failure": "Payment failure"}
@@ -146,3 +172,11 @@ with anomalies:
             "so short outages look like chance and are mostly **not detectable** from orders alone; real systems use "
             "store-system heartbeats, which this data does not have.\n"
             "- Accuracy against the planted anomalies: docs/09_business_workspace.md.")
+
+
+PAGES = [(key, title, icon, globals()[key]) for key, title, icon in SECTIONS]
+
+if __name__ == "__main__":   # run as a script (tests): filters once, then every section on one page
+    _filters_once = _filters(require_workspace(WS))
+    for *_, render in PAGES:
+        render(_filters_once)

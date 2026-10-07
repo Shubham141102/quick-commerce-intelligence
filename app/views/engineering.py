@@ -18,7 +18,7 @@ from app.components.ui import page_header, require_workspace  # noqa: E402
 require_workspace("engineering")
 page_header("engineering")
 st.info("This workspace is **on hold** and will be built in a later phase. The pipeline already records "
-        "everything it will show.", icon="🚧")
+        "everything it will show.", icon=":material/construction:")
 st.markdown("**Planned use cases**")
 for uc in PERSONAS["engineering"]["use_cases"]:
     st.markdown(f"- {uc}")
