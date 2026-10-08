@@ -19,8 +19,8 @@ def test_forecast_summary_totals_and_table():
                         "future_forecast": [5, 5, 5, 5, 5, 8, 2], "lower": [1] * 7, "upper": [9] * 7})
     lines, table = forecast_summary(pd.concat([hist, fut], ignore_index=True))
     text = " ".join(lines)
-    assert "35 units" in text and "25% more" in text            # 35 forecast vs 28 sold
-    assert "Mon 06 Oct" in text and "off by **1.0 units a day**" in text
+    assert "35 units" in text and "+25%" in text                # 35 forecast vs 28 sold
+    assert "Mon 06 Oct" in text and "±1.0 units/day" in text
     assert len(table) == 7 and list(table.columns)[0] == "date"
 
 
@@ -31,9 +31,9 @@ def test_stock_summary_predicts_run_out_day():
                         "reorder_level": None, "forecast": [1.5] * 7})
     risk = pd.Series({"risk_tier": "Medium", "reason_codes": "BELOW_REORDER", "suggested_qty": 6})
     text = " ".join(stock_summary(pd.concat([hist, fut], ignore_index=True), risk))
-    assert "**4 units**" in text and "at or below it" in text
-    assert "run out around Fri 03 Oct" in text                  # 1.5 + 1.5 + 1.5 >= 4 on the 3rd day
-    assert "Risk tier: Medium" in text and "**6 units**" in text
+    assert "4 units" in text and "at or below reorder" in text
+    assert "around Fri 03 Oct" in text                          # 1.5 + 1.5 + 1.5 >= 4 on the 3rd day
+    assert "Medium risk" in text and "order 6 units" in text
 
 
 def test_tier_colours():
@@ -48,4 +48,4 @@ def test_reliability_bands_and_headline():
     pooled = pd.Series({"model": 0.619, "baseline_moving_avg": 0.689, "baseline_seasonal_naive": 0.866})
     by_h = pd.DataFrame({"model": [0.621, 0.617, 0.623]})
     text = accuracy_headline(pooled, by_h)
-    assert "reliable for ordering" in text and "10% less error" in text and "up to 7 days ahead" in text
+    assert "Reliable for ordering" in text and "10% less error" in text and "up to 7 days ahead" in text

@@ -35,6 +35,7 @@ Overview plus every group.
 | Business & Revenue | Sales & revenue performance, Delivery & operations, Anomaly detection (`/business-…`) |
 | Customer Growth & Marketing | Segments, Basket & affinity, Recommendations, Retention, Promotion effectiveness (`/marketing-…`) |
 | Data Engineer | one page (on hold) |
+| Every persona | **Assistant** (last item of the group; next to Overview for the admin) — see docs/13_rag_assistant.md |
 
 How it is built: each view file defines one function per section plus a `PAGES` list; `app/Home.py` registers
 those functions as `st.Page`s. Every section page shows the breadcrumb (app › workspace) and the section as
@@ -71,6 +72,7 @@ typography, a clear hierarchy. Theme values are real Streamlit theme settings in
 | Panels | Bordered containers are white on the grey canvas; "KEY TAKEAWAYS" overline above chart summaries |
 | Tables | Slate header row (#F1F5F9 / #475569), light borders; status cells as soft badges (High #FEF3F2/#B42318, Medium #FFFAEB/#B54708, Low #ECFDF3/#067647) |
 | Charts | One shared style (`charts._base`): white plot, faint horizontal grid only, Inter 12 px, legend top-left. History in light slate, the model's past forecast in slate, forecast / primary series in the accent blue with a light-blue band, thresholds (reorder level, SLA) in amber, problem periods (stockouts, anomaly windows) as a faint red wash |
+| Text | Crisp points, not paragraphs (2026-10-07): explanations are 2–3 grey bullets via `ui.notes()`, one idea each, ~10 words; summaries use `Label — value` (e.g. *Next 7 days — 46 units (~6.6/day)*); info and warning boxes lead with a bold headline. Chart notes say how to read the chart, not which colour is which (the legend does that). No information was removed |
 | Login | Dark brand panel (facts: 12 stores, 3 cities, 6 months; the four workspaces with codes INV / BIZ / MKT / ENG) beside a plain sign-in form |
 | Admin overview | Snapshot KPI strip, then a two-column grid of workspace cards with a Live / On hold badge and an "Open" link |
 

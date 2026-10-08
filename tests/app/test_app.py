@@ -11,6 +11,7 @@ from src.common.paths import PROJECT_ROOT  # noqa: E402
 from src.ml.tables import ML_TABLES  # noqa: E402
 from src.orchestration.publish import DIMENSIONS  # noqa: E402
 from src.serving import queries as q  # noqa: E402
+from src.serving.db import get_snapshot  # noqa: E402
 from src.serving.permissions import AccessDenied  # noqa: E402
 from src.transformations.gold.run import GOLD_TABLES  # noqa: E402
 
@@ -27,7 +28,9 @@ INVENTORY_FUNCTIONS = [
 
 def test_snapshot_published_within_limits(app_env):
     result = app_env["publish_result"].results["publish"]
-    assert result["tables"] == len(GOLD_TABLES) + len(ML_TABLES) + len(DIMENSIONS) and result["size_mb"] < 50
+    assert result["tables"] == len(GOLD_TABLES) + len(ML_TABLES) + len(DIMENSIONS) + 1 and result["size_mb"] < 50
+    chunks = get_snapshot().query("SELECT doc_type, count(*) AS n FROM rag_chunks GROUP BY ALL")
+    assert set(chunks["doc_type"]) == {"policy", "metric", "method"}   # + 1 = rag_chunks (Phase 6A)
     info = q.snapshot_info()
     assert info["pipeline_run_id"] == app_env["publish_result"].run_id
 
@@ -223,3 +226,35 @@ def test_admin_lands_on_overview_and_engineer_on_hold_page(app_env):
     assert "Tables in snapshot" in {m.label for m in admin.metric}
     engineer = _home({"username": "engineer", "name": "Data Engineer (demo)", "role": "data_engineer"})
     assert any("on hold" in i.value for i in engineer.info) and not engineer.error
+
+
+# ------------------------------------------------------------------------------------------- assistant (6E)
+def _assistant_page(user):
+    at = AppTest.from_file(str(PROJECT_ROOT / "app" / "views" / "assistant.py"), default_timeout=120)
+    at.session_state["user"] = user
+    at.run()
+    assert not at.exception, at.exception
+    return at
+
+
+def test_assistant_page_answers_with_badge_and_sources(app_env):
+    at = _assistant_page(INVENTORY_USER)
+    assert len(at.button) >= 3                                         # suggested questions
+    at.chat_input[0].set_value("Which SKUs are at high risk and what does the policy say?").run()
+    assert not at.exception, at.exception
+    text = " ".join(m.value for m in at.markdown)
+    assert "Data + policy" in text and "High risk" in text and "POL-INV §" in text
+    assert len(at.dataframe) >= 1 and any(e.label == "Evidence & sources" for e in at.expander)
+
+
+def test_assistant_page_refuses_other_workspace_data(app_env):
+    at = _assistant_page(INVENTORY_USER)
+    at.chat_input[0].set_value("What was net revenue last week?").run()
+    text = " ".join(m.value for m in at.markdown)
+    assert "Not in your workspace" in text and "Business & Revenue" in text and "₹" not in text
+
+
+def test_assistant_suggested_question_click(app_env):
+    at = _assistant_page(BUSINESS_USER)
+    at.button[0].click().run()
+    assert not at.exception and len(at.chat_message) == 2               # question + answer

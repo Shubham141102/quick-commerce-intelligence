@@ -1,0 +1,133 @@
+# Phase 6F evaluation set — 40 questions + 5 role checks. Written 2026-10-08 BEFORE the first measurement;
+# never used to tune the router, retrieval or tools (the practice set is tests/rag/dev_questions.yaml).
+#
+# Fields
+#   role      who asks (the answer is checked against that role's permissions)
+#   routes    acceptable routes (data / policy / method / hybrid / insufficient / clarify / out_of_scope / not_allowed)
+#   tool      expected tool for data / hybrid questions
+#   sections  acceptable [doc_id, section prefix] pairs for retrieval hit@3 (policy / method / hybrid)
+#   check     the figure verified independently with SQL on the Gold tables (data / hybrid)
+
+questions:
+  # ---------------------------------------------------------------- policy (10)
+  - {id: P01, kind: policy, role: inventory_manager, routes: [policy],
+     question: "How often are focus SKUs counted in each store?",
+     sections: [[POL-INV, "6. Stock counts"]]}
+  - {id: P02, kind: policy, role: inventory_manager, routes: [policy],
+     question: "What supplier lead time do we plan with?",
+     sections: [[POL-INV, "5. Supplier lead time"]]}
+  - {id: P03, kind: policy, role: inventory_manager, routes: [policy],
+     question: "When must a store manager be notified about high-risk SKUs?",
+     sections: [[POL-INV, "8. Escalation"], [POL-INV, "2. Stock risk tiers"]]}
+  - {id: P04, kind: policy, role: marketing_manager, routes: [policy],
+     question: "Who has to approve a promotion before it starts?",
+     sections: [[POL-PRO, "1. Promotion types"]]}
+  - {id: P05, kind: policy, role: marketing_manager, routes: [policy],
+     question: "Can we run a promotion for three weeks?",
+     sections: [[POL-PRO, "2. Discount limits"]]}
+  - {id: P06, kind: policy, role: business_analyst, routes: [policy],
+     question: "What happens to a prepaid order that is cancelled after dispatch?",
+     sections: [[POL-CAN, "3. Customer communication"], [POL-REF, "1. Eligibility"], [POL-CAN, "1. Before and after"]]}
+  - {id: P07, kind: policy, role: business_analyst, routes: [policy],
+     question: "Which reasons can be recorded for a cancellation before dispatch?",
+     sections: [[POL-CAN, "2. Allowed reasons"]]}
+  - {id: P08, kind: policy, role: business_analyst, routes: [policy],
+     question: "How quickly is a refund issued after a cancellation?",
+     sections: [[POL-REF, "2. Timelines"]]}
+  - {id: P09, kind: policy, role: business_analyst, routes: [policy],
+     question: "How many minutes do we promise for delivery?",
+     sections: [[POL-DEL, "1. Delivery promise"]]}
+  - {id: P10, kind: policy, role: business_analyst, routes: [policy],
+     question: "What does the policy say about a store with poor on-time performance?",
+     sections: [[POL-DEL, "5. Store performance review"], [POL-DEL, "3. Late and failed"]]}
+
+  # ---------------------------------------------------------------- method (5)
+  - {id: M01, kind: method, role: business_analyst, routes: [method],
+     question: "How is the on-time delivery rate defined?",
+     sections: [[MET-DEF, "On-time delivery rate"]]}
+  - {id: M02, kind: method, role: inventory_manager, routes: [method],
+     question: "What does days of inventory mean?",
+     sections: [[MET-DEF, "Days of inventory"]]}
+  - {id: M03, kind: method, role: inventory_manager, routes: [method],
+     question: "How does the forecast model work?",
+     sections: [[MC-FCST, "Models"], [MC-FCST, "Model card"]]}
+  - {id: M04, kind: method, role: business_analyst, routes: [method],
+     question: "How are demand spikes detected?",
+     sections: [[MC-ANOM, "Anomaly detection"]]}
+  - {id: M05, kind: method, role: marketing_manager, routes: [method],
+     question: "How are customer segments named?",
+     sections: [[MC-MKT, "Model card 1: Customer segmentation"]]}
+
+  # ---------------------------------------------------------------- data (10)
+  - {id: D01, kind: data, role: inventory_manager, routes: [data], tool: at_risk_skus,
+     question: "How many SKUs are at high risk at Koramangala?", check: high_risk_count}
+  - {id: D02, kind: data, role: inventory_manager, routes: [data], tool: inventory_overview,
+     question: "What is the stock position across our stores?", check: high_risk_count}
+  - {id: D03, kind: data, role: inventory_manager, routes: [data], tool: suggested_orders,
+     question: "List the suggested orders for Bandra", check: units_to_order}
+  - {id: D04, kind: data, role: inventory_manager, routes: [data], tool: category_forecast,
+     question: "What is the demand forecast for Bakery at Saket?", check: forecast_7d}
+  - {id: D05, kind: data, role: inventory_manager, routes: [data], tool: lost_sales,
+     question: "What are the lost sales from stockouts at Rohini?", check: lost_sales}
+  - {id: D06, kind: data, role: business_analyst, routes: [data], tool: sales_overview,
+     question: "What was net revenue in August?", check: net_revenue}
+  - {id: D07, kind: data, role: business_analyst, routes: [data], tool: top_products,
+     question: "Show the top 5 best-selling products", check: top_product}
+  - {id: D08, kind: data, role: business_analyst, routes: [data], tool: delivery_overview,
+     question: "What is the on-time delivery rate in Mumbai last month?", check: on_time_rate}
+  - {id: D09, kind: data, role: business_analyst, routes: [data], tool: anomalies,
+     question: "How many payment failures were detected?", check: anomaly_count}
+  - {id: D10, kind: data, role: marketing_manager, routes: [data], tool: segments,
+     question: "How many customer segments do we have?", check: segment_count}
+
+  # ---------------------------------------------------------------- hybrid (8)
+  - {id: H01, kind: hybrid, role: inventory_manager, routes: [hybrid], tool: at_risk_skus,
+     question: "Which SKUs are at risk at Dwarka and what should the store do?", check: high_risk_count,
+     sections: [[POL-INV, "2. Stock risk tiers"], [POL-INV, "3. Reorder rules"], [POL-INV, "8. Escalation"]]}
+  - {id: H02, kind: hybrid, role: inventory_manager, routes: [hybrid], tool: suggested_orders,
+     question: "Show suggested orders for Andheri West and the rule for order quantity", check: units_to_order,
+     sections: [[POL-INV, "4. Order quantity"]]}
+  - {id: H03, kind: hybrid, role: inventory_manager, routes: [hybrid], tool: lost_sales,
+     question: "What are the lost sales at Lajpat Nagar and what does the policy say about stockouts?",
+     check: lost_sales, sections: [[POL-INV, "7. Stockouts and lost sales"]]}
+  - {id: H04, kind: hybrid, role: business_analyst, routes: [hybrid], tool: delivery_overview,
+     question: "How is our on-time rate this month and what does the delivery policy require?", check: on_time_rate,
+     sections: [[POL-DEL, "1. Delivery promise"], [POL-DEL, "2. Measuring on-time"], [POL-DEL, "5. Store performance"]]}
+  - {id: H05, kind: hybrid, role: business_analyst, routes: [hybrid], tool: cancellations,
+     question: "List cancellations by reason last week and what should we tell customers?", check: cancellation_count,
+     sections: [[POL-CAN, "3. Customer communication"]]}
+  - {id: H06, kind: hybrid, role: business_analyst, routes: [hybrid], tool: sales_overview,
+     question: "What was net revenue last week, and how should refunds be counted according to policy?",
+     check: net_revenue, sections: [[POL-REF, "4. Effect on revenue"]]}
+  - {id: H07, kind: hybrid, role: marketing_manager, routes: [hybrid], tool: promotions,
+     question: "Which promotions had negative uplift and should we repeat them?", check: promotion_count,
+     sections: [[POL-PRO, "4. Reviewing and stopping"]]}
+  - {id: H08, kind: hybrid, role: marketing_manager, routes: [hybrid], tool: promotions,
+     question: "Show promotion results and the allowed discount limits", check: promotion_count,
+     sections: [[POL-PRO, "2. Discount limits"]]}
+
+  # ---------------------------------------------------------------- ambiguous / insufficient (4)
+  - {id: A01, kind: ambiguous, role: business_analyst, routes: [insufficient, clarify],
+     question: "Why did deliveries get slower in September?"}
+  - {id: A02, kind: ambiguous, role: marketing_manager, routes: [insufficient, clarify],
+     question: "Why are customers lapsing?"}
+  - {id: A03, kind: ambiguous, role: inventory_manager, routes: [clarify],
+     question: "Show me the forecast"}
+  - {id: A04, kind: ambiguous, role: business_analyst, routes: [clarify, out_of_scope],
+     question: "What should we do?"}
+
+  # ---------------------------------------------------------------- out of scope (3)
+  - {id: O01, kind: out_of_scope, role: marketing_manager, routes: [out_of_scope],
+     question: "What is the share price of our competitor?"}
+  - {id: O02, kind: out_of_scope, role: business_analyst, routes: [out_of_scope],
+     question: "Book a table for dinner tonight"}
+  - {id: O03, kind: out_of_scope, role: inventory_manager, routes: [out_of_scope],
+     question: "Translate this sentence into French"}
+
+# ---------------------------------------------------------------- role checks (5): data outside the workspace
+role_checks:
+  - {id: R01, role: inventory_manager, question: "What was net revenue in July?"}
+  - {id: R02, role: marketing_manager, question: "Which SKUs are at high risk?"}
+  - {id: R03, role: business_analyst, question: "What are our customer segments?"}
+  - {id: R04, role: data_engineer, question: "Show the top selling products"}
+  - {id: R05, role: inventory_manager, question: "How many customers have lapsed?"}

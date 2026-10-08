@@ -18,7 +18,7 @@ Documentation for the Quick-Commerce Intelligence Platform. Each completed proce
 | 10 | Marketing analytics — model cards: segmentation, basket rules, recommendations, retention (Phase 5D) | [10_marketing_analytics.md](10_marketing_analytics.md) | Done |
 | 11 | Customer Growth & Marketing workspace (Phase 5E) | [11_marketing_workspace.md](11_marketing_workspace.md) | Done |
 | 12 | Frontend: login page, persona landing, page design | [12_frontend.md](12_frontend.md) | Done (Data Engineer workspace on hold) |
-| 13 | Business assistant — RAG (Phase 6) | — | Next |
+| 13 | Business assistant — RAG (Phase 6) | [13_rag_assistant.md](13_rag_assistant.md) | In progress (6A–6F done; all evaluation bars pass) |
 
 ## Reference documents (generated — do not edit by hand)
 

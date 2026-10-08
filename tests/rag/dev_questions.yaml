@@ -1,0 +1,29 @@
+# Practice questions for calibrating retrieval (Phase 6B). Used ONLY to set MIN_SCORE in src/rag/retrieval.py.
+# They must never be reused in the 40-question evaluation set (tests/rag/questions.yaml, Phase 6F).
+# expect: doc_id and the start of the section the answer is in; empty = out of scope (should retrieve nothing).
+
+- question: When should a store reorder a SKU?
+  expect: {doc_id: POL-INV, section: "3. Reorder rules"}
+- question: What is our delivery promise to customers?
+  expect: {doc_id: POL-DEL, section: "1. Delivery promise"}
+- question: Can a refund be larger than the payment?
+  expect: {doc_id: POL-REF, section: "3. Refund amount limit"}
+- question: What discount levels are allowed for promotions?
+  expect: {doc_id: POL-PRO, section: "2. Discount limits"}
+- question: Which cancellation reasons are allowed after dispatch?
+  expect: {doc_id: POL-CAN, section: "2. Allowed reasons"}
+- question: How is average order value calculated?
+  expect: {doc_id: MET-DEF, section: "Average order value"}
+- question: How do we estimate the sales lost to stockouts?
+  expect: {doc_id: MC-LOST, section: "Lost-sales estimate"}
+- question: What is the capital of France?
+  expect: {}
+- question: Will it rain in Mumbai tomorrow?
+  expect: {}
+- question: Who won the cricket match yesterday?
+  expect: {}
+# Added 2026-10-08 during the 6F re-calibration (a two-part question from the unit / app tests, NOT the evaluation
+# set): the policy part of a hybrid question must clear the threshold. Searched in policy chunks only.
+- question: Which SKUs are at high risk and what does the policy say?
+  expect: {doc_id: POL-INV, section: "2. Stock risk tiers"}
+  doc_types: [policy]

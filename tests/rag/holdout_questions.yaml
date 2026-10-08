@@ -1,0 +1,72 @@
+# Phase 6F HELD-OUT set — 20 questions + 2 role checks. Written 2026-10-08 AFTER the first measurement of the gold
+# set and BEFORE any fix was implemented, so the fixes could not be shaped by these questions. It shows whether the
+# general fixes generalise beyond the 40 known questions. Same fields as questions.yaml.
+
+questions:
+  # ---------------------------------------------------------------- policy (5)
+  - {id: HP1, kind: policy, role: inventory_manager, routes: [policy],
+     question: "What is the order-up-to level for a focus SKU?",
+     sections: [[POL-INV, "4. Order quantity"], [POL-INV, "3. Reorder rules"]]}
+  - {id: HP2, kind: policy, role: business_analyst, routes: [policy],
+     question: "How many delivery partners does a store work with?",
+     sections: [[POL-DEL, "4. Delivery partners"]]}
+  - {id: HP3, kind: policy, role: business_analyst, routes: [policy],
+     question: "Is a refund given for cash-on-delivery orders that were never delivered?",
+     sections: [[POL-REF, "1. Eligibility"], [POL-CAN, "3. Customer communication"]]}
+  - {id: HP4, kind: policy, role: marketing_manager, routes: [policy],
+     question: "How many promotions can run in one category at the same time?",
+     sections: [[POL-PRO, "2. Discount limits"]]}
+  - {id: HP5, kind: policy, role: business_analyst, routes: [policy],
+     question: "What cancellation rate is considered normal?",
+     sections: [[POL-CAN, "1. Before and after"], [POL-CAN, "4. Monitoring"]]}
+
+  # ---------------------------------------------------------------- method (3)
+  - {id: HM1, kind: method, role: business_analyst, routes: [method],
+     question: "How is the cancellation rate calculated?",
+     sections: [[MET-DEF, "Cancellation rate"]]}
+  - {id: HM2, kind: method, role: inventory_manager, routes: [method],
+     question: "How is lost sales estimated?",
+     sections: [[MET-DEF, "Lost sales"], [MC-LOST, "Lost-sales estimate"]]}
+  - {id: HM3, kind: method, role: marketing_manager, routes: [method],
+     question: "What does support mean for basket rules?",
+     sections: [[MET-DEF, "Support / confidence / lift"], [MC-MKT, "Model card 2"]]}
+
+  # ---------------------------------------------------------------- data (5)
+  - {id: HD1, kind: data, role: inventory_manager, routes: [data], tool: at_risk_skus,
+     question: "Which SKUs are at medium risk at Whitefield?", check: medium_risk_count}
+  - {id: HD2, kind: data, role: business_analyst, routes: [data], tool: sales_overview,
+     question: "What was net revenue at Powai in June?", check: net_revenue}
+  - {id: HD3, kind: data, role: business_analyst, routes: [data], tool: delivery_overview,
+     question: "Show delivery performance for Bengaluru stores last week", check: on_time_rate}
+  - {id: HD4, kind: data, role: marketing_manager, routes: [data], tool: retention,
+     question: "Show the retention status of our customers", check: active_customers}
+  - {id: HD5, kind: data, role: inventory_manager, routes: [data], tool: category_forecast,
+     question: "What is the forecast for Tea & Coffee next week?", check: forecast_7d}
+
+  # ---------------------------------------------------------------- hybrid (4)
+  - {id: HH1, kind: hybrid, role: inventory_manager, routes: [hybrid], tool: at_risk_skus,
+     question: "Which SKUs at HSR Layout are high risk and when must we escalate?", check: high_risk_count,
+     sections: [[POL-INV, "8. Escalation"], [POL-INV, "2. Stock risk tiers"]]}
+  - {id: HH2, kind: hybrid, role: business_analyst, routes: [hybrid], tool: delivery_overview,
+     question: "What is the on-time rate at Indiranagar and what is our delivery promise according to policy?",
+     check: on_time_rate, sections: [[POL-DEL, "1. Delivery promise"], [POL-DEL, "2. Measuring on-time"]]}
+  - {id: HH3, kind: hybrid, role: marketing_manager, routes: [hybrid], tool: promotions,
+     question: "Show the promotions with the highest uplift and the approval rule for new ones",
+     check: promotion_count, sections: [[POL-PRO, "1. Promotion types"], [POL-PRO, "4. Reviewing"]]}
+  - {id: HH4, kind: hybrid, role: business_analyst, routes: [hybrid], tool: cancellations,
+     question: "How many cancellations were there in July and what should we tell the customer?",
+     check: cancellation_count, sections: [[POL-CAN, "3. Customer communication"]]}
+
+  # ---------------------------------------------------------------- ambiguous / insufficient (2)
+  - {id: HA1, kind: ambiguous, role: inventory_manager, routes: [insufficient, clarify],
+     question: "Why did stockouts rise at Dwarka?"}
+  - {id: HA2, kind: ambiguous, role: marketing_manager, routes: [insufficient, clarify],
+     question: "Why did the promotion fail?"}
+
+  # ---------------------------------------------------------------- out of scope (1)
+  - {id: HO1, kind: out_of_scope, role: business_analyst, routes: [out_of_scope],
+     question: "What is the weather in Delhi this week?"}
+
+role_checks:
+  - {id: HR1, role: marketing_manager, question: "What are the lost sales from stockouts?"}
+  - {id: HR2, role: business_analyst, question: "Which promotions had the best uplift?"}

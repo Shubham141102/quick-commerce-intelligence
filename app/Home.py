@@ -23,6 +23,7 @@ import streamlit as st  # noqa: E402
 from app.components.auth import current_user, login_page  # noqa: E402
 from app.components.personas import PERSONAS  # noqa: E402
 from app.components.ui import sidebar_profile  # noqa: E402
+from app.views import assistant as assistant_view  # noqa: E402
 from app.views import business, inventory, marketing  # noqa: E402
 from src.serving.permissions import allowed_workspaces  # noqa: E402
 
@@ -50,9 +51,12 @@ else:
     mine = allowed_workspaces(user["role"])
     per_ws = {ws: workspace_pages(ws, landing=len(mine) == 1) for ws in mine}
     groups = {PERSONAS[ws]["title"]: pages for ws, pages in per_ws.items()}
-    if len(mine) > 1:   # admin: an overview first, then every workspace group
+    helper = st.Page(assistant_view.assistant, title="Assistant", icon=":material/forum:", url_path="assistant")
+    if len(mine) > 1:   # admin: overview and assistant first, then every workspace group
         overview = st.Page(VIEWS / "welcome.py", title="Overview", icon=":material/dashboard:", default=True)
-        groups = {"": [overview], **groups}
+        groups = {"": [overview, helper], **groups}
+    else:               # a persona: the assistant closes its own group
+        groups[PERSONAS[mine[0]]["title"]] = [*per_ws[mine[0]], helper]
     st.session_state["_workspace_landing"] = {ws: pages[0] for ws, pages in per_ws.items()}   # overview links
     page = st.navigation(groups, position="sidebar", expanded=True)
     st.logo(str(ASSETS / "logo.svg"), icon_image=str(ASSETS / "mark.svg"), size="large")

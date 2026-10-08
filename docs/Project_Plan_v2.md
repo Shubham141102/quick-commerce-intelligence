@@ -678,6 +678,31 @@ A 40-question gold set (`tests/rag/questions.yaml`): 10 policy, 10 structured, 1
 
 A provider-agnostic `LLMClient` interface. The API key comes from Streamlit secrets or an env var. If the key is missing or the call fails, the assistant falls back silently to no-LLM mode and the UI shows the active mode.
 
+### 9.9 Phase 6 build plan (agreed 2026-10-07)
+
+**Decisions:**
+- **LLM:** template mode first (no key, no cost, reproducible); an optional Claude layer (`claude-haiku-4-5`) only rephrases the evidence and must cite it; on a missing key or any error it falls back to templates.
+- **Knowledge base:** 5 policies (inventory, delivery, cancellation, refund, promotion) **plus** `metric_definitions.md` **plus** the model cards / method docs (05 forecasting, 06 stockout, 08 lost sales, 09 anomalies, 10 marketing analytics). So it answers "what should we do", "how is X calculated" and "how does model Y work".
+- **Placement:** an **Assistant** page in every persona's sidebar group.
+- **Role-aware:** the assistant calls only the existing role-checked query functions the user's role may use; knowledge documents are readable by every role.
+- **Storage:** chunks are published as `rag_chunks.csv` in the snapshot (CSV-only rule); the BM25 index is built in the app (cached). No vector database; embeddings stay a Tier 2 offline comparison (PyTorch is too heavy for the free host).
+- **No free-form SQL:** data comes only from whitelisted functions.
+
+**Steps:**
+
+| Step | Scope |
+|---|---|
+| 6A Knowledge base | Write the 5 policies with numbered sections and the generator's real thresholds (15-min SLA, 1–2 day restock lead time, cancellation / refund handling, promotion rules); chunk policies + metric definitions + model cards by section (~120–200 words, 30-word overlap, `doc_id`, title, section, chunk_id); publish `rag_chunks.csv` |
+| 6B Retrieval | BM25 over chunks, min-score threshold, top-k = 3, citations |
+| 6C Data tools | Whitelist over existing `queries.py` functions; Pydantic parameters; source table + as-of on every result; no PII; entity extraction (store, category, product, tier, dates) |
+| 6D Router + composer | Rule-based intents (policy / method / data / hybrid / refuse); template answers (numbers table + quoted passages + citations); refusal and insufficient-evidence replies |
+| 6E Assistant UI | Chat page per persona: suggested questions, route badge, "Evidence & sources", active mode |
+| 6F Evaluation | 40-question gold set — 10 policy, 5 metric / method, 10 data, 8 hybrid, 4 ambiguous / insufficient, 3 out-of-scope — plus role checks; `scripts/check_phase6.py`; `meta_rag_runs` |
+| 6G Optional LLM | `LLMClient` (Claude), grounded prompt, citations required, silent fallback |
+| 6H Docs + tests | `docs/13_rag_assistant.md`, unit tests, file registry |
+
+**Pass bars (fixed before measuring):** routing accuracy ≥ 90%; retrieval hit@3 ≥ 85%; numbers equal the data function **100%**; citations correct **100%**; correct refusal on out-of-scope / insufficient ≥ 90%; role check **100%** (never returns data outside the user's workspace).
+
 ---
 
 ## 10. Streamlit application

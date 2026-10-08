@@ -99,13 +99,19 @@ def _published(info: dict) -> str:
 def page_header(workspace: str, section: str | None = None) -> None:
     """Breadcrumb (app › workspace), the section title and the workspace purpose on the left; data status on
     the right; a hairline underneath."""
+    p = PERSONAS[workspace]
+    header(p["title"], section or p["title"], p["tagline"])
+
+
+def header(crumb: str, title: str, subtitle: str, status: str = "Snapshot current") -> None:
+    """The page header used everywhere: breadcrumb, title, one-line purpose; status and data period on the right."""
     inject_css()
-    p, info = PERSONAS[workspace], snapshot_info()
+    info = snapshot_info()
     st.markdown(
         "<div class='qc-head'><div>"
-        f"<div class='qc-crumb'>{html.escape(APP_NAME)} &nbsp;›&nbsp; <b>{html.escape(p['title'])}</b></div>"
-        f"<h1>{html.escape(section or p['title'])}</h1><p>{html.escape(p['tagline'])}</p></div>"
-        "<div class='qc-meta'><span class='qc-status'><span class='qc-dot'></span>Snapshot current</span><br>"
+        f"<div class='qc-crumb'>{html.escape(APP_NAME)} &nbsp;›&nbsp; <b>{html.escape(crumb)}</b></div>"
+        f"<h1>{html.escape(title)}</h1><p>{html.escape(subtitle)}</p></div>"
+        f"<div class='qc-meta'><span class='qc-status'><span class='qc-dot'></span>{html.escape(status)}</span><br>"
         f"Data period {DATA_PERIOD} · {html.escape(info.get('profile', '?'))} profile<br>"
         f"Published {html.escape(_published(info))}</div></div>",
         unsafe_allow_html=True)
@@ -115,6 +121,11 @@ def tab_intro(question: str) -> None:
     """The business question a tab answers, as a quiet callout."""
     st.markdown(f"<div class='qc-question'><span>Business question</span><div>{html.escape(question)}</div></div>",
                 unsafe_allow_html=True)
+
+
+def notes(*points: str) -> None:
+    """Crisp grey bullet points (the house style for explanations: one idea per point, minimal words)."""
+    st.caption("\n".join(f"- {p}" for p in points))
 
 
 def label(text: str) -> None:
@@ -148,5 +159,5 @@ def freshness_banner() -> None:
 
 
 def advisory_note() -> None:
-    st.info("**Advisory only.** Risk tiers and suggested quantities support a manager's decision; "
-            "nothing here places an order or changes stock.", icon=":material/info:")
+    st.info("**Advisory only** — supports the manager's decision; nothing is ordered or changed automatically.",
+            icon=":material/info:")

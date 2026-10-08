@@ -32,6 +32,7 @@ from app.components.insights import (  # noqa: E402
 from app.components.ui import (  # noqa: E402
     advisory_note,
     label,
+    notes,
     page_header,
     require_workspace,
     tab_intro,
@@ -59,7 +60,7 @@ def overview() -> None:
     role = _open("overview")
     tab_intro("Where do we stand today: which SKUs are at risk and what should be reordered?")
     k = q.inventory_kpis(role)
-    st.caption(f"Stock position at the end of **{k['as_of']:%d %b %Y}** for {k['skus']} store × focus-SKU pairs.")
+    st.caption(f"As of **{k['as_of']:%d %b %Y}** · {k['skus']} store × focus-SKU pairs")
     c = st.columns(5)
     c[0].metric("High risk", int(k["high"]), help="Stock is 0, or forecast demand over lead time + 1 day ≥ stock")
     c[1].metric("Medium risk", int(k["medium"]), help="Stock ≤ reorder level, or under 3 days of inventory")
@@ -85,10 +86,8 @@ def forecasting() -> None:
     fc = q.category_forecast(role, store, cat)
     full = st.toggle("Show full history (April–September)", value=False)
     st.plotly_chart(forecast_chart(fc, days_back=None if full else 30), width="stretch")
-    st.caption("Blue bars: units actually sold. Orange line: what the model (trained on April–August only) forecast "
-               "for each September day, the day before — compare it with the bars to see how close it gets. "
-               "Red line: the forecast for the 7 days after the data ends; the shaded band is the likely range "
-               "(8 days in 10 should fall inside it).")
+    notes("September: line vs bars = how close the model gets (trained on Apr–Aug only)",
+          "After today: forecast line · band = likely range (8 in 10 days)")
     acc = q.forecast_accuracy(role)
     cat_acc = acc[acc["evaluation"] == "category_daily"]
     pooled = cat_acc[cat_acc["horizon"] == 0].set_index("model")["wape"]
@@ -117,9 +116,8 @@ def forecasting() -> None:
     groups["what to do"] = groups["reliability"].map(RELIABILITY_ACTION)
     st.dataframe(style_reliability(groups.rename(columns={"category": "categories"})), hide_index=True,
                  width="stretch", column_config={"categories": st.column_config.TextColumn(width="large")})
-    st.caption("Reliability comes from each category's error in the September test: High when the error is below 55% "
-               "of units sold, Medium up to 70%, Low above. Staples sell steadily and are easy to forecast; occasional "
-               "purchases are not.")
+    notes("Reliability = September error: High < 55% · Medium ≤ 70% · Low > 70% of units sold",
+          "Staples forecast well · occasional purchases don't")
 
     with st.expander("Technical details (for analysts)"):
         m = st.columns(3)
@@ -142,14 +140,12 @@ def forecasting() -> None:
                      hide_index=True, width="stretch", column_config=wape_cols)
         st.markdown("**What drives the forecast** (permutation importance)")
         st.plotly_chart(importance_chart(q.feature_importance(role)), width="stretch")
-        st.markdown(
-            "- WAPE = total absolute error ÷ total units sold. A store-category sells only ~3 units a day, so much of "
-            "the error is randomness no model can remove: a *perfect* model would still score about 0.58 on this "
-            "data (see docs/05_demand_forecasting.md).\n"
-            "- Moving average = average of the last 7 days; seasonal naive = same weekday last week.\n"
-            "- Future weather is assumed equal to the last 7-day average; no promotions are assumed after the data ends.\n"
-            "- Holiday dates are approximate and the synthetic data has no holiday effect.\n"
-            "- The model slightly under-forecasts (about −7%).")
+        notes("**WAPE** — total error ÷ units sold (lower is better)",
+              "**Noise floor** — ≈ 0.58: ~3 units/day per store-category is mostly chance",
+              "**Baselines** — moving average = last 7 days · seasonal naive = same weekday last week",
+              "**Assumptions** — weather = last 7-day average · no promotions after the data ends",
+              "**Bias** — slight under-forecast (≈ −7%) · holidays approximate, no holiday effect",
+              "Details: docs/05_demand_forecasting.md")
 
 # ------------------------------------------------------------------------------------------- stockout
 def stockout() -> None:
@@ -162,7 +158,7 @@ def stockout() -> None:
     picked_stores = f1.multiselect("Stores", stores["store_id"], format_func=names.get, placeholder="All stores")
     tiers = f2.multiselect("Risk tier", ["High", "Medium", "Low"], default=["High", "Medium"])
     risks = q.risk_list(role, picked_stores or None, tiers or None)
-    st.markdown(f"**{len(risks)} SKUs** — sorted by tier, then fewest days of cover")
+    st.markdown(f"**{len(risks)} SKUs** · by tier, then fewest days of cover")
     st.dataframe(style_tiers(risks.drop(columns=["store_id", "product_id"]), ["risk_tier"]), hide_index=True,
                  width="stretch",
                  column_config={
@@ -185,9 +181,8 @@ def stockout() -> None:
                            format_func=dict(zip(products["product_id"], products["product_name"])).get)
     timeline_sku = q.sku_timeline(role, sku_store, product)
     st.plotly_chart(stock_chart(timeline_sku), width="stretch")
-    st.caption("Green steps: units on the shelf at the end of each day. Blue bars: units sold that day. Dashed line: "
-               "the reorder level. Red bars after the last day: forecast demand for the next 7 days (whiskers = likely "
-               "range). When the green line approaches the dashed line while sales stay high, a stockout is coming.")
+    notes("Stock line nearing the reorder line while sales hold = stockout coming",
+          "Bars after today = forecast demand · whiskers = likely range")
     row = q.risk_list(role, [sku_store])
     row = row[row["product_id"] == product]
     with st.container(border=True):
@@ -196,15 +191,13 @@ def stockout() -> None:
 
     assumptions = q.replenishment_assumptions(role)
     with st.expander("How the suggested order is calculated"):
-        st.markdown(
-            f"`suggested = ceil(max(0, forecast demand over {int(assumptions['lead_time_days'])} + "
-            f"{int(assumptions['review_days'])} days + safety stock − current stock))`  \n"
-            f"`safety stock = 1.65 × std(daily units, last 28 days) × √{int(assumptions['lead_time_days'])}` "
-            f"(≈ {assumptions['service_level']:.0%} service level)  \n"
-            f"Lead time of {int(assumptions['lead_time_days'])} days is an **assumption** (the simulated suppliers "
-            "deliver in 1–2 days).")
+        lead, review = int(assumptions["lead_time_days"]), int(assumptions["review_days"])
+        notes(f"**Suggested order** = forecast over {lead} + {review} days + safety stock − stock (rounded up, ≥ 0)",
+              f"**Safety stock** = 1.65 × std(daily units, 28 days) × √{lead} "
+              f"(≈ {assumptions['service_level']:.0%} service level)",
+              f"**Lead time** = {lead} days — an assumption (suppliers deliver in 1–2 days)")
     st.subheader("Do the risk tiers work? (September backtest)")
-    st.caption("Decisions taken while the SKU was still in stock: did it run out within the next 3 days?")
+    notes("Flag raised while in stock → did it run out within 3 days?")
     st.dataframe(q.stockout_backtest(role), hide_index=True, width="stretch",
                  column_config={"precision": st.column_config.NumberColumn(format="percent"),
                                 "recall": st.column_config.NumberColumn(format="percent"),
@@ -214,8 +207,8 @@ def stockout() -> None:
 def explorer() -> None:
     role = _open("explorer")
     tab_intro("What did empty shelves cost us, and why did a SKU run out?")
-    st.markdown("Drill into one store × focus SKU: every stock movement, the weekly counts against the calculated "
-                "stock, stockout days and the sales they cost.")
+    notes("Every stock movement for one store × SKU", "Weekly counts vs calculated stock",
+          "Stockout days and the sales they cost")
     lost_by_store = q.lost_sales_by_store(role)
     total_rev = float(lost_by_store["lost_revenue"].sum()) if len(lost_by_store) else 0.0
     total_units = float(lost_by_store["lost_units"].sum()) if len(lost_by_store) else 0.0
@@ -233,13 +226,12 @@ def explorer() -> None:
     right.markdown("**Lost sales by store**")
     right.dataframe(lost_by_store, hide_index=True, width="stretch",
                     column_config={"lost_revenue": st.column_config.NumberColumn("lost revenue (₹)", format="%.0f")})
-    st.caption("Estimate = average daily units on the SKU's in-stock days in the previous 28 days − units sold, "
-               "on stockout days, × catalog price. In the simulation shoppers often bought a substitute, so the store "
-               "as a whole lost less than this.")
-    st.warning("**How far to trust this:** the total and the biggest losers are reliable (total within 1% of the "
-               "simulator's true lost units). Rankings among SKUs that lost only a unit or two are not: stockout days "
-               "come from the rebuilt daily stock, which misses about a third of real stockout days. "
-               "Details: docs/08_inventory_explorer_lost_sales.md.", icon=":material/warning:")
+    notes("**Lost units** = normal daily sales (in-stock days, last 28) − units sold, on stockout days",
+          "**Lost revenue** = lost units × price · before substitutes (the store lost less overall)")
+    st.warning("**How far to trust it**\n"
+               "- Total and biggest losers: reliable (within 1% of the true figure)\n"
+               "- Small losers (1–2 units): ranking not reliable\n"
+               "- Cause: rebuilt daily stock misses ~⅓ of stockout days (docs/08)", icon=":material/warning:")
 
     st.subheader("One SKU in detail")
     stores = q.stores(role)

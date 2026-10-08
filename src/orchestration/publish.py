@@ -2,6 +2,7 @@
 
 The Streamlit app reads only this folder (through DuckDB) and never runs Spark or the pipeline code:
 - one flat CSV per table (all Gold + ML tables, plus small product / store / category lookups)
+- `rag_chunks.csv`: the business assistant's knowledge base (policies, metric definitions, model cards)
 - `snapshot_schema.csv`: column types for every table, so the app can read them without pipeline code
 - `snapshot_manifest.csv`: which pipeline run and generation run produced the snapshot, and when
 
@@ -18,10 +19,13 @@ from pathlib import Path
 import pandas as pd
 
 from src.common.io import read_csv_strings, replace_with_retry, write_csv
+from src.common.paths import PROJECT_ROOT
 from src.common.schemas import SOURCE_SCHEMAS
 from src.orchestration.tracking import RunTracker, utc_now
+from src.rag.chunking import CHUNK_COLUMNS, build_chunks
 
 MAX_SNAPSHOT_MB = 50
+RAG_TABLE = "rag_chunks"
 DIMENSIONS = {  # app lookup tables from Silver: name -> (silver dataset, columns)
     "dim_products": ("products", ["product_id", "product_name", "category_id", "brand", "price"]),
     "dim_stores": ("stores", ["store_id", "store_name", "city_id", "city", "state"]),
@@ -58,6 +62,12 @@ def run_publish(tracker: RunTracker, gold_root: Path, silver_root: Path, demo_ro
         types = {c.name: c.dtype for c in SOURCE_SCHEMAS[dataset].columns}
         schema_rows += [{"table": name, "column": c, "dtype": types[c]} for c in columns]
 
+    # Business-assistant knowledge base (Phase 6A): policies, metric definitions and model cards as chunks
+    chunks = build_chunks(PROJECT_ROOT)
+    counts[RAG_TABLE] = write_csv(chunks.astype(str), staging / f"{RAG_TABLE}.csv", CHUNK_COLUMNS)
+    schema_rows += [{"table": RAG_TABLE, "column": c, "dtype": "int" if c == "words" else "string"}
+                    for c in CHUNK_COLUMNS]
+
     write_csv(pd.DataFrame(schema_rows), staging / "snapshot_schema.csv", ["table", "column", "dtype"])
     # The model version comes from the published predictions themselves: the run log (meta_model_runs) is only
     # written when a run ends, so within an `ml,publish` run it would still hold the previous model.
@@ -82,6 +92,10 @@ def run_publish(tracker: RunTracker, gold_root: Path, silver_root: Path, demo_ro
                   engine="python", module="src.orchestration.publish", rows_written=sum(counts.values()),
                   status="success", started_at=started, ended_at=utc_now(), duration_s=round(time.perf_counter() - t0, 2))
     for name in counts:
+        if name == RAG_TABLE:       # knowledge base: built from policy and documentation files
+            for rel in sorted({src for src in chunks["source"]}):
+                tracker.lineage(rel, f"demo/{name}", "publish (chunking)", engine="python")
+            continue
         tracker.lineage(name if name.startswith("gld_") else f"slv_{DIMENSIONS[name][0]}", f"demo/{name}",
                         "publish", engine="python")
     return {"tables": len(counts), "rows": sum(counts.values()), "size_mb": round(size_mb, 1)}

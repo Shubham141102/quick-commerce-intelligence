@@ -19,7 +19,7 @@ from app.components.charts import (  # noqa: E402
     revenue_trend_chart,
 )
 from app.components.insights import style_tiers  # noqa: E402
-from app.components.ui import page_header, require_workspace, tab_intro  # noqa: E402
+from app.components.ui import notes, page_header, require_workspace, tab_intro  # noqa: E402
 from src.serving import queries as q  # noqa: E402
 
 WS = "business"
@@ -81,8 +81,7 @@ def sales(filters: tuple | None = None) -> None:
     c[4].metric("Cancellation rate", f"{rate:.1%}" if rate is not None else "—",
                 f"{(rate - prev['cancellation_rate']) * 100:+.1f} pts" if rate is not None and prev["cancellation_rate"] else None,
                 delta_color="inverse")
-    st.caption(f"Changes compare with the {k['days']} days before the selected period (empty when that period is "
-               "outside the data).")
+    st.caption(f"Δ vs the previous {k['days']} days · blank when outside the data")
 
     grain = st.radio("Trend by", ["day", "week"], horizontal=True, index=1)
     st.plotly_chart(revenue_trend_chart(q.sales_trend(role, start, end, store_ids, grain)), width="stretch")
@@ -99,11 +98,11 @@ def sales(filters: tuple | None = None) -> None:
     st.dataframe(q.top_products(role, start, end), hide_index=True, width="stretch",
                  column_config={"revenue": st.column_config.NumberColumn("revenue (₹)", format="%.0f")})
     with st.expander("Metric definitions"):
-        st.markdown("- **Net revenue** = GMV − discount − completed refunds (refunds on the refund's date)\n"
-                    "- **GMV** = line revenue of completed orders (catalog price for lines with a flagged unit price)\n"
-                    "- **AOV** = (GMV − discount) ÷ completed orders\n"
-                    "- **Completed order** = delivered, successful payment, not cancelled\n"
-                    "- Full list: docs/metric_definitions.md")
+        notes("**Net revenue** — GMV − discount − completed refunds",
+              "**GMV** — line revenue of completed orders",
+              "**AOV** — (GMV − discount) ÷ completed orders",
+              "**Completed** — delivered · paid · not cancelled",
+              "Full list: docs/metric_definitions.md")
 
 # ------------------------------------------------------------------------------------------- delivery
 def delivery(filters: tuple | None = None) -> None:
@@ -127,17 +126,17 @@ def delivery(filters: tuple | None = None) -> None:
     canc = q.cancellations_by_reason(role, start, end, store_ids)
     right.markdown("**Cancellations by reason**")
     right.dataframe(canc, hide_index=True, width="stretch")
-    st.caption("Cancellations before dispatch are mostly customer-side (changed mind, item unavailable, payment); after "
-               "dispatch they are delivery-side (delays, unreachable customer, address). Weekly figures: periods are "
-               "matched by week.")
+    notes("Before dispatch — mostly customer-side (changed mind, unavailable, payment)",
+          "After dispatch — delivery-side (delay, unreachable, address)",
+          "Weekly figures, matched to the period by week")
 
 # ------------------------------------------------------------------------------------------- anomalies
 def anomalies(filters: tuple | None = None) -> None:
     role = _open("anomalies")
     start, end, store_ids = filters or _filters(role)
     tab_intro("Did something unusual happen that needs investigating?")
-    st.info("An anomaly is a **signal to investigate**, not proof of fraud or failure. Each one compares what happened "
-            "with what is normal for that store, hour or product over the previous 28 days.", icon=":material/search:")
+    st.info("**Signal to investigate, not proof** — compared with the last 28 days for that store, hour or product.",
+            icon=":material/search:")
     summary = q.anomaly_summary(role)
     labels = {"store_outage": "Store outage (experimental)", "demand_spike": "Demand spike",
               "payment_failure": "Payment failure"}
@@ -151,7 +150,7 @@ def anomalies(filters: tuple | None = None) -> None:
     a1, a2 = st.columns(2)
     dets = a1.multiselect("Type", list(labels), format_func=labels.get, placeholder="All types")
     found = q.anomaly_list(role, dets or None, store_ids)
-    a2.caption(f"{len(found)} anomalies (store filter above applies; payment failures are network-wide).")
+    a2.caption(f"{len(found)} anomalies · store filter applies · payment failures are network-wide")
     st.dataframe(style_tiers(found.drop(columns=["observed", "expected"])
                              .assign(detector=lambda d: d["detector"].map(labels)), ["severity"]),
                  hide_index=True, width="stretch",
@@ -162,16 +161,11 @@ def anomalies(filters: tuple | None = None) -> None:
                             format_func=lambda a: f"{a} — {found.set_index('anomaly_id').loc[a, 'description'][:90]}")
         st.plotly_chart(anomaly_chart(q.anomaly_series(role, pick)), width="stretch")
     with st.expander("How the detectors work and their limits"):
-        st.markdown(
-            "- **Demand spike:** orders containing a product at a store on a day, vs its share of the store's orders "
-            "over the last 28 days × that day's store orders (p < 0.0001).\n"
-            "- Daily order counts swing more than pure chance would (weekdays, rain, promotions), so the p-values allow "
-            "for that extra variation (negative binomial).\n"
-            "- **Payment failure:** network-wide failed payments and payment-service ERROR logs per hour vs normal.\n"
-            "- **Store outage (experimental):** runs of 2–8 hours with far fewer orders than normal. A store gets only ~1 order an hour, "
-            "so short outages look like chance and are mostly **not detectable** from orders alone; real systems use "
-            "store-system heartbeats, which this data does not have.\n"
-            "- Accuracy against the planted anomalies: docs/09_business_workspace.md.")
+        notes("**Demand spike** — product orders vs its usual share of store orders (p < 0.0001)",
+              "**Payment failure** — failed payments + payment ERROR logs per hour vs normal",
+              "**Store outage** (experimental) — 2–8 quiet hours; at ~1 order/hour mostly undetectable",
+              "**Method** — negative binomial: allows for weekday, rain and promotion swings",
+              "Accuracy vs planted anomalies: docs/09_business_workspace.md")
 
 
 PAGES = [(key, title, icon, globals()[key]) for key, title, icon in SECTIONS]

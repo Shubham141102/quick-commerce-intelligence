@@ -18,7 +18,7 @@ from app.components.charts import (  # noqa: E402
     cohort_heatmap,
     segment_bubble_chart,
 )
-from app.components.ui import page_header, require_workspace, tab_intro  # noqa: E402
+from app.components.ui import notes, page_header, require_workspace, tab_intro  # noqa: E402
 from src.serving import queries as q  # noqa: E402
 
 WS = "marketing"
@@ -57,8 +57,8 @@ def segments() -> None:
     tab_intro("Who are our customers, and how should we talk to each group?")
     _kpis(role)
     prof = q.segment_profiles(role)
-    st.caption(f"{len(prof)} segments found by K-means on spending, frequency, timing, promotion use and category mix. "
-               "Names are generated from each segment's measured traits; campaign ideas are suggestions, not tested results.")
+    notes(f"{len(prof)} segments · K-means on spend, frequency, timing, promotions, category mix",
+          "Names from measured traits · campaign ideas are untested suggestions")
     st.plotly_chart(segment_bubble_chart(prof), width="stretch")
     st.dataframe(prof, hide_index=True, width="stretch",
                  column_config={"share": st.column_config.NumberColumn("share", format="percent"),
@@ -74,17 +74,16 @@ def segments() -> None:
                                 "avg_order_value": st.column_config.NumberColumn("AOV (₹)", format="%.0f")})
     with st.expander("How the number of segments was chosen"):
         st.dataframe(q.segmentation_selection(role), hide_index=True, width="stretch")
-        st.markdown("k is the value with the best **silhouette** (how well separated the segments are). **Stability** "
-                    "is the agreement (adjusted Rand index) with 5 reruns using different random seeds: near 1 means the "
-                    "same customers land together every time.")
+        notes("**k** — best silhouette (how well separated)",
+              "**Stability** — agreement with 5 reruns (1 = identical)")
 
 # ------------------------------------------------------------------------------------------- basket
 def basket() -> None:
     role = _open("basket")
     tab_intro("What do customers buy together?")
-    st.caption("Rules **A → B**: when a basket has A it often has B too. Confidence = share of A-baskets that also "
-               "have B; lift = how many times more often than chance (1 = no link). Only rules with confidence ≥ 10% "
-               "and lift ≥ 2 are kept.")
+    notes("**A → B** — baskets with A often contain B",
+          "**Confidence** — share of A-baskets with B · **Lift** — × more than chance (1 = no link)",
+          "Kept: confidence ≥ 10%, lift ≥ 2")
     products = q.rule_products(role)
     names = dict(zip(products["product_id"], products["product_name"]))
     left, right = st.columns([1, 1])
@@ -105,15 +104,15 @@ def basket() -> None:
     st.dataframe(rules, hide_index=True, width="stretch",
                  column_config={"confidence": st.column_config.NumberColumn("confidence", format="percent"),
                                 "lift": st.column_config.NumberColumn("lift", format="%.1f")})
-    st.caption("Use: place B next to A in the app, bundle them, or suggest B at checkout when A is in the cart.")
+    notes("Use: shelve together · bundle · suggest B at checkout")
 
 # ------------------------------------------------------------------------------------------- recommendations
 def recs() -> None:
     role = _open("recs")
     tab_intro("What should we show each customer next, and does it work?")
     m = q.recommendation_metrics(role).set_index("method")
-    st.markdown("**How good are the recommendations?** Weights chosen on August, model trained on April–August, "
-                "checked once against what each customer actually bought in September.")
+    st.markdown("**How good are the recommendations?**")
+    notes("Weights chosen on Aug · trained Apr–Aug · tested once on Sept purchases")
     c = st.columns(3)
     for col, method, title in zip(c, ("hybrid", "repeat", "popularity"),
                                   ("Hybrid (used)", "Buy-again only", "Most popular")):
@@ -123,9 +122,9 @@ def recs() -> None:
                             f"recall@10 {m.loc[method, 'recall_at_10']:.1%}, coverage {m.loc[method, 'coverage']:.0%}")
     if "hybrid" in m.index:
         st.caption(f"Hybrid weights: {m.loc['hybrid', 'weights']}.")
-    st.caption("Precision@10 = share of the 10 recommended products the customer bought. In this data only about a "
-               "quarter of purchases are repeats of an item the customer bought before, so best-sellers are a strong "
-               "baseline; the hybrid mixes buy-again, 'often bought with' and best-sellers. Full table below.")
+    notes("**Precision@10** — share of the 10 suggestions actually bought",
+          "Only ~¼ of purchases are repeats → best-sellers are a strong baseline",
+          "Hybrid = buy-again + often-bought-with + best-sellers")
     st.dataframe(m.reset_index(), hide_index=True, width="stretch")
     prof = q.segment_profiles(role)
     labels = dict(zip(prof["segment_id"], prof["segment_label"]))
@@ -147,14 +146,14 @@ def recs() -> None:
 def retention() -> None:
     role = _open("retention")
     tab_intro("Who is still ordering, and who is worth winning back?")
-    st.info("Descriptive only: who is still ordering and who has gone quiet. No churn **prediction** is made — the "
-            "data has no reliable churn signal to train on (a predictive model is a later, Tier 2 item).", icon=":material/info:")
-    st.markdown("**Cohort retention** — customers grouped by the month of their first completed order; each cell is "
-                "the share who ordered again that many months later.")
+    st.info("**Descriptive only** — no churn prediction (no reliable churn signal; Tier 2 item).",
+            icon=":material/info:")
+    st.markdown("**Cohort retention**")
+    notes("Row = month of first order · cell = share ordering again N months later")
     st.plotly_chart(cohort_heatmap(q.retention_cohorts(role)), width="stretch")
     status = q.retention_status(role)
-    st.markdown("**Status at the end of the data** — active ≤ 14 days since last order, cooling 15–30, at risk 31–60, "
-                "lapsed > 60")
+    st.markdown("**Status at end of data**")
+    notes("Active ≤ 14 days · Cooling 15–30 · At risk 31–60 · Lapsed > 60 (since last order)")
     grid = status.pivot_table(index="status", columns="value_tier", values="customers", fill_value=0, sort=False)
     st.dataframe(grid, width="stretch")
     f1, f2, f3 = st.columns([2, 2, 1])
@@ -162,7 +161,7 @@ def retention() -> None:
     tiers = f2.multiselect("Value tier", ["High", "Medium", "Low"], default=["High"])
     overdue = f3.checkbox("Overdue only", help="Days since last order > 2 × their own average gap")
     who = q.retention_customers(role, sts or None, tiers or None, overdue)
-    st.caption(f"{len(who)} customers (highest spend first) — a win-back list.")
+    st.caption(f"{len(who)} customers · highest spend first · win-back list")
     st.dataframe(who, hide_index=True, width="stretch",
                  column_config={"total_spend": st.column_config.NumberColumn("spend (₹)", format="%.0f")})
 
@@ -171,9 +170,8 @@ def promos() -> None:
     role = _open("promos")
     tab_intro("Did our promotions lift sales, and what did they cost?")
     pm = q.promotion_metrics(role)
-    st.caption("Uplift = average daily units of the promoted category (all stores) during the promotion vs days when "
-               "that category had no promotion. It is a simple before/after comparison, not a controlled experiment: "
-               "seasonality and other events can also move sales.")
+    notes("**Uplift** — category daily units during the promotion vs no-promotion days",
+          "Before/after comparison — not a controlled test")
     if len(pm):
         c = st.columns(3)
         c[0].metric("Promotions", len(pm))

@@ -339,3 +339,12 @@ dim_stores,city,string
 dim_stores,state,string
 dim_categories,category_id,string
 dim_categories,category_name,string
+rag_chunks,chunk_id,string
+rag_chunks,doc_id,string
+rag_chunks,doc_type,string
+rag_chunks,doc_title,string
+rag_chunks,section,string
+rag_chunks,text,string
+rag_chunks,words,int
+rag_chunks,source,string
+rag_chunks,doc_sha,string

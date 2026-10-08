@@ -68,6 +68,7 @@ GROUPS = {
     "src/transformations/silver": "Phase 2 — Silver transformations",
     "src/transformations/gold": "Phase 3 — Gold tables",
     "src/ml": "Phases 4–5 — Machine learning and analytics",
+    "src/rag": "Phase 6 — Business assistant (RAG)",
     "src/orchestration": "Pipeline orchestration, tracking, publishing",
     "src/serving": "App data layer (DuckDB, queries, permissions, metrics)",
     "app": "Streamlit application",
@@ -237,16 +238,42 @@ REGISTRY: tuple[FileEntry, ...] = (
               "gld_retention_cohorts, gld_customer_retention", "pipeline stage ml, Marketing workspace"),
 
     # ------------------------------------------------------------------ src/orchestration
+    FileEntry("src/rag/composer.py", "6", "Template answers in the house style: headline points, table, 1–2 quoted "
+              "sentences with citations, understood-as line, sources; help and out-of-scope replies",
+              "ToolResult, hits", "Answer", "src/rag/assistant.py"),
+    FileEntry("src/rag/entities.py", "6", "Turn words in a question into tool parameters: stores, cities, categories, "
+              "products, risk tiers, detectors, top-N, periods relative to the end of the data", "question, published "
+              "lookups (dim tables)", "Entities", "business assistant"),
+    FileEntry("src/rag/router.py", "6", "Rule-based router: data / policy / method / hybrid / insufficient (why) / "
+              "help / out-of-scope, and the tool by its trigger phrases", "question, entities", "Route",
+              "src/rag/assistant.py"),
+    FileEntry("src/rag/tools.py", "6", "Whitelisted data tools (16) wrapping role-checked queries: validated inputs "
+              "(Pydantic + lookups + data period), headline numbers, table, source, as-of; no customer-level data",
+              "Entities / parameters, role", "ToolResult", "business assistant"),
+    FileEntry("src/rag/retrieval.py", "6", "BM25 keyword search over the knowledge chunks (implemented in-house, no "
+              "vector database), synonym expansion, doc-type filter, top-3 with a calibrated minimum score, citations",
+              "rag_chunks (snapshot)", "ranked hits with citations", "business assistant"),
     FileEntry("src/orchestration/tracking.py", "2", "Run tracking: pipeline / stage / table runs, file loads, lineage, "
               "quality and model registry tables (CSV, one file per run)", "—", "data/metadata/meta_*/",
               "every stage, check scripts"),
     FileEntry("src/orchestration/pipeline.py", "2", "Pipeline runner: resolve the generation run, run stages in order, "
               "record the outcome", "stage list, configs", "stage results, run metadata", "scripts/run_pipeline.py, tests"),
     FileEntry("src/orchestration/publish.py", "4", "The publish stage: copy app tables to data/demo/ with schema and "
-              "manifest, size-checked, swapped in atomically", "Gold + ML tables, Silver lookups",
-              "data/demo/*.csv, snapshot_schema.csv, snapshot_manifest.csv", "pipeline stage publish"),
+              "manifest, size-checked, swapped in atomically; includes the assistant's knowledge chunks",
+              "Gold + ML tables, Silver lookups, policies + docs", "data/demo/*.csv (incl. rag_chunks.csv), "
+              "snapshot_schema.csv, snapshot_manifest.csv", "pipeline stage publish"),
 
     # ------------------------------------------------------------------ src/serving
+    FileEntry("src/rag/assistant.py", "6", "The business assistant: question → entities → route → tool and / or "
+              "retrieval → composed answer; refuses other workspaces' data; log record per answer",
+              "question, role, retriever, lookups", "Answer", "Assistant page, check_phase6"),
+    FileEntry("src/rag/chunking.py", "6", "Knowledge base for the business assistant: split policies, metric "
+              "definitions and model cards into citable chunks (section-based, 160-word windows, 30-word overlap)",
+              "policies/*.md, docs/metric_definitions.md, docs/05/06/08/09/10", "chunk table (rag_chunks)",
+              "src/orchestration/publish.py"),
+    FileEntry("src/serving/reliability.py", "6", "Forecast reliability bands per category (High / Medium / Low) "
+              "and the action for each — one definition for the app and the assistant", "category WAPE",
+              "reliability label, action", "app/components/insights.py, src/rag/tools.py"),
     FileEntry("src/serving/metrics.py", "3", "The single definition of every business metric (+ Spark helpers)",
               "—", "METRICS, line_revenue(), ratio()", "Gold, docs, app"),
     FileEntry("src/serving/permissions.py", "4", "Roles, workspaces and the access check used inside data functions",
@@ -278,6 +305,9 @@ REGISTRY: tuple[FileEntry, ...] = (
               "page", "Home.py"),
     FileEntry("app/views/inventory.py", "4", "Inventory & Supply Chain workspace: overview, forecasting, stockout & "
               "replenishment, inventory explorer", "src/serving/queries.py (inventory functions)", "page", "Home.py"),
+    FileEntry("app/views/assistant.py", "6", "Assistant page (every persona): suggested questions, chat, route badge, "
+              "answer table, Evidence & sources, mode; index cached per snapshot", "src/rag (assistant), session",
+              "page", "Home.py"),
     FileEntry("app/views/business.py", "5", "Business & Revenue workspace: sales & revenue performance, delivery & "
               "operations, anomaly detection", "src/serving/queries.py (business functions)", "page", "Home.py"),
     FileEntry("app/views/engineering.py", "5", "Data Engineer landing page — workspace on hold, lists the planned "
@@ -302,6 +332,13 @@ REGISTRY: tuple[FileEntry, ...] = (
               "users, tests", "python -m scripts.check_ml"),
     FileEntry("scripts/check_phase5.py", "5", "Phase 5 report, section per step; PASS / LIMIT / FAIL",
               "Phase 5 tables, snapshot, ground truth", "console report", "users", "python -m scripts.check_phase5"),
+    FileEntry("scripts/calibrate_retrieval.py", "6", "Calibrate the retrieval threshold on the practice questions "
+              "(never on the evaluation set)", "data/demo/rag_chunks.csv, tests/rag/dev_questions.yaml",
+              "console table + suggested MIN_SCORE", "users", "python -m scripts.calibrate_retrieval"),
+    FileEntry("scripts/check_phase6.py", "6", "Phase 6 evaluation of the assistant: 40-question gold set + 5 role "
+              "checks against fixed bars (routing, hit@3, numbers vs independent SQL, citations, refusal, roles)",
+              "tests/rag/questions.yaml, snapshot", "console report, data/metadata/meta_rag_runs/<run>.csv", "users",
+              "python -m scripts.check_phase6"),
     FileEntry("scripts/build_docs.py", "1", "Regenerate every generated document", "registries, specs, declarations",
               "docs/data_dictionary.md, transformation_catalog.md, gold_catalog.md, metric_definitions.md, "
               "file_registry.md", "users, tests", "python -m scripts.build_docs"),
@@ -334,6 +371,15 @@ REGISTRY: tuple[FileEntry, ...] = (
               "normal data", "—", "pass / fail", "pytest"),
     FileEntry("tests/unit/test_insights.py", "5", "Chart summaries and tier colours on hand-made data", "—",
               "pass / fail", "pytest"),
+    FileEntry("tests/unit/test_chunking.py", "6", "Chunking rules on hand-made markdown and on the real knowledge base",
+              "policies, docs", "pass / fail", "pytest"),
+    FileEntry("tests/unit/test_retrieval.py", "6", "Tokenizer, synonyms, BM25 ranking, type filter, threshold, "
+              "citations; core questions on the real knowledge base", "hand-made chunks, policies, docs",
+              "pass / fail", "pytest"),
+    FileEntry("tests/unit/test_entities.py", "6", "Entity extraction on hand-made lookups: stores, cities, categories, "
+              "products, tiers, periods", "—", "pass / fail", "pytest"),
+    FileEntry("tests/unit/test_router.py", "6", "Routes and tool choice for 16 phrasings, whole-word matching, quote "
+              "selection", "—", "pass / fail", "pytest"),
     FileEntry("tests/unit/test_marketing.py", "5", "Segment naming, basket rules both directions, recommendation "
               "metrics and retention status on hand-made data", "—", "pass / fail", "pytest"),
     FileEntry("tests/integration/test_generation.py", "1", "Counts, 90% clean, consistency rules C1–C11, landing files, "
@@ -350,6 +396,12 @@ REGISTRY: tuple[FileEntry, ...] = (
               "idempotent rebuild", "small run", "pass / fail", "pytest"),
     FileEntry("tests/integration/test_ml.py", "4", "Forecast structure, future forecast, SKU split, no peeking at the "
               "future", "small run", "pass / fail", "pytest"),
+    FileEntry("tests/app/test_assistant.py", "6", "The assistant end to end on a real snapshot: every route, numbers "
+              "equal the dashboard, citations, refusal of other workspaces' data with no number leak",
+              "small run snapshot", "pass / fail", "pytest"),
+    FileEntry("tests/app/test_rag_tools.py", "6", "Assistant data tools on a real snapshot: per-role tool lists, every "
+              "tool runs with source and no customer ids, role refusals, input validation, numbers equal the dashboards",
+              "small run snapshot", "pass / fail", "pytest"),
     FileEntry("tests/app/test_app.py", "4", "Snapshot publish, role checks in every data function, login, workspace "
               "pages render / are blocked", "small run snapshot", "pass / fail", "pytest"),
 )

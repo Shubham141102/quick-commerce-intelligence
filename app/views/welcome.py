@@ -54,8 +54,7 @@ for i, ws in enumerate(mine):
 
 st.write("")
 label("About the data")
-st.markdown(
-    "Synthetic quick-commerce data (12 dark stores, 3 cities, Apr–Sep 2025) processed through a PySpark "
-    "Medallion pipeline: **Bronze** (raw) → **Silver** (cleaned, validated, quarantine) → **Gold** "
-    "(business tables) → **ML** (forecasts, stockout risk, anomalies, segments, recommendations). "
-    "Every number in these workspaces comes from that pipeline.")
+st.markdown("- **Data** — synthetic: 12 dark stores · 3 cities · Apr–Sep 2025\n"
+            "- **Pipeline** — PySpark Medallion: Bronze (raw) → Silver (clean) → Gold (business) → ML\n"
+            "- **ML** — forecasts · stockout risk · anomalies · segments · recommendations\n"
+            "- **Every number** in these workspaces comes from that pipeline")
