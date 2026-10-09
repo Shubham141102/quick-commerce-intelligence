@@ -37,8 +37,23 @@ def main() -> None:
         print(f"  {username:10s} / {password:16s} -> {role}")
     path = PROJECT_ROOT / ".streamlit" / "secrets.toml"
     path.parent.mkdir(exist_ok=True)
+    kept = _other_sections(path.read_text(encoding="utf-8")) if path.exists() else []
+    if kept:   # e.g. the optional [anthropic] key (Phase 6G) survives a password change
+        lines += kept
+        print("kept existing non-login sections: " + ", ".join(ln for ln in kept if ln.startswith("[")))
     path.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {path.relative_to(PROJECT_ROOT)}")
+
+
+def _other_sections(text: str) -> list[str]:
+    """Every section of an existing secrets file except the demo logins ([auth...]), kept verbatim."""
+    out, keep = [], False
+    for line in text.splitlines():
+        if line.strip().startswith("["):
+            keep = not line.strip().startswith("[auth")
+        if keep:
+            out.append(line)
+    return out + ([""] if out else [])
 
 
 if __name__ == "__main__":

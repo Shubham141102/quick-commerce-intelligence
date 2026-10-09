@@ -5,7 +5,8 @@
 
 Numbers come only from whitelisted, role-checked tools; guidance only from retrieved chunks. A question about
 another workspace's data is refused (the policy part is still answered). Every answer carries a log record
-(question, route, tool, citations, latency) for evaluation (Phase 6F).
+(question, route, tool, citations, latency) for evaluation (Phase 6F). With an optional LLM client (6G) the template
+answer is rephrased by Claude and verified (src/rag/llm.py); otherwise the template answer is returned.
 """
 
 from __future__ import annotations
@@ -14,6 +15,7 @@ import time
 
 from src.rag.composer import Answer, compose
 from src.rag.entities import Entities, Lookups, extract
+from src.rag.llm import LLMClient, grounded_rewrite
 from src.rag.retrieval import Retriever
 from src.rag.router import route_question
 from src.rag.tools import TOOLS, ToolInputError, run_tool
@@ -29,13 +31,16 @@ def params_from(entities: Entities) -> dict:
 
 
 class Assistant:
-    def __init__(self, retriever: Retriever, lookups: Lookups):
+    def __init__(self, retriever: Retriever, lookups: Lookups, llm: LLMClient | None = None):
         self.retriever = retriever
         self.lookups = lookups
+        self.llm = llm               # optional (6G): rephrases the template answer, verified, else template
 
-    def ask(self, question: str, role: str) -> Answer:
+    def ask(self, question: str, role: str, use_llm: bool = True) -> Answer:
         t0 = time.perf_counter()
         answer = self._answer(question.strip(), role)
+        if use_llm:
+            answer = grounded_rewrite(answer, self.llm)
         answer.latency_ms = round((time.perf_counter() - t0) * 1000, 1)
         return answer
 

@@ -23,6 +23,7 @@ from app.components.ui import header, notes  # noqa: E402
 from src.rag.assistant import Assistant, log_record  # noqa: E402
 from src.rag.composer import EXAMPLES  # noqa: E402
 from src.rag.entities import Lookups  # noqa: E402
+from src.rag.llm import client_from_config  # noqa: E402
 from src.rag.retrieval import Retriever  # noqa: E402
 from src.serving.db import get_snapshot  # noqa: E402
 from src.serving.permissions import allowed_workspaces  # noqa: E402
@@ -30,20 +31,36 @@ from src.serving.queries import snapshot_info  # noqa: E402
 
 BADGE = {"data": "blue", "hybrid": "blue", "policy": "violet", "method": "gray", "insufficient": "orange",
          "clarify": "orange", "not_allowed": "red", "out_of_scope": "gray", "help": "gray"}
-MODE_LABEL = "Template mode (no LLM)"
+
+
+def _llm_settings() -> dict:
+    """Optional LLM settings from Streamlit secrets: [llm] provider / api_key / model (e.g. groq), or a legacy
+    [anthropic] api_key. Empty → template mode (environment variables LLM_* are still honoured)."""
+    try:
+        if "llm" in st.secrets:
+            return dict(st.secrets["llm"])
+        if "anthropic" in st.secrets:
+            return {"provider": "anthropic", **dict(st.secrets["anthropic"])}
+    except Exception:  # noqa: BLE001  (no secrets file)
+        pass
+    return {}
 
 
 @st.cache_resource(show_spinner=False)
-def _assistant(snapshot_run: str) -> Assistant:      # keyed by the snapshot, so a new publish rebuilds it
-    return Assistant(Retriever(get_snapshot().query("SELECT * FROM rag_chunks")), Lookups.from_snapshot())
+def _assistant(snapshot_run: str, llm_enabled: bool) -> Assistant:   # rebuilt after a new publish or key change
+    return Assistant(Retriever(get_snapshot().query("SELECT * FROM rag_chunks")), Lookups.from_snapshot(),
+                     client_from_config(_llm_settings()) if llm_enabled else None)
 
 
 def _render(answer) -> None:
     st.markdown(f":{BADGE.get(answer.route, 'gray')}-badge[{answer.route_label}]")
     st.markdown(answer.markdown)
+    if answer.mode.startswith("llm"):
+        st.caption(":material/smart_toy: AI-phrased from the evidence · numbers and citations verified · the model can "
+                   "still draw wrong conclusions — check the exact evidence below")
     if answer.table is not None:
         st.dataframe(style_tiers(answer.table, ["risk_tier", "severity"]), hide_index=True, width="stretch")
-    if answer.sources or answer.understood:
+    if answer.sources or answer.understood or answer.evidence_markdown:
         with st.expander("Evidence & sources"):
             points = []
             if answer.understood:
@@ -51,6 +68,9 @@ def _render(answer) -> None:
             points += [f"**Source** — {s}" for s in answer.sources]
             points.append(f"**Answered in** — {answer.latency_ms:.0f} ms · {answer.mode}")
             notes(*points)
+            if answer.evidence_markdown:      # Claude's text is shown above; the exact evidence stays here
+                st.markdown("**Exact evidence (template answer)**")
+                st.markdown(answer.evidence_markdown)
 
 
 def assistant() -> None:
@@ -61,10 +81,16 @@ def assistant() -> None:
     role = user["role"]
     mine = allowed_workspaces(role)
     crumb = PERSONAS[mine[0]]["title"] if len(mine) == 1 else "All workspaces"
+    client = client_from_config(_llm_settings())
+    has_key = client is not None
+    use_llm = has_key and st.session_state.get("assistant_use_llm", True)
     header(crumb, "Assistant", "Ask about your data and our policies — every answer shows its sources.",
-           status=MODE_LABEL)
+           status=f"{client.name} · verified" if use_llm else "Template mode (no LLM)")
+    if has_key:
+        st.toggle(f"Rephrase answers with {client.name} (numbers and citations are verified; falls back to the "
+                  "template)", value=True, key="assistant_use_llm")
 
-    bot = _assistant(snapshot_info().get("pipeline_run_id", ""))
+    bot = _assistant(snapshot_info().get("pipeline_run_id", ""), has_key)
     chat = st.session_state.setdefault("assistant_chat", [])
     log = st.session_state.setdefault("assistant_log", [])
 
@@ -78,7 +104,8 @@ def assistant() -> None:
     asked = st.chat_input("Ask a question about your workspace or our policies…")
     question = asked or picked
     if question:
-        answer = bot.ask(question, role)
+        with st.spinner("Answering…"):
+            answer = bot.ask(question, role, use_llm=use_llm)
         chat.append(answer)
         log.append(log_record(answer, role))
 

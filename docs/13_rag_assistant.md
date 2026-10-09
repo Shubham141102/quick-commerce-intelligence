@@ -1,11 +1,11 @@
 # 13. Business Assistant — RAG (Phase 6)
 
-**Status:** 6A–6F complete (all 6 evaluation bars pass) · 6G–6H in progress · **Plan:** [Project_Plan_v2.md §9.9](Project_Plan_v2.md)
+**Status:** 6A–6G complete (all 6 evaluation bars pass in template and LLM mode) · 6H wrap-up next · **Plan:** [Project_Plan_v2.md §9.9](Project_Plan_v2.md)
 
 ## Principles
 
 - **Numbers only from data functions** — retrieval never estimates a number.
-- **Works without an LLM** — template answers by default; an optional Claude layer only rephrases the evidence and must cite it.
+- **Works without an LLM** — template answers by default; an optional LLM layer (free open-weight gpt-oss-120b on Groq) only rephrases the evidence, verified in code.
 - **No vector database** — knowledge is a CSV in the app snapshot; BM25 keyword search runs in memory inside Streamlit (no extra service, no model download, fits Streamlit Community Cloud).
 - **Role-aware** — the assistant calls only the role-checked data functions the user's role may use.
 
@@ -259,3 +259,66 @@ Latency: median 14 ms (gold), 17 ms (held-out). **All six bars pass on the gold 
 - **A rule question naming a data topic plus an entity** is answered as data + policy instead of policy only (gold P03);
   the policy guidance is still included.
 - Every remaining miss is conservative — a refusal or extra data — never a wrong number or a false citation.
+
+## 6G Optional LLM layer
+
+**Decision (2026-10-09):** a free, open-source model instead of a paid API — **Groq + `openai/gpt-oss-120b`**
+(Apache-2.0 open weights). Llama 3.3 70B, chosen first, turned out to be retired on Groq (HTTP 404 `model_not_found`);
+the available models were listed with the user's key and gpt-oss-120b was chosen. The client is generic
+(`src/rag/llm.py`): any OpenAI-compatible provider (groq, openrouter, ollama) or Anthropic, set in
+`.streamlit/secrets.toml`:
+
+```toml
+[llm]
+provider = "groq"
+api_key  = "gsk_..."          # never committed; on Streamlit Cloud: Settings → Secrets
+# model  = "openai/gpt-oss-120b"   (default for groq)
+```
+
+No package is added (standard-library HTTP). Without `[llm]` the app runs in template mode exactly as before;
+`create_demo_secrets` keeps the `[llm]` section when the demo password changes.
+
+**Grounding contract.** The model sees only the question and the template's evidence (headline numbers, the table,
+quoted passages with citations, and a line saying when the table is partial). Only data / policy / method / hybrid /
+"why" answers are rephrased; refusals, help and clarifications never are. The template answer stays visible under
+"Exact evidence"; LLM answers carry an "AI-phrased — check the exact evidence" note.
+
+**Guardrails (code, after every reply):** every number must appear in the evidence (digits **and number words** such
+as "three"); every citation must appear verbatim; length ≤ 2,500 characters; a reply cut off at the token limit is
+rejected; typographic hyphens / spaces are normalised first; HTTP 429 / 503 are retried twice (Retry-After, ≤ 10 s).
+Any failure → the template answer, with the reason in the answer's mode.
+
+**What the live model taught us (each fixed generally, tested with a fake client):**
+
+| Finding | Fix |
+|---|---|
+| Model retired on Groq (404) | generic provider presets; model chosen from the key's live model list |
+| Citations rejected although present: the model writes "POL‑INV" with a non-breaking hyphen (U+2011) | normalise typographic hyphens / spaces before verifying |
+| Replies cut mid-sentence (the model spends tokens on internal reasoning) | budget 700 → 2,000 tokens; a reply stopped at the limit is rejected |
+| 17 consecutive HTTP errors in the first LLM evaluation = free-tier rate limit | retry 429 / 503 with Retry-After |
+| A correct number written as a word ("Three anomalies") escaped the digit check — so a wrong one could too | number words count as numbers; prompt requires digits |
+| **A misleading conclusion that passed every check:** "no promotions have negative uplift" — the model saw only the top 10 by uplift | the evidence states when a table is partial ("10 of 57 rows"); prompt forbids "none / all" claims the evidence does not state; headline figures must be stated; UI caution note |
+
+**Evaluation (`python -m scripts.check_phase6 --mode llm`, gold set):**
+
+| Bar | Template mode (binding) | LLM mode (gpt-oss-120b) |
+|---|---|---|
+| 6F.1 Routing | 92.5% | 92.5% |
+| 6F.2 Hit@3 | 87.0% | 87.0% |
+| 6F.3 Numbers = independent SQL | 18/18 | 18/18 (figure in the evidence **and** copied into the text) |
+| 6F.4 Citations | 42/42 | 42/42 (quotes genuine, every citation in the text) |
+| 6F.5 Refusal | 7/7 | 7/7 |
+| 6F.6 Role check | 5/5 | 5/5 |
+
+LLM mode: of 33 rephrasable answers, **29 rephrased and verified, 4 rejected by the guardrails** (an invented
+number ×2, a number word, a dropped citation) and shown as templates; median latency ≈ 4.7 s on the free tier
+(template ≈ 15 ms).
+
+**Limits:** guardrails verify numbers and citations, not reasoning — a model can still summarise evidence
+incompletely or draw a wrong conclusion (the promotions case above, now mitigated, not eliminated). Hence the exact
+evidence stays one click away and template mode remains the default when no key is set. Free-tier rate limits can
+slow answers or cause fallbacks.
+
+**Tests:** `tests/unit/test_llm.py` (14, fake client, no network): verified reply shown with evidence kept; invented
+number, number word, missing citation rejected; timeout, truncation and errors fall back; rate-limit retry; typographic
+hyphens; refusals never rephrased; provider settings; secrets preservation.

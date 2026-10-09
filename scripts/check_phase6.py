@@ -2,6 +2,7 @@
 
     python -m scripts.check_phase6                  # the 40-question gold set (the bars apply here)
     python -m scripts.check_phase6 --set holdout    # 20 held-out questions written after the first run (6F)
+    python -m scripts.check_phase6 --mode llm       # same bars with the optional LLM layer (6G); needs [llm]
 
 Pass bars, fixed before measuring (2026-10-07, Project_Plan_v2.md §9.9):
   6F.1 routing accuracy ≥ 90%        right route (and right tool for data / hybrid questions)
@@ -27,6 +28,7 @@ from src.common.io import write_csv
 from src.common.paths import PROJECT_ROOT, resolve
 from src.rag.assistant import Assistant, params_from
 from src.rag.entities import Lookups, extract
+from src.rag.llm import client_from_config, numbers_in
 from src.rag.retrieval import Retriever, citation
 from src.serving.db import get_snapshot
 
@@ -112,6 +114,19 @@ def citations_ok(markdown: str, chunks: pd.DataFrame) -> tuple[int, int]:
     return good, total
 
 
+def _llm_settings() -> dict:
+    """[llm] (or legacy [anthropic]) from .streamlit/secrets.toml; LLM_* environment variables also work. The key is
+    never printed."""
+    import tomllib
+    path = PROJECT_ROOT / ".streamlit" / "secrets.toml"
+    secrets = tomllib.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    if "llm" in secrets:
+        return dict(secrets["llm"])
+    if "anthropic" in secrets:
+        return {"provider": "anthropic", **secrets["anthropic"]}
+    return {}
+
+
 def status(ok: bool) -> str:
     return "PASS" if ok else "FAIL"
 
@@ -123,8 +138,14 @@ def main() -> int:
     spec = yaml.safe_load((PROJECT_ROOT / "tests" / "rag" / name).read_text(encoding="utf-8"))
     chunks = get_snapshot().query("SELECT * FROM rag_chunks")
     lk = Lookups.from_snapshot()
-    bot = Assistant(Retriever(chunks), lk)
-    run_id = ("rag_holdout_" if holdout else "rag_") + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    llm_mode = "--mode" in sys.argv and sys.argv[sys.argv.index("--mode") + 1] == "llm"
+    client = client_from_config(_llm_settings()) if llm_mode else None
+    if llm_mode and client is None:
+        print("LLM mode skipped: no LLM configured ([llm] provider / api_key in .streamlit/secrets.toml).")
+        return 0
+    bot = Assistant(Retriever(chunks), lk, client)
+    run_id = ("rag_holdout_" if holdout else "rag_") + ("llm_" if llm_mode else "") + \
+        datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
 
     rows, misses = [], []
     route_ok = hit = hit_n = num_ok = num_n = cite_ok = cite_n = refuse_ok = refuse_n = 0
@@ -141,13 +162,19 @@ def main() -> int:
         n = None
         if item.get("check") and a.tool == item.get("tool"):
             want = expected_text(item["check"], params_from(extract(item["question"], lk)), lk)
-            n = want in a.markdown
+            if a.evidence_markdown:     # LLM text: the figure must be in the evidence AND copied into the text
+                n = want in a.evidence_markdown and (numbers_in(want) <= numbers_in(a.markdown)
+                                                     if numbers_in(want) else want in a.markdown)
+            else:
+                n = want in a.markdown
             num_ok += n
             num_n += 1
             if not n:
                 misses.append(f"{item['id']} number: expected «{want}»")
-        g, t = citations_ok(a.markdown, chunks)
-        cite_ok, cite_n = cite_ok + g, cite_n + t
+        g, t = citations_ok(a.evidence_markdown or a.markdown, chunks)
+        if a.evidence_markdown:         # every citation must also appear in the LLM text
+            g -= sum(c not in a.markdown for c in a.citations)
+        cite_ok, cite_n = cite_ok + max(g, 0), cite_n + t
         if item["kind"] in ("ambiguous", "out_of_scope"):
             ok = a.route in item["routes"] and (a.route != "out_of_scope" or (not a.citations and a.table is None))
             refuse_ok += ok
@@ -187,10 +214,17 @@ def main() -> int:
              ("6F.4 Citations correct (quote is in the cited chunk)", "citations", f"{cite_ok}/{cite_n} quotes"),
              ("6F.5 Correct refusal / clarification", "refusal", f"{refuse_ok}/{refuse_n}"),
              ("6F.6 Role check (no data outside the workspace)", "roles", f"{role_ok}/{n_r}")]
-    print("\nPhase 6 evaluation — business assistant (template mode)\n")
+    mode_label = f"LLM mode ({client.name})" if client else "template mode"
+    print(f"\nPhase 6 evaluation — business assistant ({mode_label}) — {'held-out set' if holdout else 'gold set'}\n")
     for title, key, detail in lines:
         print(f"  [{status(rates[key] >= BARS[key])}] {title:52s} {rates[key]:6.1%}  (bar {BARS[key]:.0%})  {detail}")
     lat = pd.Series([r["latency_ms"] for r in rows])
+    if client:
+        modes = pd.Series([r["mode"] for r in rows])
+        used, fallback = modes.str.startswith("llm").sum(), modes.str.contains("rejected|unavailable").sum()
+        reasons = sorted({m for m in modes if "template (" in m})
+        print(f"\n  LLM: {used} answers rephrased and verified, {fallback} fell back to the template"
+              + (f": {'; '.join(reasons)}" if reasons else ""))
     print(f"\n  latency: median {lat.median():.0f} ms, max {lat.max():.0f} ms over {len(rows)} answers")
     if misses:
         print("\n  Misses:")

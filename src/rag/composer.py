@@ -40,6 +40,7 @@ class Answer:
     understood: str = ""
     mode: str = "template"
     latency_ms: float = 0.0
+    evidence_markdown: str = ""     # the exact template answer, kept when the optional LLM rephrased it (6G)
 
     @property
     def route_label(self) -> str:
@@ -89,6 +90,8 @@ def compose(question: str, route: str, *, result=None, hits: list[Hit] | None = 
         parts.append("\n".join(f"- **{k}** — {v}" for k, v in result.headline.items()))
         if result.note:
             parts.append(f"*{result.note}*")
+        if result.total_rows > len(result.table):       # a partial list must say so (6G finding)
+            parts.append(f"*The table lists {len(result.table)} of {result.total_rows} rows; items not shown may exist.*")
         table = result.table if len(result.table) else None
         sources.append(f"{result.source} (as of {result.as_of})" if result.as_of else result.source)
     if route == "hybrid":

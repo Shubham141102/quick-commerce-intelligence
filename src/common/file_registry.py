@@ -250,6 +250,10 @@ REGISTRY: tuple[FileEntry, ...] = (
     FileEntry("src/rag/tools.py", "6", "Whitelisted data tools (16) wrapping role-checked queries: validated inputs "
               "(Pydantic + lookups + data period), headline numbers, table, source, as-of; no customer-level data",
               "Entities / parameters, role", "ToolResult", "business assistant"),
+    FileEntry("src/rag/llm.py", "6", "Optional LLM layer (default: free Groq + open-weight gpt-oss-120b; any OpenAI-compatible provider or Claude): rephrases the template answer's evidence only; code verifies "
+              "every number and citation, caps length, and falls back silently to the template (stdlib HTTP, no package)",
+              "Answer (template), optional API key", "Answer (verified LLM text or template) + mode",
+              "src/rag/assistant.py, check_phase6 --mode llm"),
     FileEntry("src/rag/retrieval.py", "6", "BM25 keyword search over the knowledge chunks (implemented in-house, no "
               "vector database), synonym expansion, doc-type filter, top-3 with a calibrated minimum score, citations",
               "rag_chunks (snapshot)", "ranked hits with citations", "business assistant"),
@@ -380,6 +384,9 @@ REGISTRY: tuple[FileEntry, ...] = (
               "products, tiers, periods", "—", "pass / fail", "pytest"),
     FileEntry("tests/unit/test_router.py", "6", "Routes and tool choice for 16 phrasings, whole-word matching, quote "
               "selection", "—", "pass / fail", "pytest"),
+    FileEntry("tests/unit/test_llm.py", "6", "LLM layer with a fake client (no network): verified reply shown, invented "
+              "number / missing citation rejected, errors fall back, refusals never rephrased, key handling",
+              "—", "pass / fail", "pytest"),
     FileEntry("tests/unit/test_marketing.py", "5", "Segment naming, basket rules both directions, recommendation "
               "metrics and retention status on hand-made data", "—", "pass / fail", "pytest"),
     FileEntry("tests/integration/test_generation.py", "1", "Counts, 90% clean, consistency rules C1–C11, landing files, "

@@ -68,6 +68,7 @@ class ToolResult:
     as_of: str
     scope: str
     note: str = ""
+    total_rows: int = 0      # rows before the table was cut to `limit` (6G: a partial list must say so)
 
 
 @dataclass(frozen=True)
@@ -117,10 +118,12 @@ def _only_stores(df: pd.DataFrame, lk: Lookups, p: ToolParams, column: str = "st
 
 
 def _result(tool: str, title: str, headline: dict, table: pd.DataFrame, source: str, as_of, scope: str,
-            note: str = "") -> ToolResult:
+            note: str = "", total: int | None = None) -> ToolResult:
+    """`total` = rows before the caller cut the table to the requested limit (defaults to the table's length)."""
     as_of_text = f"{pd.Timestamp(as_of):%d %b %Y}" if as_of is not None else ""
-    return ToolResult(tool, title, headline, _no_pii(table).head(MAX_ROWS).reset_index(drop=True), source,
-                      as_of_text, scope, note)
+    shown = _no_pii(table).head(MAX_ROWS).reset_index(drop=True)
+    return ToolResult(tool, title, headline, shown, source, as_of_text, scope, note,
+                      total if total is not None else len(table))
 
 
 # ----------------------------------------------------------------------------------------------- inventory
@@ -145,8 +148,7 @@ def _at_risk_skus(role, p, lk):
     headline["Units to order"] = str(int(risks["suggested_qty"].fillna(0).sum()))
     return _result("at_risk_skus", "SKUs at risk of running out", headline, table,
                    "gld_stockout_risk, gld_replenishment", k["as_of"],
-                   f"{_store_scope(lk, p)} · {' + '.join(tiers)} tier",
-                   f"{len(risks)} SKUs in total; showing up to {p.limit}." if len(risks) > p.limit else "")
+                   f"{_store_scope(lk, p)} · {' + '.join(tiers)} tier", total=len(risks))
 
 
 def _suggested_orders(role, p, lk):
@@ -157,7 +159,7 @@ def _suggested_orders(role, p, lk):
     return _result("suggested_orders", "Suggested orders (advisory)", {
         "SKUs to order": str(len(orders)), "Units": str(int(orders["suggested_qty"].sum()))},
         table, "gld_replenishment", k["as_of"], _store_scope(lk, p),
-        "Advisory only: the store manager approves every order.")
+        "Advisory only: the store manager approves every order.", total=len(orders))
 
 
 def _category_forecast(role, p, lk):
@@ -199,12 +201,13 @@ def _forecast_reliability(role, p, lk):
 
 def _lost_sales(role, p, lk):
     by_store = _only_stores(q.lost_sales_by_store(role), lk, p)
-    top = _only_stores(q.top_lost_sales_skus(role, 50), lk, p).drop(columns=["store_id", "product_id"]).head(p.limit)
+    top_all = _only_stores(q.top_lost_sales_skus(role, 50), lk, p).drop(columns=["store_id", "product_id"])
+    top = top_all.head(p.limit)
     return _result("lost_sales", "Estimated lost sales from stockouts", {
         "Lost sales": _rupees(by_store["lost_revenue"].sum()), "Lost units": f"{by_store['lost_units'].sum():,.0f}",
         "Stockout days": f"{int(by_store['stockout_days'].sum()):,}"},
         top, "gld_lost_sales", lk.last_day, _store_scope(lk, p),
-        "Estimate before substitutes; totals are reliable, small-SKU rankings are not.")
+        "Estimate before substitutes; totals are reliable, small-SKU rankings are not.", total=len(top_all))
 
 
 # ----------------------------------------------------------------------------------------------- business
@@ -260,7 +263,7 @@ def _anomalies(role, p, lk):
         "Anomalies": str(len(found)), "High severity": str(int((found["severity"] == "High").sum())),
         **{d.replace("_", " ").capitalize(): str(int(n)) for d, n in counts.items()}},
         found.drop(columns=["observed", "expected"]).head(p.limit), "gld_sales_anomalies", lk.last_day,
-        _store_scope(lk, p), "A signal to investigate, not proof of a problem.")
+        _store_scope(lk, p), "A signal to investigate, not proof of a problem.", total=len(found))
 
 
 # ----------------------------------------------------------------------------------------------- marketing
@@ -310,7 +313,8 @@ def _promotions(role, p, lk):
         "Promotions": str(len(pm)), "Discount cost": _rupees(pm["discount_cost"].sum()),
         "Median uplift": "—" if pm.empty else f"{pm['uplift_pct'].median():+.1f}%"},
         pm[["name", "category", "discount_pct", "days_active", "discount_cost", "uplift_pct"]].head(p.limit),
-        "gld_promotion_metrics", lk.last_day, "all stores", "Before / after comparison, not a controlled test.")
+        "gld_promotion_metrics", lk.last_day, "all stores · sorted by uplift, highest first",
+        "Before / after comparison, not a controlled test.", total=len(pm))
 
 
 TOOLS: dict[str, Tool] = {t.name: t for t in (
