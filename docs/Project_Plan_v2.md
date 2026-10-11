@@ -703,6 +703,8 @@ A provider-agnostic `LLMClient` interface. The API key comes from Streamlit secr
 
 **Pass bars (fixed before measuring):** routing accuracy ≥ 90%; retrieval hit@3 ≥ 85%; numbers equal the data function **100%**; citations correct **100%**; correct refusal on out-of-scope / insufficient ≥ 90%; role check **100%** (never returns data outside the user's workspace).
 
+**Outcome (Phase 6 complete, 2026-10-11):** first measurement 4/6 (routing 85%, refusal 85.7%); after an approved general revision (√word-normalised threshold, stem matching, content-based policy detection) and one re-measure: **6/6 bars** (routing 92.5%, hit@3 87%, numbers 18/18, citations 42/42, refusal 7/7, roles 5/5), confirmed on a 20-question held-out set written before the fix. **LLM decision changed (2026-10-09):** instead of a paid Claude key, a free open-weight model — Groq + `openai/gpt-oss-120b` (Llama 3.3 70B was retired on Groq); provider-agnostic client; LLM mode also passes 6/6, with 29 of 33 rephrasable answers verified and 4 rejected by the guardrails. Full record: docs/13_rag_assistant.md.
+
 ---
 
 ## 10. Streamlit application
@@ -973,10 +975,10 @@ Tests use one session-scoped SparkSession (`local[2]`, shuffle partitions = 4, U
 - [ ] Model registry populated
 
 **RAG**
-- [ ] Five policies indexed; BM25 retrieval with citations
-- [ ] Whitelisted structured functions with role checks
-- [ ] Rule-based router; hybrid answers; no-LLM mode works end to end
-- [ ] 40-question evaluation recorded
+- [x] Five policies indexed (plus metric definitions and model cards); BM25 retrieval with citations
+- [x] Whitelisted structured functions with role checks (16 tools)
+- [x] Rule-based router; hybrid answers; no-LLM mode works end to end
+- [x] 40-question evaluation recorded (all 6 bars pass; 20-question held-out set; docs/13_rag_assistant.md)
 
 **App and ops**
 - [ ] Demo auth; role checks inside data functions
@@ -993,7 +995,8 @@ Tests use one session-scoped SparkSession (`local[2]`, shuffle partitions = 4, U
 - [ ] Anomaly detection with recall on planted anomalies
 - [ ] Forecast prediction intervals (quantile GBM)
 - [ ] Stockout classifier vs rules
-- [ ] Embedding retrieval compared to BM25; optional LLM answer composer
+- [ ] Embedding retrieval compared to BM25 (not done: PyTorch too heavy for the free host)
+- [x] Optional LLM answer composer (Phase 6G: free open-weight gpt-oss-120b via Groq, verified numbers and citations)
 - [ ] Remaining 8 pages (Inventory Explorer, Customer Insights, Recommendations, Product Affinity, Sales Analytics, Anomaly Detection, Transformations, ML & RAG Monitoring)
 - [ ] SCD2 product prices
 - [ ] Large-profile benchmark report (Spark vs pandas)

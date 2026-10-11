@@ -1,6 +1,19 @@
 # 13. Business Assistant — RAG (Phase 6)
 
-**Status:** 6A–6G complete (all 6 evaluation bars pass in template and LLM mode) · 6H wrap-up next · **Plan:** [Project_Plan_v2.md §9.9](Project_Plan_v2.md)
+**Status:** ✅ Phase 6 complete (6A–6H) — all 6 evaluation bars pass in template and LLM mode · **Plan:** [Project_Plan_v2.md §9.9](Project_Plan_v2.md)
+
+## At a glance
+
+| | |
+|---|---|
+| **What it is** | An Assistant page for every persona: questions about its own data and our policies, answered with exact numbers and cited policy passages |
+| **Knowledge** | 5 policies + metric definitions + 5 model cards → 101 chunks in `data/demo/rag_chunks.csv` |
+| **Retrieval** | In-house BM25 (no vector database, no extra package), synonyms, √word-normalised threshold calibrated on practice questions |
+| **Numbers** | 16 whitelisted, role-checked data tools over the published Gold tables — never estimated, never free SQL |
+| **Routing** | Rules: data · policy · method · hybrid · "why" (no causal claim) · help · clarify · out of scope · not your workspace |
+| **LLM** | Optional: free open-weight gpt-oss-120b via Groq rephrases the evidence; numbers and citations verified in code; falls back to the template |
+| **Evaluation** | 40-question gold set + 5 role checks: **6/6 bars** (template and LLM mode); 20-question held-out set confirms the fixes generalise |
+| **Code** | `src/rag/` (chunking, retrieval, entities, tools, router, composer, assistant, llm), `app/views/assistant.py`, `scripts/check_phase6.py` |
 
 ## Principles
 
@@ -322,3 +335,53 @@ slow answers or cause fallbacks.
 **Tests:** `tests/unit/test_llm.py` (14, fake client, no network): verified reply shown with evidence kept; invented
 number, number word, missing citation rejected; timeout, truncation and errors fall back; rate-limit retry; typographic
 hyphens; refusals never rephrased; provider settings; secrets preservation.
+
+## 6H Demo walkthrough
+
+Sign in, open **Assistant** (last item of the sidebar group). Each question below was checked in the evaluation or
+the tests; the badge shows the route. Open **Evidence & sources** after any answer to show how it was understood,
+the Gold tables with their as-of date, the policy citations and the response time.
+
+| Persona | Ask | What it shows |
+|---|---|---|
+| `inventory` | *Which SKUs are at high risk and what does the policy say we should do?* | **Data + policy:** High-risk count and SKU table from `gld_stockout_risk`, quoted **POL-INV §2** and **§8** |
+| `inventory` | *What is the demand forecast for Bakery at Saket?* | **Data:** 7-day forecast table and the category's forecast reliability |
+| `inventory` | *How does the forecast model work?* | **How it works:** quoted model card (demand forecasting) |
+| `inventory` | *What was net revenue last week?* | **Not in your workspace:** refused, no ₹ figure — the same rule as the pages |
+| `business` | *What was net revenue in August?* | **Data:** net revenue, orders, AOV vs the previous period, revenue by store |
+| `business` | *What happens when a delivery takes longer than promised?* | **Policy:** quoted **POL-DEL §1 / §3** (15-minute promise) |
+| `business` | *Why did deliveries get slower in September?* | **Data (no causal claim):** the delivery numbers, explicitly without inventing a cause |
+| `marketing` | *Show promotion results and the allowed discount limits* | **Data + policy:** promotion table (partial-list note) + **POL-PRO §2** |
+| `marketing` | *How many customer segments do we have?* | **Data:** segment count and profiles |
+| any | *Will it rain in Mumbai tomorrow?* | **Out of scope:** polite refusal with suggested questions |
+
+**With the optional LLM** (`[llm]` in secrets): the header shows "gpt-oss-120b via Groq · verified" and a toggle.
+Ask the first question again: the answer reads naturally, carries the "AI-phrased" note, and **Exact evidence
+(template answer)** shows what it was built from; the mode line reads `llm (gpt-oss-120b via Groq, verified)` — or,
+when a guardrail rejects the reply, `template (LLM reply rejected: …)`.
+
+**Talking points for the presentation:**
+- *Why no vector database?* ~100 chunks: BM25 is fast, explainable and free-host friendly; the evaluation shows it
+  meets the retrieval bar.
+- *How are numbers kept correct?* Only whitelisted tools produce numbers; the evaluation recomputes each one with
+  independent SQL (18/18); the LLM can only copy numbers present in the evidence.
+- *How do you know the citations are real?* The evaluation checks that every quoted sentence literally exists in the
+  section it cites (42/42).
+- *What went wrong and how was it handled?* The first evaluation failed two bars; general fixes, one re-measure and a
+  held-out set (6F). The live LLM revealed five issues, each fixed generally — including a misleading conclusion that
+  passed every numeric check, which is why the exact evidence always stays visible (6G).
+
+## Phase 6 sign-off (2026-10-11)
+
+| Check | Result |
+|---|---|
+| Evaluation, template mode (binding) | 6/6 bars |
+| Evaluation, LLM mode | 6/6 bars (29 verified, 4 rejected by guardrails) |
+| Held-out set | routing 90%, hit@3 100%, numbers 9/9, citations 24/24, roles 2/2; refusal 2/3 (3 questions) |
+| Tests | unit + app + integration green |
+| Snapshot | `rag_chunks.csv` identical to the current policy and doc files |
+| Cloud | no new packages; the app imports nothing heavy; works without a key |
+
+**Known characteristics (documented, not chased):** short definition questions may be refused; some "why" questions
+are refused instead of clarified; an LLM can still summarise evidence incompletely — the exact evidence stays one
+click away. **Not done (Tier 2):** embedding retrieval (PyTorch too heavy for the free host).

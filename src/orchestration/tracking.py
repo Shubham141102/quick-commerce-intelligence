@@ -89,6 +89,8 @@ class RunTracker:
 
     def quality(self, **fields) -> None:
         self.rows["meta_quality_results"].append({"run_id": self.run_id, **fields})
+        if fields.get("dataset"):   # the quality log is computed from the Bronze dataset during Silver (7.6 finding)
+            self.lineage(f"brz_{fields['dataset']}", "meta_quality_results", "silver quality checks")
 
     def lineage(self, source: str, target: str, transform: str, engine: str = "spark") -> None:
         edge = {"run_id": self.run_id, "source": source, "target": target, "transform": transform, "engine": engine}

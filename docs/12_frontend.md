@@ -1,6 +1,6 @@
 # 12. Frontend: Login, Persona Landing and Page Design
 
-**Status:** complete for the three built workspaces; the Data Engineer workspace is on hold (decision 2026-10-05) · **Code:** `app/Home.py`, `app/components/{auth,ui,personas}.py`, `app/views/{inventory,business,marketing,welcome,engineering}.py`, `.streamlit/config.toml` · **Run:** `streamlit run app/Home.py`
+**Status:** complete for all four workspaces (the Data Engineer workspace was added in Phase 7) · **Code:** `app/Home.py`, `app/components/{auth,ui,personas}.py`, `app/views/{inventory,business,marketing,welcome,engineering}.py`, `.streamlit/config.toml` · **Run:** `streamlit run app/Home.py`
 
 ## What the user sees
 
@@ -19,7 +19,7 @@ streamlit run app/Home.py
  inventory  → 📦 Inventory & Supply Chain     (4 tabs)
  business   → 📈 Business & Revenue           (3 tabs)
  marketing  → 🎯 Customer Growth & Marketing  (5 tabs)
- engineer   → 🛠️ Data Engineer                (on hold: planned use cases only)
+ engineer   → 🛠️ Data Engineer                (4 pages, Phase 7)
  admin      → 🏠 Overview → links to every workspace (sidebar menu)
 ```
 
@@ -34,7 +34,7 @@ Overview plus every group.
 | Inventory & Supply Chain | Overview (`/`), Demand forecasting (`/inventory-forecasting`), Stockout risk & replenishment (`/inventory-stockout`), Inventory explorer (`/inventory-explorer`) |
 | Business & Revenue | Sales & revenue performance, Delivery & operations, Anomaly detection (`/business-…`) |
 | Customer Growth & Marketing | Segments, Basket & affinity, Recommendations, Retention, Promotion effectiveness (`/marketing-…`) |
-| Data Engineer | one page (on hold) |
+| Data Engineer | Pipeline runs (`/`), Data quality & quarantine, Lineage & tables, Model monitoring (`/engineering-…`) — docs/14_data_engineer_workspace.md |
 | Every persona | **Assistant** (last item of the group; next to Overview for the admin) — see docs/13_rag_assistant.md |
 
 How it is built: each view file defines one function per section plus a `PAGES` list; `app/Home.py` registers
@@ -120,6 +120,5 @@ typography, a clear hierarchy. Theme values are real Streamlit theme settings in
 
 ## Not in scope yet
 
-- Data Engineer workspace (on hold).
 - Business assistant (RAG, Phase 6).
 - Production login (SSO, password reset); this is demo-grade access control.

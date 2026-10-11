@@ -9,6 +9,7 @@ from streamlit.testing.v1 import AppTest  # noqa: E402
 
 from src.common.paths import PROJECT_ROOT  # noqa: E402
 from src.ml.tables import ML_TABLES  # noqa: E402
+from src.orchestration.ops_snapshot import OPS_TABLES  # noqa: E402
 from src.orchestration.publish import DIMENSIONS  # noqa: E402
 from src.serving import queries as q  # noqa: E402
 from src.serving.db import get_snapshot  # noqa: E402
@@ -28,7 +29,9 @@ INVENTORY_FUNCTIONS = [
 
 def test_snapshot_published_within_limits(app_env):
     result = app_env["publish_result"].results["publish"]
-    assert result["tables"] == len(GOLD_TABLES) + len(ML_TABLES) + len(DIMENSIONS) + 1 and result["size_mb"] < 50
+    # + 1 = rag_chunks (6A), + the ops tables of the Data Engineer workspace (7A)
+    assert result["tables"] == len(GOLD_TABLES) + len(ML_TABLES) + len(DIMENSIONS) + 1 + len(OPS_TABLES)
+    assert result["size_mb"] < 50
     chunks = get_snapshot().query("SELECT doc_type, count(*) AS n FROM rag_chunks GROUP BY ALL")
     assert set(chunks["doc_type"]) == {"policy", "metric", "method"}   # + 1 = rag_chunks (Phase 6A)
     info = q.snapshot_info()
@@ -221,11 +224,11 @@ def test_signed_out_visitor_sees_only_the_login_page(app_env):
     assert len(at.text_input) == 2 and not at.metric
 
 
-def test_admin_lands_on_overview_and_engineer_on_hold_page(app_env):
+def test_admin_lands_on_overview_and_engineer_on_pipeline_runs(app_env):
     admin = _home({"username": "admin", "name": "Admin (demo)", "role": "admin"})
     assert "Tables in snapshot" in {m.label for m in admin.metric}
     engineer = _home({"username": "engineer", "name": "Data Engineer (demo)", "role": "data_engineer"})
-    assert any("on hold" in i.value for i in engineer.info) and not engineer.error
+    assert "Last run" in {m.label for m in engineer.metric} and not engineer.error     # Phase 7: lands on runs
 
 
 # ------------------------------------------------------------------------------------------- assistant (6E)
@@ -258,3 +261,62 @@ def test_assistant_suggested_question_click(app_env):
     at = _assistant_page(BUSINESS_USER)
     at.button[0].click().run()
     assert not at.exception and len(at.chat_message) == 2               # question + answer
+
+
+# ------------------------------------------------------------------------------------------- data engineer (7)
+ENGINEER_USER = {"username": "engineer", "name": "Data Engineer (demo)", "role": "data_engineer"}
+
+
+def _engineering_functions():
+    run = q.pipeline_runs("data_engineer")["run_id"].iloc[0]
+    return [(q.ops_overview, ()), (q.pipeline_runs, ()), (q.stage_durations, ()), (q.table_runs_for, (run,)),
+            (q.failed_runs, ()), (q.quality_by_dataset, ()), (q.quality_rules, ()), (q.quarantine_summary, ()),
+            (q.quarantine_by_dataset, ()), (q.file_loads_summary, ()), (q.lineage_edges, ()), (q.table_catalog, ()),
+            (q.model_registry, ()), (q.key_metric_history, ()), (q.assistant_eval_history, ())]
+
+
+def test_engineering_functions_check_the_role(app_env):
+    for fn, args in _engineering_functions():
+        assert fn("data_engineer", *args) is not None and fn("admin", *args) is not None
+        for role in ("inventory_manager", "business_analyst", "marketing_manager", None):
+            with pytest.raises(AccessDenied):
+                fn(role, *args)
+
+
+def test_engineering_numbers_are_consistent(app_env):
+    role = "data_engineer"
+    o = q.ops_overview(role)
+    runs = q.pipeline_runs(role, 1000)
+    assert o["runs"] == len(runs) == o["succeeded"] + o["failed"] + int((~runs["status"].isin(["success", "failed"])).sum())
+    qd = q.quarantine_by_dataset(role)
+    assert int(qd["total"].sum()) == int(q.quarantine_summary(role)["rows"].sum())
+    assert (qd["total"] == qd["direct"] + qd["cascade"]).all()
+    assert q.quality_by_dataset(role)["clean_rate"].between(0, 1).all()
+    edges = q.lineage_edges(role)
+    assert {"source", "bronze", "silver", "gold", "app"} <= set(edges["source_layer"]) | set(edges["target_layer"])
+    cat = q.table_catalog(role)
+    assert {"bronze", "silver", "gold", "ml", "app"} <= set(cat["layer"]) and cat["table"].is_unique
+    assert len(q.table_catalog(role, search="revenue")) >= 1
+    assert "raw_record" not in q.quarantine_summary(role).columns            # privacy: never raw rejected rows
+
+
+def test_engineering_workspace_renders(app_env):
+    at = AppTest.from_file(str(PROJECT_ROOT / "app" / "views" / "engineering.py"), default_timeout=180)
+    at.session_state["user"] = ENGINEER_USER
+    at.run()
+    assert not at.exception, at.exception
+    labels = {m.label for m in at.metric}
+    assert {"Last run", "Rows checked", "Rows quarantined", "Models in the registry"} <= labels
+    assert not at.error
+
+
+def test_other_roles_are_blocked_from_engineering(app_env):
+    at = AppTest.from_file(str(PROJECT_ROOT / "app" / "views" / "engineering.py"), default_timeout=120)
+    at.session_state["user"] = INVENTORY_USER
+    at.run()
+    assert not at.exception and any("cannot open" in e.value for e in at.error) and not at.metric
+
+
+def test_model_monitoring_has_every_headline_metric(app_env):
+    metrics = set(q.key_metric_history("data_engineer")["metric"])
+    assert {"Demand forecast — WAPE", "Stockout High tier — precision", "Recommendations — Precision@10"} <= metrics

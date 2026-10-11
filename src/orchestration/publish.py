@@ -3,6 +3,7 @@
 The Streamlit app reads only this folder (through DuckDB) and never runs Spark or the pipeline code:
 - one flat CSV per table (all Gold + ML tables, plus small product / store / category lookups)
 - `rag_chunks.csv`: the business assistant's knowledge base (policies, metric definitions, model cards)
+- `ops_*.csv`: the Data Engineer workspace (run history, quality, quarantine summary, lineage, catalog, models)
 - `snapshot_schema.csv`: column types for every table, so the app can read them without pipeline code
 - `snapshot_manifest.csv`: which pipeline run and generation run produced the snapshot, and when
 
@@ -21,6 +22,7 @@ import pandas as pd
 from src.common.io import read_csv_strings, replace_with_retry, write_csv
 from src.common.paths import PROJECT_ROOT
 from src.common.schemas import SOURCE_SCHEMAS
+from src.orchestration.ops_snapshot import OPS_COLUMNS, OPS_SOURCES, build_ops_tables
 from src.orchestration.tracking import RunTracker, utc_now
 from src.rag.chunking import CHUNK_COLUMNS, build_chunks
 
@@ -40,7 +42,7 @@ def _tables():
 
 
 def run_publish(tracker: RunTracker, gold_root: Path, silver_root: Path, demo_root: Path,
-                metadata_root: Path, generation_run_id: str, profile: str) -> dict:  # noqa: ARG001 (kept for callers)
+                metadata_root: Path, generation_run_id: str, profile: str, quarantine_root: Path | None = None) -> dict:
     t0, started = time.perf_counter(), utc_now()
     staging = demo_root.parent / "_demo_staging"
     if staging.exists():
@@ -68,6 +70,18 @@ def run_publish(tracker: RunTracker, gold_root: Path, silver_root: Path, demo_ro
     schema_rows += [{"table": RAG_TABLE, "column": c, "dtype": "int" if c == "words" else "string"}
                     for c in CHUNK_COLUMNS]
 
+    # Data Engineer workspace (Phase 7A): run history, quality, quarantine summary, lineage, catalog, models
+    from src.ml.tables import ML_TABLES
+    from src.transformations.gold.run import GOLD_TABLES
+    edges = _publish_edges([*counts, *OPS_SOURCES], chunks)       # this run's lineage, known before it finishes
+    ops = build_ops_tables(metadata_root, quarantine_root or metadata_root.parent / "quarantine", GOLD_TABLES,
+                           ML_TABLES, dict(counts),
+                           [{"run_id": tracker.run_id, "source": s, "target": t, "transform": x, "engine": "python"}
+                            for s, t, x in edges], pending=tracker.rows)
+    for name, frame in ops.items():
+        counts[name] = write_csv(frame, staging / f"{name}.csv", list(OPS_COLUMNS[name]))
+        schema_rows += [{"table": name, "column": c, "dtype": d} for c, d in OPS_COLUMNS[name].items()]
+
     write_csv(pd.DataFrame(schema_rows), staging / "snapshot_schema.csv", ["table", "column", "dtype"])
     # The model version comes from the published predictions themselves: the run log (meta_model_runs) is only
     # written when a run ends, so within an `ml,publish` run it would still hold the previous model.
@@ -91,11 +105,19 @@ def run_publish(tracker: RunTracker, gold_root: Path, silver_root: Path, demo_ro
     tracker.table(stage="publish", job="publish_demo_snapshot", source="gold,ml,silver dims", target="data/demo",
                   engine="python", module="src.orchestration.publish", rows_written=sum(counts.values()),
                   status="success", started_at=started, ended_at=utc_now(), duration_s=round(time.perf_counter() - t0, 2))
-    for name in counts:
-        if name == RAG_TABLE:       # knowledge base: built from policy and documentation files
-            for rel in sorted({src for src in chunks["source"]}):
-                tracker.lineage(rel, f"demo/{name}", "publish (chunking)", engine="python")
-            continue
-        tracker.lineage(name if name.startswith("gld_") else f"slv_{DIMENSIONS[name][0]}", f"demo/{name}",
-                        "publish", engine="python")
+    for source, target, transform in edges:
+        tracker.lineage(source, target, transform, engine="python")
     return {"tables": len(counts), "rows": sum(counts.values()), "size_mb": round(size_mb, 1)}
+
+
+def _publish_edges(names, chunks: pd.DataFrame) -> list[tuple[str, str, str]]:
+    """(source, target, transform) for every published table."""
+    out = []
+    for name in names:
+        if name in OPS_SOURCES:     # ops tables: built from recorded metadata / quarantine
+            out.append((OPS_SOURCES[name], f"demo/{name}", "publish (ops snapshot)"))
+        elif name == RAG_TABLE:     # knowledge base: built from policy and documentation files
+            out += [(rel, f"demo/{name}", "publish (chunking)") for rel in sorted(set(chunks["source"]))]
+        else:
+            out.append((name if name.startswith("gld_") else f"slv_{DIMENSIONS[name][0]}", f"demo/{name}", "publish"))
+    return out

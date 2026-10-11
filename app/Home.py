@@ -24,7 +24,7 @@ from app.components.auth import current_user, login_page  # noqa: E402
 from app.components.personas import PERSONAS  # noqa: E402
 from app.components.ui import sidebar_profile  # noqa: E402
 from app.views import assistant as assistant_view  # noqa: E402
-from app.views import business, inventory, marketing  # noqa: E402
+from app.views import business, engineering, inventory, marketing  # noqa: E402
 from src.serving.permissions import allowed_workspaces  # noqa: E402
 
 st.set_page_config(page_title="Quick-Commerce Intelligence", page_icon=str(ROOT / "app" / "assets" / "mark.svg"),
@@ -32,13 +32,14 @@ st.set_page_config(page_title="Quick-Commerce Intelligence", page_icon=str(ROOT 
 
 VIEWS = ROOT / "app" / "views"
 ASSETS = ROOT / "app" / "assets"
-SECTION_PAGES = {"inventory": inventory.PAGES, "business": business.PAGES, "marketing": marketing.PAGES}
+SECTION_PAGES = {"inventory": inventory.PAGES, "business": business.PAGES, "marketing": marketing.PAGES,
+                 "engineering": engineering.PAGES}
 
 
 def workspace_pages(ws: str, landing: bool = False) -> list:
     """The sidebar pages of one workspace; with `landing`, its first section is the app's default page."""
     p = PERSONAS[ws]
-    if ws not in SECTION_PAGES:     # single-page workspace (Data Engineer, on hold)
+    if ws not in SECTION_PAGES:     # a single-page workspace (none at the moment)
         return [st.Page(ROOT / "app" / p["page"], title=p["title"], icon=p["icon"], url_path=ws, default=landing)]
     return [st.Page(render, title=title, icon=icon, url_path=f"{ws}-{key}", default=landing and i == 0)
             for i, (key, title, icon, render) in enumerate(SECTION_PAGES[ws])]

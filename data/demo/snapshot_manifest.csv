@@ -1,9 +1,9 @@
 key,value
-pipeline_run_id,run_20261008T170726786
+pipeline_run_id,run_20261011T083017363
 generation_run_id,gen_medium_s42_20261004T134306Z
 profile,medium
-published_at,2026-10-08T17:07:36Z
-tables,34
-rows,398182
-size_mb,32.8
+published_at,2026-10-11T08:30:27Z
+tables,45
+rows,400855
+size_mb,33.1
 forecast_model_version,demand_forecast_run_20261005T135746863

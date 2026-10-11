@@ -190,3 +190,64 @@ def segment_bubble_chart(df: pd.DataFrame) -> go.Figure:
     fig.update_layout(xaxis_title="average completed orders", yaxis_title="average order value (₹)")
     fig.update_xaxes(showgrid=True, gridcolor=GRID)
     return fig
+
+
+# ------------------------------------------------------------------------------------------- data engineer (7C)
+STAGE_COLOURS = {"ingest": "#94A3B8", "silver": "#64748B", "gold": ACCENT, "ml": "#0EA5E9", "publish": AMBER}
+LAYER_ORDER = ["source", "bronze", "silver", "quarantine", "metadata", "knowledge", "gold", "ml", "app"]
+LAYER_LABELS = {"source": "Source files", "bronze": "Bronze", "silver": "Silver", "quarantine": "Quarantine",
+                "metadata": "Run metadata", "knowledge": "Policies & docs", "gold": "Gold", "ml": "ML", "app": "App snapshot"}
+
+
+def stage_duration_chart(df: pd.DataFrame) -> go.Figure:
+    """Stacked seconds per stage for recent runs; failed stages outlined in red."""
+    df = df.copy()
+    df["run"] = pd.to_datetime(df["started_at"]).dt.strftime("%d %b %H:%M")
+    fig = go.Figure()
+    for stage in [s for s in STAGE_COLOURS if s in set(df["stage"])]:
+        part = df[df["stage"] == stage]
+        fig.add_trace(go.Bar(x=part["run"], y=part["duration_s"], name=stage, marker_color=STAGE_COLOURS[stage],
+                             marker_line=dict(color=[RED if s == "failed" else "rgba(0,0,0,0)" for s in part["status"]],
+                                              width=2),
+                             hovertemplate=f"{stage}: %{{y:.0f}} s<extra></extra>"))
+    fig = _base(fig, height=340)
+    fig.update_layout(barmode="stack", yaxis_title="seconds", hovermode="x unified")
+    return fig
+
+
+def lineage_sankey(edges: pd.DataFrame, focus: str | None = None) -> go.Figure:
+    """Without a focus: data flow between layers (number of table-to-table edges). With a focus table: its direct
+    upstream sources and downstream consumers."""
+    if focus:
+        part = edges[(edges["source"] == focus) | (edges["target"] == focus)]
+        nodes = list(dict.fromkeys([*part["source"], focus, *part["target"]]))
+        links = part.groupby(["source", "target"], as_index=False).size()
+        labels = nodes
+        colours = [ACCENT if n == focus else SLATE_LIGHT for n in nodes]
+    else:
+        links = (edges.groupby(["source_layer", "target_layer"], as_index=False).size()
+                 .rename(columns={"source_layer": "source", "target_layer": "target"}))
+        links = links[links["source"] != links["target"]]
+        nodes = [n for n in LAYER_ORDER if n in set(links["source"]) | set(links["target"])]
+        labels = [LAYER_LABELS.get(n, n) for n in nodes]
+        colours = [ACCENT if n in ("gold", "ml") else SLATE if n in ("bronze", "silver") else SLATE_LIGHT for n in nodes]
+    index = {n: i for i, n in enumerate(nodes)}
+    fig = go.Figure(go.Sankey(
+        arrangement="snap",
+        node=dict(label=labels, color=colours, pad=18, thickness=14, line=dict(color="#FFFFFF", width=0.5)),
+        link=dict(source=links["source"].map(index), target=links["target"].map(index), value=links["size"],
+                  color="rgba(148, 163, 184, 0.35)")))
+    fig.update_layout(height=max(320, 26 * len(nodes)) if focus else 380, margin=dict(l=8, r=8, t=8, b=8),
+                      font=dict(family=FONT, size=12, color=TEXT), paper_bgcolor="#FFFFFF")
+    return fig
+
+
+def metric_history_chart(df: pd.DataFrame) -> go.Figure:
+    fig = go.Figure()
+    palette = [ACCENT, AMBER, SLATE]
+    for i, (metric, part) in enumerate(df.groupby("metric", sort=False)):
+        fig.add_trace(go.Scatter(x=part["trained_at"], y=part["value"], name=metric, mode="lines+markers",
+                                 line=dict(color=palette[i % len(palette)], width=2)))
+    fig = _base(fig, height=320)
+    fig.update_layout(yaxis_title="value", hovermode="x unified")
+    return fig

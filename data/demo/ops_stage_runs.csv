@@ -1,0 +1,43 @@
+run_id,stage,status,started_at,ended_at,duration_s,error
+run_20261004T142254765,ingest,failed,2026-10-04T14:22:54Z,2026-10-04T14:23:55Z,60.5,"StreamingQueryException: [STREAM_FAILED] Query [id = aed958e2-0700-4889-a1df-378e4a0bec0b, runId = dbfa5bdc-ed94-4b63-a287-4c035ccb4e24] terminated with exception: An exception was raised by the Python Proxy. Return Message: Traceback (most recent call last):
+  File ""<project>\.venv\Lib\site-packages\py4j\clientserver.py"", line 644, in _call_proxy
+    return_value = getattr(self.pool[obj_id], meth"
+run_20261004T142421738,ingest,success,2026-10-04T14:24:21Z,2026-10-04T14:25:17Z,55.94,
+run_20261004T142931178,ingest,success,2026-10-04T14:29:31Z,2026-10-04T14:31:11Z,99.4,
+run_20261004T162837473,silver,failed,2026-10-04T16:28:37Z,2026-10-04T16:31:09Z,151.98,"Py4JJavaError: An error occurred while calling o9487.collectToPython.
+: java.lang.OutOfMemoryError: Java heap space
+	at java.base/java.lang.AbstractStringBuilder.<init>(AbstractStringBuilder.java:88)
+	at java.base/java.lang.StringBuilder.<init>(StringBuilder.java:119)
+	at org.apache.spark.sql.catalyst.util.StringConcat.toString(StringUtils.scala:62)
+	at org.apache.spark.sql.catalyst.util.Strin"
+run_20261004T163123437,silver,failed,2026-10-04T16:31:23Z,2026-10-04T16:34:39Z,195.66,"Py4JJavaError: An error occurred while calling o9487.collectToPython.
+: java.lang.OutOfMemoryError: Java heap space
+	at java.base/java.util.Arrays.copyOfRange(Arrays.java:3822)
+	at java.base/java.lang.StringLatin1.newString(StringLatin1.java:769)
+	at java.base/java.lang.StringBuilder.toString(StringBuilder.java:453)
+	at org.apache.spark.sql.catalyst.util.StringConcat.toString(StringUtils.scala"
+run_20261004T163908232,silver,success,2026-10-04T16:39:08Z,2026-10-04T16:40:17Z,68.83,
+run_20261004T164606770,silver,success,2026-10-04T16:46:06Z,2026-10-04T16:47:21Z,74.55,
+run_20261004T165517135,silver,success,2026-10-04T16:55:17Z,2026-10-04T16:56:36Z,79.34,
+run_20261004T181021412,gold,success,2026-10-04T18:10:21Z,2026-10-04T18:11:52Z,90.83,
+run_20261004T181746192,gold,success,2026-10-04T18:17:46Z,2026-10-04T18:19:18Z,92.45,
+run_20261005T050023146,ml,failed,2026-10-05T05:00:26Z,2026-10-05T05:00:52Z,26.49,KeyError: 'baseline_moving_avg'
+run_20261005T050108525,ml,success,2026-10-05T05:01:10Z,2026-10-05T05:01:40Z,29.75,
+run_20261005T051023605,ml,success,2026-10-05T05:10:25Z,2026-10-05T05:10:57Z,31.72,
+run_20261005T051336891,ml,failed,2026-10-05T05:13:38Z,2026-10-05T05:14:12Z,33.68,PermissionError: [WinError 5] Access is denied: '<project>\\data\\gold\\_staging\\gld_stockout_risk' -> '<project>\\data\\gold\\gld_stockout_risk'
+run_20261005T051455251,ml,success,2026-10-05T05:14:57Z,2026-10-05T05:15:31Z,34.49,
+run_20261005T051555810,ml,success,2026-10-05T05:15:57Z,2026-10-05T05:16:32Z,34.56,
+run_20261005T053306044,publish,success,2026-10-05T05:33:06Z,2026-10-05T05:33:12Z,6.89,
+run_20261005T130920538,ml,success,2026-10-05T13:09:23Z,2026-10-05T13:10:06Z,43.33,
+run_20261005T130920538,publish,success,2026-10-05T13:10:06Z,2026-10-05T13:10:14Z,7.79,
+run_20261005T131247490,publish,success,2026-10-05T13:12:47Z,2026-10-05T13:12:55Z,7.88,
+run_20261005T134653114,ml,success,2026-10-05T13:46:55Z,2026-10-05T13:49:42Z,167.55,
+run_20261005T134653114,publish,success,2026-10-05T13:49:42Z,2026-10-05T13:49:52Z,9.33,
+run_20261005T135746863,ml,success,2026-10-05T13:57:49Z,2026-10-05T13:59:45Z,115.99,
+run_20261005T135746863,publish,success,2026-10-05T13:59:45Z,2026-10-05T13:59:56Z,11.49,
+run_20261008T170643183,publish,failed,2026-10-08T17:06:43Z,2026-10-08T17:06:53Z,10.01,KeyError: 'rag_chunks'
+run_20261008T170659495,publish,failed,2026-10-08T17:06:59Z,2026-10-08T17:07:09Z,10.15,KeyError: 'rag_chunks'
+run_20261008T170726786,publish,success,2026-10-08T17:07:26Z,2026-10-08T17:07:36Z,9.49,
+run_20261011T075901488,publish,success,2026-10-11T07:59:01Z,2026-10-11T07:59:12Z,10.68,
+run_20261011T080504671,publish,success,2026-10-11T08:05:04Z,2026-10-11T08:05:14Z,9.68,
+run_20261011T082301892,publish,success,2026-10-11T08:23:01Z,2026-10-11T08:23:12Z,10.36,

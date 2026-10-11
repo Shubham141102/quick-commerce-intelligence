@@ -25,6 +25,5 @@ PERSONAS = {
         "icon": ":material/engineering:", "code": "ENG", "title": "Data Engineer", "page": "views/engineering.py",
         "tagline": "Pipeline runs, data quality, lineage and model monitoring.",
         "use_cases": ["Pipeline runs", "Data quality & quarantine", "Lineage & tables", "Model monitoring"],
-        "on_hold": True,
     },
 }

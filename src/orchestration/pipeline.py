@@ -109,7 +109,7 @@ def run_pipeline(stages: list[str], generation_run: str | None = None, generatio
             with tracker.stage("publish"):
                 result.results["publish"] = run_publish(tracker, resolve(cfg.paths["gold"]), resolve(cfg.paths["silver"]),
                                                         resolve(cfg.paths["demo"]), metadata_root, generation_dir.name,
-                                                        cfg.profile)
+                                                        cfg.profile, resolve(cfg.paths["quarantine"]))
         result.status = "success"
         tracker.finish("success")
     except BaseException as exc:

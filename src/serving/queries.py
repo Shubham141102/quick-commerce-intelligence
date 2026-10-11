@@ -490,3 +490,147 @@ def promotion_metrics() -> pd.DataFrame:
                         m.uplift_pct
                  FROM gld_promotion_metrics m LEFT JOIN dim_categories c USING (category_id)
                  ORDER BY m.start_date""")
+
+
+# =================================================================================== data engineer workspace (7B)
+_PIPELINE = "quick_commerce_pipeline"
+
+
+@workspace("engineering")
+def ops_overview() -> dict:
+    runs = _q("SELECT * FROM ops_pipeline_runs WHERE pipeline = ? ORDER BY started_at", [_PIPELINE])
+    last = runs.iloc[-1].to_dict() if len(runs) else {}
+    ok = runs[runs["status"] == "success"]
+    return {"runs": len(runs), "succeeded": len(ok), "failed": int((runs["status"] == "failed").sum()),
+            "success_rate": len(ok) / len(runs) if len(runs) else None,
+            "last_status": last.get("status"), "last_started": last.get("started_at"), "last_stages": last.get("stages"),
+            "last_duration_s": last.get("duration_s"), "last_success": ok["ended_at"].max() if len(ok) else None,
+            "median_duration_s": float(ok["duration_s"].median()) if len(ok) else None}
+
+
+@workspace("engineering")
+def pipeline_runs(limit: int = 50) -> pd.DataFrame:
+    return _q("""SELECT run_id, started_at, stages, status, duration_s, profile, generation_run_id,
+                        left(error, 160) AS error
+                 FROM ops_pipeline_runs WHERE pipeline = ? ORDER BY started_at DESC LIMIT ?""",
+              [_PIPELINE, int(limit)])
+
+
+@workspace("engineering")
+def stage_durations(limit: int = 15) -> pd.DataFrame:
+    return _q("""WITH recent AS (SELECT run_id, started_at FROM ops_pipeline_runs
+                                 WHERE pipeline = ? ORDER BY started_at DESC LIMIT ?)
+                 SELECT s.run_id, r.started_at, s.stage, s.status, s.duration_s
+                 FROM ops_stage_runs s JOIN recent r USING (run_id) ORDER BY r.started_at, s.started_at""",
+              [_PIPELINE, int(limit)])
+
+
+@workspace("engineering")
+def table_runs_for(run_id: str) -> pd.DataFrame:
+    return _q("""SELECT stage, target, source, engine, rows_read, rows_written, rows_rejected, rows_rejected_cascade,
+                        rows_deduplicated, rows_corrupt, rows_flagged, status, duration_s
+                 FROM ops_table_runs WHERE run_id = ? ORDER BY stage, target""", [run_id])
+
+
+@workspace("engineering")
+def failed_runs() -> pd.DataFrame:
+    return _q("""SELECT p.run_id, p.started_at, p.stages, s.stage AS failed_stage, p.error
+                 FROM ops_pipeline_runs p LEFT JOIN ops_stage_runs s ON s.run_id = p.run_id AND s.status = 'failed'
+                 WHERE p.status = 'failed' AND p.pipeline = ? ORDER BY p.started_at DESC""", [_PIPELINE])
+
+
+@workspace("engineering")
+def quality_by_dataset() -> pd.DataFrame:
+    """Latest Silver run per dataset: rows checked, removed, quarantined, fixed, flagged, and the clean-row rate."""
+    return _q("""SELECT dataset, max(rows_checked) AS rows_checked,
+                        coalesce(sum(rows_affected) FILTER (WHERE outcome = 'removed'), 0) AS duplicates_removed,
+                        coalesce(sum(rows_affected) FILTER (WHERE outcome IN ('quarantined', 'cascade')), 0)
+                            AS quarantined,
+                        coalesce(sum(rows_affected) FILTER (WHERE outcome = 'fixed'), 0) AS values_fixed,
+                        coalesce(sum(rows_affected) FILTER (WHERE outcome = 'flagged'), 0) AS rows_flagged,
+                        round(1 - coalesce(sum(rows_affected) FILTER (WHERE outcome IN ('removed', 'quarantined',
+                              'cascade')), 0) / nullif(max(rows_checked), 0), 4) AS clean_rate
+                 FROM gld_quality_summary GROUP BY dataset ORDER BY clean_rate, dataset""")
+
+
+@workspace("engineering")
+def quality_rules(dataset: str | None = None, limit: int = 100) -> pd.DataFrame:
+    f, p = _in("dataset", [dataset] if dataset else None)
+    return _q(f"""SELECT dataset, check_type, rule, "column", rows_affected, rows_checked, affected_pct, outcome
+                  FROM gld_quality_summary WHERE rows_affected > 0{f}
+                  ORDER BY rows_affected DESC LIMIT ?""", [*p, int(limit)])
+
+
+@workspace("engineering")
+def quarantine_summary(dataset: str | None = None) -> pd.DataFrame:
+    f, p = _in("dataset", [dataset] if dataset else None)
+    return _q(f"""SELECT dataset, primary_rule, rejection_type, severity, rows, example_record_ids
+                  FROM ops_quarantine_summary WHERE TRUE{f} ORDER BY rows DESC""", p)
+
+
+@workspace("engineering")
+def quarantine_by_dataset() -> pd.DataFrame:
+    return _q("""SELECT dataset, coalesce(sum(rows) FILTER (WHERE rejection_type = 'direct'), 0) AS direct,
+                        coalesce(sum(rows) FILTER (WHERE rejection_type = 'cascade'), 0) AS cascade,
+                        sum(rows) AS total
+                 FROM ops_quarantine_summary GROUP BY dataset ORDER BY total DESC""")
+
+
+@workspace("engineering")
+def file_loads_summary() -> pd.DataFrame:
+    return _q("""SELECT dataset, slice, sum(files) AS files, sum(rows_read) AS rows_read,
+                        sum(rows_corrupt) AS rows_corrupt, round(sum(size_mb), 2) AS size_mb,
+                        max(last_loaded_at) AS last_loaded_at
+                 FROM ops_file_loads WHERE status = 'loaded' GROUP BY ALL ORDER BY dataset, slice""")
+
+
+@workspace("engineering")
+def lineage_edges() -> pd.DataFrame:
+    return _q("SELECT source, target, transform, engine, source_layer, target_layer FROM ops_lineage")
+
+
+@workspace("engineering")
+def table_catalog(layer: str | None = None, search: str | None = None) -> pd.DataFrame:
+    f, p = _in("layer", [layer] if layer else None)
+    s, sp = (' AND (lower("table") LIKE ? OR lower(description) LIKE ?)', [f"%{search.lower()}%"] * 2) \
+        if search else ("", [])
+    return _q(f"""SELECT "table", layer, rows, columns, grain, description FROM ops_table_catalog
+                  WHERE TRUE{f}{s}
+                  ORDER BY CASE layer WHEN 'bronze' THEN 1 WHEN 'silver' THEN 2 WHEN 'gold' THEN 3 WHEN 'ml' THEN 4
+                                      ELSE 5 END, "table" """, [*p, *sp])
+
+
+@workspace("engineering")
+def model_registry() -> pd.DataFrame:
+    """The latest run of each model."""
+    return _q("""SELECT model_name, model_version, method, trained_at, train_start, train_end, test_start, test_end,
+                        input_table, train_rows, metrics, status, limitations
+                 FROM ops_model_runs
+                 QUALIFY row_number() OVER (PARTITION BY model_name ORDER BY trained_at DESC) = 1
+                 ORDER BY model_name""")
+
+
+@workspace("engineering")
+def key_metric_history() -> pd.DataFrame:
+    """One headline metric per model across runs (WAPE: lower is better; precision: higher is better)."""
+    # the forecast registry stores "<run>/backtest" and "<run>/production"; its metrics use "<run>" (the backtest)
+    return _q("""SELECT r.trained_at, m.model_version, 'Demand forecast — WAPE' AS metric, m.value
+                 FROM ops_model_metrics m JOIN ops_model_runs r ON r.model_version = m.model_version || '/backtest'
+                 WHERE m.evaluation = 'category_daily' AND m.model = 'model' AND m.horizon = 0 AND m.metric = 'wape'
+                   AND m.segment = 'all'
+                 UNION ALL
+                 SELECT r.trained_at, m.model_version, 'Stockout High tier — precision', m.value
+                 FROM ops_model_metrics m JOIN ops_model_runs r USING (model_version)
+                 WHERE m.evaluation = 'stockout_backtest' AND m.model LIKE 'High tier%' AND m.metric = 'precision'
+                 UNION ALL
+                 SELECT r.trained_at, m.model_version, 'Recommendations — Precision@10', m.value
+                 FROM ops_model_metrics m JOIN ops_model_runs r USING (model_version)
+                 WHERE m.evaluation = 'recommendation_backtest' AND m.model = 'hybrid' AND m.metric = 'precision_at_10'
+                 ORDER BY metric, trained_at""")
+
+
+@workspace("engineering")
+def assistant_eval_history() -> pd.DataFrame:
+    return _q("""SELECT evaluated_at, question_set, mode, answers, routing_rate, hit_at_3_rate, numbers_rate,
+                        llm_verified, llm_fallbacks, median_latency_ms, run_id
+                 FROM ops_assistant_evals ORDER BY evaluated_at DESC""")

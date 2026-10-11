@@ -262,6 +262,11 @@ REGISTRY: tuple[FileEntry, ...] = (
               "every stage, check scripts"),
     FileEntry("src/orchestration/pipeline.py", "2", "Pipeline runner: resolve the generation run, run stages in order, "
               "record the outcome", "stage list, configs", "stage results, run metadata", "scripts/run_pipeline.py, tests"),
+    FileEntry("src/orchestration/ops_snapshot.py", "7", "Ops snapshot for the Data Engineer workspace: run "
+              "history, quality results, quarantine SUMMARY (no raw rows), file loads, lineage with layers, table "
+              "catalog, model registry / metrics, assistant evaluation history", "data/metadata/meta_*, "
+              "data/quarantine/qtn_records, Gold / ML declarations", "ops_* tables (written by publish)",
+              "src/orchestration/publish.py"),
     FileEntry("src/orchestration/publish.py", "4", "The publish stage: copy app tables to data/demo/ with schema and "
               "manifest, size-checked, swapped in atomically; includes the assistant's knowledge chunks",
               "Gold + ML tables, Silver lookups, policies + docs", "data/demo/*.csv (incl. rag_chunks.csv), "
@@ -314,8 +319,9 @@ REGISTRY: tuple[FileEntry, ...] = (
               "page", "Home.py"),
     FileEntry("app/views/business.py", "5", "Business & Revenue workspace: sales & revenue performance, delivery & "
               "operations, anomaly detection", "src/serving/queries.py (business functions)", "page", "Home.py"),
-    FileEntry("app/views/engineering.py", "5", "Data Engineer landing page — workspace on hold, lists the planned "
-              "use cases", "—", "page", "Home.py"),
+    FileEntry("app/views/engineering.py", "7", "Data Engineer workspace: pipeline runs, data quality & quarantine, "
+              "lineage & tables (Sankey + catalog), model monitoring (registry, metric history, assistant evaluations)",
+              "src/serving/queries.py (engineering functions)", "pages", "Home.py"),
     FileEntry("app/views/marketing.py", "5", "Customer Growth & Marketing workspace: segments, basket & affinity, "
               "recommendations, retention (descriptive), promotion effectiveness",
               "src/serving/queries.py (marketing functions)", "page", "Home.py"),
@@ -343,6 +349,10 @@ REGISTRY: tuple[FileEntry, ...] = (
               "checks against fixed bars (routing, hit@3, numbers vs independent SQL, citations, refusal, roles)",
               "tests/rag/questions.yaml, snapshot", "console report, data/metadata/meta_rag_runs/<run>.csv", "users",
               "python -m scripts.check_phase6"),
+    FileEntry("scripts/check_phase7.py", "7", "Phase 7 report: the Data Engineer workspace equals the raw metadata "
+              "and quarantine files (runs, table rows, quarantine, quality), lineage completeness, catalog coverage, "
+              "role check, privacy and size (9 checks)", "snapshot (ops_*), data/metadata, data/quarantine",
+              "console report", "users", "python -m scripts.check_phase7"),
     FileEntry("scripts/build_docs.py", "1", "Regenerate every generated document", "registries, specs, declarations",
               "docs/data_dictionary.md, transformation_catalog.md, gold_catalog.md, metric_definitions.md, "
               "file_registry.md", "users, tests", "python -m scripts.build_docs"),
@@ -387,6 +397,8 @@ REGISTRY: tuple[FileEntry, ...] = (
     FileEntry("tests/unit/test_llm.py", "6", "LLM layer with a fake client (no network): verified reply shown, invented "
               "number / missing citation rejected, errors fall back, refusals never rephrased, key handling",
               "—", "pass / fail", "pytest"),
+    FileEntry("tests/unit/test_ops_snapshot.py", "7", "Ops snapshot helpers: error text scrubbed of local paths, "
+              "table layers", "—", "pass / fail", "pytest"),
     FileEntry("tests/unit/test_marketing.py", "5", "Segment naming, basket rules both directions, recommendation "
               "metrics and retention status on hand-made data", "—", "pass / fail", "pytest"),
     FileEntry("tests/integration/test_generation.py", "1", "Counts, 90% clean, consistency rules C1–C11, landing files, "
