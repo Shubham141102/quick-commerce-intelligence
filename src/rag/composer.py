@@ -25,7 +25,29 @@ EXAMPLES = {
                  "What happens when a delivery is late?"],
     "marketing": ["What are our customer segments?", "What is bought with UrbanPantry Diapers?",
                   "What are the rules for discounts?"],
+    "engineering": ["Show the pipeline run history", "What is the data quality by dataset?",
+                    "Which models are in the registry?"],
 }
+
+# When a question cannot be answered, point to the dashboard page of the user's own workspace that shows it (7E).
+PAGE_HINTS = [
+    ("engineering", "Data Engineer → Lineage & tables", ("column", "columns", "schema", "table", "tables", "lineage",
+                                                         "upstream", "downstream", "catalog", "grain")),
+    ("engineering", "Data Engineer → Pipeline runs", ("run", "runs", "pipeline", "stage", "stages", "rows", "duration",
+                                                      "error", "errors")),
+    ("engineering", "Data Engineer → Data quality & quarantine", ("quality", "quarantine", "rejected", "duplicate",
+                                                                 "duplicates", "clean", "dirty")),
+    ("engineering", "Data Engineer → Model monitoring", ("model", "models", "metric", "metrics", "registry", "wape")),
+    ("inventory", "Inventory & Supply Chain", ("stock", "inventory", "sku", "skus", "reorder", "stockout")),
+    ("business", "Business & Revenue", ("revenue", "sales", "delivery", "deliveries", "cancellation", "anomaly")),
+    ("marketing", "Customer Growth & Marketing", ("customer", "customers", "segment", "basket", "promotion",
+                                                  "retention")),
+]
+
+
+def page_hints(question: str, workspaces: list[str]) -> list[str]:
+    words = set(re.findall(r"[a-z]+", question.lower()))
+    return [page for ws, page, keys in PAGE_HINTS if ws in workspaces and words & set(keys)]
 
 
 @dataclass
@@ -112,8 +134,14 @@ def compose(question: str, route: str, *, result=None, hits: list[Hit] | None = 
         parts.append(message)
     if route in ("help", "out_of_scope"):
         if route == "out_of_scope":
-            parts.append("I can only answer questions about this business's data and policies: stock, sales, "
-                         "delivery, customers, promotions, and how our metrics and models work.")
+            hints = page_hints(question, workspaces)
+            if hints:
+                parts.append("I can't answer that here, but your dashboard shows it — **where to look:** "
+                             + " · ".join(f"**{h}**" for h in hints[:2]))
+            else:
+                parts.append("I can only answer questions about this business's data and policies: stock, sales, "
+                             "delivery, customers, promotions, pipeline runs and data quality, and how our metrics "
+                             "and models work.")
         else:
             parts.append("I answer questions about your workspace's data and our policies, with sources.")
         examples = [q for ws in workspaces for q in EXAMPLES.get(ws, [])][:6]

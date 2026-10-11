@@ -14,7 +14,7 @@ The full design is in [`docs/Project_Plan_v2.md`](docs/Project_Plan_v2.md); all 
 | 4 | Inventory vertical slice | Done (forecasting, stockout risk, Inventory workspace app; check_ml 12/12) |
 | 5 | Inventory explorer, Business and Marketing workspaces | Done (lost sales, anomalies, segmentation, basket rules, recommendations, retention; check_phase5 18 pass, 2 known limitations, 0 failed) |
 | 6 | Business assistant (RAG) | Done (policies + metric definitions + model cards, BM25 retrieval, 16 role-checked data tools, rule-based router, Assistant page; check_phase6 6/6 bars in template and LLM mode; optional free LLM: gpt-oss-120b via Groq) |
-| 7 | Data Engineer workspace | Done (pipeline runs, data quality & quarantine, lineage & tables, model monitoring; check_phase7 9/9) |
+| 7 | Data Engineer workspace | Done (pipeline runs, data quality & quarantine, lineage & tables, model monitoring; check_phase7 9/9; Assistant tools for the engineer: engineering evaluation set passes) |
 | 8 | Hardening + deployment | Not started |
 
 ## Setup
@@ -96,6 +96,7 @@ api_key  = "gsk_..."
 python -m scripts.check_phase6                  # assistant evaluation: 40-question gold set, 6 bars
 python -m scripts.check_phase6 --mode llm       # same, with the optional LLM layer
 python -m scripts.check_phase6 --set holdout    # 20 held-out questions
+python -m scripts.check_phase6 --set engineering   # Data Engineer questions (Phase 7E)
 ```
 Details and a demo walkthrough: [docs/13_rag_assistant.md](docs/13_rag_assistant.md).
 

@@ -1,0 +1,26 @@
+# Data Engineer assistant evaluation (Phase 7E) — 8 questions + 2 role checks. Written 2026-10-11 BEFORE the
+# engineering tools, router phrases and refusal hints were built, and never used to tune them.
+# Same fields as questions.yaml; `mentions` = text the answer must contain (e.g. a pointer to a dashboard page).
+# Figures are checked with SQL on the published ops tables, which check_phase7 verifies against the raw logs.
+
+questions:
+  - {id: E01, kind: data, role: data_engineer, routes: [data], tool: pipeline_rows,
+     question: "How many rows were processed in the last pipeline run?", check: rows_last_run}
+  - {id: E02, kind: data, role: data_engineer, routes: [data], tool: pipeline_status,
+     question: "Did the last pipeline run succeed?", check: runs_recorded}
+  - {id: E03, kind: data, role: data_engineer, routes: [data], tool: pipeline_status,
+     question: "How many pipeline runs failed?", check: runs_failed}
+  - {id: E04, kind: data, role: data_engineer, routes: [data], tool: data_quality,
+     question: "Which datasets have the lowest clean rate?", check: lowest_clean_dataset}
+  - {id: E05, kind: data, role: data_engineer, routes: [data], tool: quarantine,
+     question: "How many rows are in quarantine?", check: quarantine_total}
+  - {id: E06, kind: data, role: data_engineer, routes: [data], tool: quarantine,
+     question: "Show quarantined rows for order items", check: quarantine_order_items}
+  - {id: E07, kind: data, role: data_engineer, routes: [data], tool: model_health,
+     question: "Which model versions are live?", check: model_count}
+  - {id: E08, kind: out_of_scope, role: data_engineer, routes: [out_of_scope],
+     question: "What columns does the orders table have?", mentions: "Lineage & tables"}
+
+role_checks:
+  - {id: ER1, role: business_analyst, question: "How many rows were processed in the last run?"}
+  - {id: ER2, role: inventory_manager, question: "Did the pipeline fail last night?"}

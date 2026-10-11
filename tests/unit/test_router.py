@@ -69,3 +69,46 @@ def test_generic_topic_flag():
     assert generic.kind == "data" and generic.generic                       # one generic word, no report cue
     assert not route_question("Show delivery performance", Entities()).generic     # explicit report request
     assert not route_question("On time rate at Dwarka", Entities(store_ids=["S05"])).generic
+
+
+
+# ---------------------------------------------------------------- Data Engineer tools (7E)
+@pytest.mark.parametrize("question, tool", [
+    ("Show me the run history of the pipeline", "pipeline_status"),
+    ("What was the data volume written yesterday?", "pipeline_rows"),
+    ("Any dirty data in payments?", "data_quality"),
+    ("List the rejected records", "quarantine"),
+    ("What is in the model registry?", "model_health"),
+])
+def test_engineering_tools_are_routed(question, tool):
+    assert route_question(question, Entities()).tool == tool
+
+
+def test_page_hints_only_for_own_workspace():
+    from src.rag.composer import page_hints
+    assert page_hints("schema of the reviews table", ["engineering"]) == ["Data Engineer → Lineage & tables"]
+    assert page_hints("schema of the reviews table", ["business"]) == []
+
+
+
+# ---------------------------------------------------------------- 7E revision: counting questions, schema questions
+def test_counting_questions_go_to_the_tool_that_reports_the_measure():
+    assert pick_tool("how many records were quarantined yesterday")[0] == "quarantine"
+    assert pick_tool("number of rows the pipeline run wrote")[0] == "pipeline_rows"
+    assert pick_tool("how many failed pipeline runs this month")[0] == "pipeline_status"
+    assert pick_tool("how many payment failures happened")[0] == "anomalies"       # not a pipeline 'failure'
+
+
+def test_overlapping_phrases_count_once():
+    from src.rag.router import _distinct
+    assert _distinct(["pipeline", "pipeline run", "pipeline runs"]) == ["pipeline run"]
+
+
+def test_schema_questions_get_the_catalog_hint():
+    assert route_question("Show the lineage of gld_inventory_daily", Entities()).kind == "out_of_scope"
+    assert route_question("What data types does the payments table use?", Entities()).kind == "out_of_scope"
+
+
+def test_counted_noun_stops_at_the_verb():
+    # "run" here is a verb, not a pipeline run (found by the held-out set, 7E)
+    assert pick_tool("how many offers can run together in a week")[0] != "pipeline_status"

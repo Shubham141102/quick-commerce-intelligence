@@ -194,7 +194,6 @@ def segment_bubble_chart(df: pd.DataFrame) -> go.Figure:
 
 # ------------------------------------------------------------------------------------------- data engineer (7C)
 STAGE_COLOURS = {"ingest": "#94A3B8", "silver": "#64748B", "gold": ACCENT, "ml": "#0EA5E9", "publish": AMBER}
-LAYER_ORDER = ["source", "bronze", "silver", "quarantine", "metadata", "knowledge", "gold", "ml", "app"]
 LAYER_LABELS = {"source": "Source files", "bronze": "Bronze", "silver": "Silver", "quarantine": "Quarantine",
                 "metadata": "Run metadata", "knowledge": "Policies & docs", "gold": "Gold", "ml": "ML", "app": "App snapshot"}
 
@@ -215,31 +214,116 @@ def stage_duration_chart(df: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def lineage_sankey(edges: pd.DataFrame, focus: str | None = None) -> go.Figure:
-    """Without a focus: data flow between layers (number of table-to-table edges). With a focus table: its direct
-    upstream sources and downstream consumers."""
-    if focus:
-        part = edges[(edges["source"] == focus) | (edges["target"] == focus)]
-        nodes = list(dict.fromkeys([*part["source"], focus, *part["target"]]))
-        links = part.groupby(["source", "target"], as_index=False).size()
-        labels = nodes
-        colours = [ACCENT if n == focus else SLATE_LIGHT for n in nodes]
-    else:
-        links = (edges.groupby(["source_layer", "target_layer"], as_index=False).size()
-                 .rename(columns={"source_layer": "source", "target_layer": "target"}))
-        links = links[links["source"] != links["target"]]
-        nodes = [n for n in LAYER_ORDER if n in set(links["source"]) | set(links["target"])]
-        labels = [LAYER_LABELS.get(n, n) for n in nodes]
-        colours = [ACCENT if n in ("gold", "ml") else SLATE if n in ("bronze", "silver") else SLATE_LIGHT for n in nodes]
-    index = {n: i for i, n in enumerate(nodes)}
-    fig = go.Figure(go.Sankey(
-        arrangement="snap",
-        node=dict(label=labels, color=colours, pad=18, thickness=14, line=dict(color="#FFFFFF", width=0.5)),
-        link=dict(source=links["source"].map(index), target=links["target"].map(index), value=links["size"],
-                  color="rgba(148, 163, 184, 0.35)")))
-    fig.update_layout(height=max(320, 26 * len(nodes)) if focus else 380, margin=dict(l=8, r=8, t=8, b=8),
-                      font=dict(family=FONT, size=12, color=TEXT), paper_bgcolor="#FFFFFF")
+# Simple box-and-arrow lineage (replaces the Sankey, user feedback 2026-10-11: "simpler and easy to understand").
+MAIN_FLOW = ["source", "bronze", "silver", "gold", "ml", "app"]
+LAYER_WHAT = {"source": "CSV files from the generator", "bronze": "raw rows, as received",
+              "silver": "cleaned & validated", "gold": "business tables", "ml": "forecasts, risk, segments…",
+              "app": "what the app reads", "quarantine": "rejected rows, with reasons",
+              "metadata": "run logs & quality results", "knowledge": "for the assistant"}
+LAYER_FILL = {"source": "#F8FAFC", "bronze": "#F1F5F9", "silver": "#E2E8F0", "quarantine": "#FEF3F2",
+              "gold": "#DBEAFE", "ml": "#E0F2FE", "app": "#ECFDF3", "metadata": "#F8FAFC", "knowledge": "#F8FAFC"}
+LAYER_EDGE = {"quarantine": "#FECDCA", "gold": "#93C5FD", "ml": "#7DD3FC", "app": "#ABEFC6"}
+
+
+def _layer_tables(edges: pd.DataFrame) -> dict[str, set[str]]:
+    out: dict[str, set[str]] = {}
+    for name_col, layer_col in (("source", "source_layer"), ("target", "target_layer")):
+        for name, layer in zip(edges[name_col], edges[layer_col]):
+            out.setdefault(layer, set()).add(name)
+    return out
+
+
+def _box(fig: go.Figure, x: float, y: float, w: float, h: float, layer: str, text: str, bold: bool = False) -> None:
+    fig.add_shape(type="rect", x0=x - w / 2, x1=x + w / 2, y0=y - h / 2, y1=y + h / 2, layer="below",
+                  fillcolor=LAYER_FILL.get(layer, "#F8FAFC"), line=dict(color=ACCENT if bold else LAYER_EDGE.get(
+                      layer, "#CBD5E1"), width=2.5 if bold else 1.2))
+    fig.add_annotation(x=x, y=y, text=text, showarrow=False, font=dict(family=FONT, size=12, color=TEXT),
+                       align="center")
+
+
+def _arrow(fig: go.Figure, x0: float, y0: float, x1: float, y1: float, label: str = "") -> None:
+    fig.add_annotation(x=x1, y=y1, ax=x0, ay=y0, xref="x", yref="y", axref="x", ayref="y", text="", showarrow=True,
+                       arrowhead=3, arrowsize=1.1, arrowwidth=1.6, arrowcolor="#94A3B8")
+    if label:
+        fig.add_annotation(x=(x0 + x1) / 2, y=(y0 + y1) / 2, text=label, showarrow=False, xshift=34,
+                           font=dict(size=11, color=SLATE))
+
+
+def _canvas(fig: go.Figure, height: int, x_range, y_range) -> go.Figure:
+    fig.update_layout(height=height, margin=dict(l=4, r=4, t=4, b=4), paper_bgcolor="#FFFFFF", plot_bgcolor="#FFFFFF",
+                      showlegend=False, xaxis=dict(visible=False, range=x_range, fixedrange=True),
+                      yaxis=dict(visible=False, range=y_range, fixedrange=True))
     return fig
+
+
+def pipeline_map(edges: pd.DataFrame, supporting: bool = False) -> go.Figure:
+    """The pipeline as one row of boxes, left to right: Source files → Bronze → Silver → Gold → ML → App snapshot,
+    each with its number of tables and what it holds; Quarantine below Silver. `supporting` adds run metadata and
+    policies & docs (inputs of the app and the assistant)."""
+    tables = _layer_tables(edges)
+    fig = go.Figure()
+    w, h = 0.84, 0.62
+    for i, layer in enumerate(MAIN_FLOW):
+        n = len(tables.get(layer, ()))
+        unit = "files" if layer == "source" else "tables"
+        _box(fig, i, 0, w, h, layer, f"<b>{LAYER_LABELS[layer]}</b><br>{n} {unit}<br>"
+                                     f"<span style='font-size:11px;color:{SLATE}'>{LAYER_WHAT[layer]}</span>")
+        if i:
+            _arrow(fig, i - 1 + w / 2, 0, i - w / 2, 0)
+    if tables.get("quarantine"):
+        _box(fig, 2, -1.05, w, 0.5, "quarantine",
+             f"<b>Quarantine</b><br><span style='font-size:11px;color:{SLATE}'>{LAYER_WHAT['quarantine']}</span>")
+        _arrow(fig, 2, -h / 2, 2, -1.05 + 0.25, "rejected")
+    y_min = -1.45
+    if supporting:
+        for x, layer in ((4, "metadata"), (5, "knowledge")):
+            if tables.get(layer):
+                _box(fig, x, 1.05, w, 0.5, layer, f"<b>{LAYER_LABELS[layer]}</b><br><span style='font-size:11px;"
+                                                  f"color:{SLATE}'>{LAYER_WHAT[layer]}</span>")
+                _arrow(fig, x, 1.05 - 0.25, 5 if layer == "knowledge" else 5 - w / 2 + 0.1, h / 2)
+    return _canvas(fig, 300 if not supporting else 380, [-0.5, 5.5], [y_min, 1.45 if supporting else 0.5])
+
+
+def table_neighbours(edges: pd.DataFrame, focus: str, max_side: int = 10) -> go.Figure:
+    """Three columns: what the table reads from → the table → what uses it; boxes coloured by layer."""
+    layer = dict(zip(edges["source"], edges["source_layer"])) | dict(zip(edges["target"], edges["target_layer"]))
+    up = sorted(set(edges.loc[edges["target"] == focus, "source"]))
+    down = sorted(set(edges.loc[edges["source"] == focus, "target"]))
+
+    def column(names: list[str], empty: str) -> list[tuple[str, str]]:
+        if not names:
+            return [(empty, "")]
+        shown = [(n, layer.get(n, "")) for n in names[:max_side]]
+        return shown + ([(f"+{len(names) - max_side} more", "")] if len(names) > max_side else [])
+
+    left, right = column(up, "nothing — a source file"), column(down, "nothing yet")
+    rows = max(len(left), len(right), 1)
+    fig = go.Figure()
+    w, h = 1.25, 0.72
+
+    def ys(n: int) -> list[float]:
+        return [(rows - 1) / 2 - i * ((rows - 1) / max(n - 1, 1)) if n > 1 else 0.0 for i in range(n)]
+
+    def label(name: str, lay: str) -> str:
+        sub = f"<br><span style='font-size:10px;color:{SLATE}'>{LAYER_LABELS.get(lay, lay)}</span>" if lay else ""
+        return f"{name}{sub}"
+
+    for (name, lay), y in zip(left, ys(len(left))):
+        _box(fig, 0, y, w, h, lay or "source", label(name, lay))
+        if lay:
+            _arrow(fig, w / 2, y, 1.6 - w / 2, 0)
+    _box(fig, 1.6, 0, w, h + 0.2, layer.get(focus, ""), f"<b>{focus}</b><br><span style='font-size:10px;"
+                                                         f"color:{SLATE}'>{LAYER_LABELS.get(layer.get(focus, ''), '')}"
+                                                         "</span>", bold=True)
+    for (name, lay), y in zip(right, ys(len(right))):
+        _box(fig, 3.2, y, w, h, lay or "source", label(name, lay))
+        if lay:
+            _arrow(fig, 1.6 + w / 2, 0, 3.2 - w / 2, y)
+    for x, title in ((0, "READS FROM"), (1.6, "THIS TABLE"), (3.2, "USED BY")):
+        fig.add_annotation(x=x, y=(rows - 1) / 2 + 0.75, text=f"<b>{title}</b>", showarrow=False,
+                           font=dict(size=11, color=SLATE))
+    span = (rows - 1) / 2
+    return _canvas(fig, max(260, 70 * rows + 90), [-0.75, 3.95], [-span - 0.6, span + 1.0])
 
 
 def metric_history_chart(df: pd.DataFrame) -> go.Figure:

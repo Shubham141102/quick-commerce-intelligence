@@ -58,3 +58,18 @@ def test_log_record(bot):
     a = bot.ask("Which promotions had the best uplift?", "marketing_manager")
     rec = log_record(a, "marketing_manager")
     assert rec["route"] == "data" and rec["tool"] == "promotions" and rec["latency_ms"] >= 0
+
+
+
+def test_engineer_gets_pipeline_answers_and_other_roles_do_not(bot):
+    a = bot.ask("Give me the row counts of the latest run", "data_engineer")
+    assert a.route == "data" and a.tool == "pipeline_rows" and "**Rows written**" in a.markdown
+    refused = bot.ask("Give me the row counts of the latest run", "marketing_manager")
+    assert refused.route == "not_allowed" and "Data Engineer" in refused.markdown
+
+
+def test_unanswerable_question_points_to_the_right_page(bot):
+    a = bot.ask("What is the grain of the reviews table?", "data_engineer")
+    assert a.route == "out_of_scope" and "Lineage & tables" in a.markdown
+    other = bot.ask("What is the grain of the reviews table?", "business_analyst")
+    assert "Lineage & tables" not in other.markdown                     # only pages of your own workspace

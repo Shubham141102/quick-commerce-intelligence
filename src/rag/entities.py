@@ -19,9 +19,12 @@ from datetime import date, timedelta
 
 import pandas as pd
 
+from src.common.schemas import SOURCE_SCHEMAS
+
 MONTHS = {name.lower(): i for i, name in enumerate(calendar.month_name) if name}
 TIERS = {"high": "High", "medium": "Medium", "low": "Low"}
 DETECTORS = {"spike": "demand_spike", "payment": "payment_failure", "outage": "store_outage"}
+DATASETS = tuple(SOURCE_SCHEMAS)
 SIZE = re.compile(r"\s+(\d+(\.\d+)?\s*(g|kg|ml|l)|pack of \d+)$", re.I)
 
 
@@ -52,6 +55,7 @@ class Entities:
     product_ids: list[str] = field(default_factory=list)
     tiers: list[str] = field(default_factory=list)
     detectors: list[str] = field(default_factory=list)
+    datasets: list[str] = field(default_factory=list)       # source datasets, e.g. order_items (Data Engineer, 7E)
     start: date | None = None
     end: date | None = None
     period_label: str = ""
@@ -127,6 +131,12 @@ def extract(question: str, lk: Lookups) -> Entities:
     if e.tiers:
         e.found["tier"] = ", ".join(e.tiers)
     e.detectors = [d for k, d in DETECTORS.items() if k in text]
+    # datasets ("order items" / "order_items" / "returns refunds"); the longest name wins ("order items" ≠ "orders")
+    for ds in sorted(DATASETS, key=len, reverse=True):
+        if (_has(text, ds) or _has(text, ds.replace("_", " "))) and not any(ds in d for d in e.datasets):
+            e.datasets.append(ds)
+    if e.datasets:
+        e.found["dataset"] = ", ".join(e.datasets)
 
     period = _period(text, lk.first_day, lk.last_day)
     if period:

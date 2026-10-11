@@ -26,7 +26,8 @@ def params_from(entities: Entities) -> dict:
     return {"store_ids": entities.store_ids or None, "tiers": entities.tiers or None,
             "category_id": entities.category_ids[0] if entities.category_ids else None,
             "product_id": entities.product_ids[0] if entities.product_ids else None,
-            "detectors": entities.detectors or None, "start": entities.start, "end": entities.end,
+            "detectors": entities.detectors or None, "dataset": entities.datasets[0] if entities.datasets else None,
+            "start": entities.start, "end": entities.end,
             "limit": min(entities.limit, 20) if entities.limit else None}
 
 
@@ -50,8 +51,12 @@ class Assistant:
             return compose(question, "help", workspaces=workspaces)
         entities = extract(question, self.lookups)
         route = route_question(question, entities)
+        if route.tool is None or TOOLS[route.tool].workspace != "engineering":
+            entities.found.pop("dataset", None)        # dataset names matter only to Data Engineer tools
         if route.kind == "help":
             return compose(question, "help", workspaces=workspaces)
+        if route.kind == "out_of_scope":            # e.g. schema / catalog questions (7E): refusal + page hint
+            return compose(question, "out_of_scope", workspaces=workspaces, found=entities.found)
 
         hits = self.retriever.search(question, doc_types=route.doc_types) if route.doc_types or route.kind == "policy" \
             else []

@@ -9,7 +9,7 @@
 | **What it is** | An Assistant page for every persona: questions about its own data and our policies, answered with exact numbers and cited policy passages |
 | **Knowledge** | 5 policies + metric definitions + 5 model cards → 101 chunks in `data/demo/rag_chunks.csv` |
 | **Retrieval** | In-house BM25 (no vector database, no extra package), synonyms, √word-normalised threshold calibrated on practice questions |
-| **Numbers** | 16 whitelisted, role-checked data tools over the published Gold tables — never estimated, never free SQL |
+| **Numbers** | 21 whitelisted, role-checked data tools (16 business + 5 Data Engineer, added in 7E — docs/14) — never estimated, never free SQL |
 | **Routing** | Rules: data · policy · method · hybrid · "why" (no causal claim) · help · clarify · out of scope · not your workspace |
 | **LLM** | Optional: free open-weight gpt-oss-120b via Groq rephrases the evidence; numbers and citations verified in code; falls back to the template |
 | **Evaluation** | 40-question gold set + 5 role checks: **6/6 bars** (template and LLM mode); 20-question held-out set confirms the fixes generalise |

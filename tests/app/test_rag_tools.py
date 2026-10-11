@@ -8,7 +8,8 @@ from src.rag.tools import TOOLS, ToolInputError, available_tools, run_tool
 from src.serving import queries as q
 from src.serving.permissions import AccessDenied
 
-ROLE_OF = {"inventory": "inventory_manager", "business": "business_analyst", "marketing": "marketing_manager"}
+ROLE_OF = {"inventory": "inventory_manager", "business": "business_analyst", "marketing": "marketing_manager",
+           "engineering": "data_engineer"}
 
 
 @pytest.fixture(scope="module")
@@ -27,13 +28,13 @@ def _params(name: str, lk: Lookups) -> dict:
 def test_each_role_sees_only_its_workspace_tools(app_env):
     for ws, role in ROLE_OF.items():
         assert {t.workspace for t in available_tools(role)} == {ws}
-    assert len(available_tools("admin")) == len(TOOLS) and available_tools("data_engineer") == []
+    assert len(available_tools("admin")) == len(TOOLS)
 
 
 def test_every_tool_runs_for_its_role_with_source_and_no_customer_ids(app_env, lk):
     for name, tool in TOOLS.items():
         r = run_tool(name, ROLE_OF[tool.workspace], _params(name, lk), lk)
-        assert r.headline and r.source.startswith("gld_") and r.as_of and r.scope, name
+        assert r.headline and r.source.startswith(("gld_", "ops_")) and r.as_of and r.scope, name
         assert len(r.table) <= 20, name
         # no customer identifiers (a "customers" count column is an aggregate, which is allowed)
         assert not [c for c in r.table.columns if "customer" in c.lower() and c.lower().endswith("id")], name
@@ -66,3 +67,19 @@ def test_numbers_equal_the_dashboard_functions(app_env, lk):
     s = q.sales_kpis("business_analyst", lk.first_day, lk.last_day)["current"]
     r = run_tool("sales_overview", "business_analyst", {}, lk)
     assert r.headline["Net revenue"].startswith(f"₹{float(s['net_revenue']):,.0f}")
+
+
+def test_engineering_tools_equal_the_dashboard(app_env, lk):
+    role = "data_engineer"
+    o = q.ops_overview(role)
+    status = run_tool("pipeline_status", role, {}, lk)
+    assert status.headline["Runs recorded"] == str(o["runs"]) and status.headline["Failed"] == str(o["failed"])
+    qd = q.quarantine_by_dataset(role)
+    assert run_tool("quarantine", role, {}, lk).headline["Rows quarantined"] == f"{int(qd['total'].sum()):,}"
+    one = qd.iloc[0]["dataset"]
+    r = run_tool("quarantine", role, {"dataset": one}, lk)
+    assert r.headline["Rows quarantined"] == f"{int(qd.iloc[0]['total']):,}" and r.scope == one
+    with pytest.raises(ToolInputError):
+        run_tool("quarantine", role, {"dataset": "nonsense"}, lk)
+    with pytest.raises(AccessDenied):
+        run_tool("pipeline_rows", "business_analyst", {}, lk)

@@ -38,7 +38,7 @@ monitoring · Assistant.
 |---|---|
 | **Pipeline runs** | Last run, runs recorded, success rate, median run time, last success; time per stage for recent runs (the failed stage outlined in red); run history with status colours; for any run: tables written, rows written, rejected, deduplicated and the per-table table; failed runs with their errors |
 | **Data quality & quarantine** | Datasets and rows checked, rows quarantined (direct / cascade), lowest clean rate; clean rate per dataset; quarantined rows by dataset; quarantine detail by rule with example ids; rules that fired; Bronze file loads |
-| **Lineage & tables** | A Sankey of the data flow between layers (source files → Bronze → Silver / quarantine → Gold → ML → app snapshot, plus run metadata and policies / docs); a searchable table catalog; for any table, its direct upstream sources and downstream consumers; the transformation catalog |
+| **Lineage & tables** | A **pipeline map**: one row of boxes left to right (Source files → Bronze → Silver → Gold → ML → App snapshot), each with its number of tables and what it holds, Quarantine below Silver ("rejected"), run metadata and policies & docs behind a toggle; a searchable table catalog; **one table in context**: three columns *Reads from → this table → Used by*, boxes coloured by layer (≤ 10 per side, "+N more"); the transformation catalog. (First version was a Sankey; replaced on user feedback 2026-10-11 as hard to read.) |
 | **Model monitoring** | Models in the registry, latest forecast WAPE, assistant evaluations, latest routing rate; the registry; one headline metric per model across runs (forecast WAPE, stockout High-tier precision, recommendation Precision@10); the assistant's evaluation history |
 
 ## Results (medium snapshot)
@@ -84,7 +84,48 @@ blocked; the engineer lands on Pipeline runs; every headline metric present.
 | **Before the first push:** run error messages contained full local paths (`C:\Users\<name>\…`), and the snapshot is committed to a public repository | errors are scrubbed before publishing (project folder → `<project>`, a user home → `<home>`); check 7.9 now fails on any local path in the ops tables (verified: it failed on the old snapshot and passes after re-publishing); the whole snapshot was scanned clean |
 | On a fresh pipeline the first snapshot had no models: the tracker writes a run's records only when the run finishes, after publish | the ops snapshot also includes the current run's records so far (models, metrics, table runs, quality, lineage), held in memory by the tracker; check 7.3 counts the publishing run's pre-publish table runs |
 
-## Not in Phase 7
+## 7E Assistant tools for the Data Engineer
 
-Assistant data tools for the engineer ("did last night's run fail?") — the engineer's Assistant answers policy and
-method questions; engineering tools would need their own evaluation questions.
+**Why:** asked "how many rows are being processed", the engineer's Assistant answered "Out of scope" — it had no
+tools for pipeline data and the refusal did not say where the answer was.
+
+**What was added:**
+
+| Part | Detail |
+|---|---|
+| 5 tools (`src/rag/tools.py`) | `pipeline_status` (last run, runs, failed, success rate) · `pipeline_rows` (rows written / rejected / deduplicated in the last run, by stage) · `data_quality` (clean rate per dataset) · `quarantine` (rows by dataset and rule, direct / cascade) · `model_health` (registry + latest headline metrics) — each wraps the role-checked engineering queries |
+| Datasets as entities | "order items" / "order_items" → the dataset (longest name wins, so not "orders"); shown in "understood as" only for engineering answers |
+| Role rule | only the Data Engineer and admin get these answers; other roles get "part of the Data Engineer workspace" |
+| Better refusal | an unanswerable question now names the dashboard page **of the user's own workspace** that shows it (e.g. "Data Engineer → Lineage & tables") |
+
+**Evaluation — bars unchanged** (`python -m scripts.check_phase6 --set engineering`; questions written before the
+tools; figures checked with SQL on the ops tables, which check 7.x verifies against the raw logs):
+
+| Bar | First measurement | After the approved general fix (binding) | Engineering held-out (new) |
+|---|---|---|---|
+| Routing ≥ 90% | **62.5%** (5/8) — FAIL | **100%** (8/8) | 87.5% (7/8) |
+| Numbers = independent SQL | 5/5 | **7/7** | 5/5 |
+| Refusal ≥ 90% | **0/1** — FAIL | **1/1** | 2/2 |
+| Role check | 2/2 | **2/2** | 2/2 |
+| Hit@3, citations | n/a (no retrieval questions) | n/a | citations 2/2 |
+
+**Root causes of the first measurement and the general fix (user decision 2026-10-11, same process as 6F: a new
+held-out set written before the fix, one re-measure):**
+1. *Tool choice summed overlapping phrases* ("pipeline" + "pipeline run" + "pipeline runs" = 33 beat "how many rows"
+   = 13) → matched phrases of one tool now count once (`_distinct`).
+2. *Counting questions ignored what is counted* ("how many rows are in quarantine" → rows processed) → each tool
+   declares the measure it reports (rows, runs, models); "how many <X>" competes only between tools that report X,
+   the one whose topic is named wins, otherwise the measure's primary owner.
+3. *Schema questions fell through to a weak knowledge match* ("What columns does the orders table have?" quoted an
+   irrelevant forecasting passage) → column / schema / grain / lineage / upstream / downstream questions go straight
+   to the refusal with the Lineage & tables pointer.
+
+**Found by the held-out sets and fixed:** the counting rule first read "how many promotions can **run**" as pipeline
+runs (a business question refused) → the counted noun now stops at the first verb / auxiliary.
+
+**Known characteristics (documented, not chased):**
+- *"What was the rejected **row** count in the latest run?"* (engineering held-out) goes to quarantine — "rejected
+  rows" is a quarantine phrase.
+- The 6F held-out set is now **17/20** routing (was 18/20): *"What cancellation rate is considered normal?"* used to
+  pass only because the old scorer counted "cancellation" / "cancellations" twice; removing the double counting (fix
+  1) sends it to the sales tool. Not tuned back, as it is a held-out question. The gold set is unchanged at 6/6.

@@ -7,10 +7,12 @@ Routes
 - hybrid        a data question that also asks what to do → tool + policy chunks
 - insufficient  "why did X happen" → the observed numbers, explicitly without a causal claim
 - help          greetings / "what can you do" → example questions
-- out_of_scope  nothing business-related (decided after retrieval finds nothing either)
+- out_of_scope  schema / lineage questions (→ a pointer to the Lineage & tables page), or nothing business-related
+                (decided after retrieval finds nothing either)
 
-Tool choice: every tool has trigger phrases; the tool whose matched phrases are longest wins (so "at risk customers"
-beats "at risk"). Phrases match whole words only.
+Tool choice: every tool has trigger phrases; the tool whose distinct matched phrases are longest wins (so "at risk
+customers" beats "at risk"); phrases match whole words / stems. Counting questions ("how many rows…") only compete
+between tools that report that measure (7E revision).
 """
 
 from __future__ import annotations
@@ -51,6 +53,16 @@ TOOL_PHRASES: dict[str, tuple[str, ...]] = {
     "retention": ("retention", "lapsed", "churn", "at risk customers", "inactive customers", "win back",
                   "active customers", "repeat rate", "cohort"),
     "promotions": ("promotion results", "promotions", "promotion", "uplift", "promo", "campaign results"),
+    # Data Engineer (7E) — phrases from what each tool does (written before looking at the evaluation set)
+    "pipeline_status": ("pipeline", "pipeline run", "pipeline runs", "last run", "run history", "failed runs",
+                        "run failed", "runs failed", "success rate", "pipeline status", "pipeline health"),
+    "pipeline_rows": ("rows processed", "rows written", "rows loaded", "records processed", "row count", "row counts",
+                      "how many rows", "data volume", "rows rejected"),
+    "data_quality": ("data quality", "clean rate", "quality checks", "dirty data", "data issues",
+                     "duplicates removed", "validation results"),
+    "quarantine": ("quarantine", "quarantined", "rejected rows", "rejected records", "quarantine reasons"),
+    "model_health": ("model registry", "model version", "model versions", "live models", "model health",
+                     "model performance", "models in production", "latest models"),
 }
 
 POLICY_CUES = ("policy", "policies", "should we", "should i", "should a", "should the", "what should", "rule",
@@ -104,9 +116,53 @@ def _matched(question: str) -> dict[str, list[str]]:
     return {t: _any(question, phrases) for t, phrases in TOOL_PHRASES.items()}
 
 
+# What each tool COUNTS (7E revision): "how many <rows / records / runs / models>" goes to a tool that reports it.
+TOOL_MEASURES = {"pipeline_rows": {"row", "record"}, "quarantine": {"row", "record"}, "pipeline_status": {"run"},
+                 "model_health": {"model"}}
+MEASURE_PHRASES = {"how many rows", "row count", "row counts", "how many records"}   # the ask itself, not a topic
+COUNT_ASK = re.compile(r"\b(?:how many|number of|count of)\s+((?:\w+\s+){0,2}\w+)")
+COUNT_STOP = frozenset("""can could are is was were be been did do does have has had will would should may might
+the a an in of for at on to from by with that which""".split())
+# Schema / catalog questions: answered by the Data Engineer catalog page, not by the knowledge base (7E revision).
+SCHEMA_CUES = ("column", "columns", "schema", "grain", "lineage", "upstream", "downstream", "data type", "data types")
+
+
+def _distinct(phrases: list[str]) -> list[str]:
+    """Matched phrases of one tool counted once: duplicates by stem and phrases inside a longer match are dropped
+    ("pipeline" inside "pipeline run"; "pipeline run" = "pipeline runs") — 7E revision."""
+    stems = sorted({_norm(p).strip() for p in phrases}, key=len, reverse=True)
+    kept: list[str] = []
+    for s in stems:
+        if not any(f" {s} " in f" {k} " for k in kept):
+            kept.append(s)
+    return kept
+
+
+def _scores(question: str, exclude: set[str] = frozenset()) -> dict[str, int]:
+    excluded = {_norm(p).strip() for p in exclude}
+    return {t: sum(len(p) for p in _distinct(ps) if p not in excluded) for t, ps in _matched(question).items()}
+
+
 def pick_tool(question: str) -> tuple[str | None, int]:
-    """Best tool by total length of its matched trigger phrases (0 = none)."""
-    scored = {t: sum(len(p) for p in ps) for t, ps in _matched(question).items()}
+    """Best tool by the total length of its distinct matched trigger phrases (0 = none). For a counting question
+    ("how many rows…"), only tools that report that measure compete, and the one whose topic is also named wins
+    ("rows in quarantine" → quarantine; "rows in the last run" → rows processed)."""
+    scored = _scores(question)
+    ask = COUNT_ASK.search(question.lower())
+    if ask:
+        # the counted noun phrase stops at the first verb / auxiliary ("how many promotions CAN run" counts promotions)
+        words = []
+        for w in ask.group(1).split():
+            if w in COUNT_STOP:
+                break
+            words.append(w)
+        asked = {stem(w) for w in words}
+        candidates = [t for t, measures in TOOL_MEASURES.items() if measures & asked]   # in ownership order
+        if candidates:
+            topic = _scores(question, MEASURE_PHRASES)
+            # the candidate whose topic is named wins; otherwise the measure's primary owner (first in the order)
+            best = max(candidates, key=lambda t: (topic[t], -candidates.index(t)))
+            return best, max(scored[best], 1)
     best = max(scored, key=scored.get)
     return (best, scored[best]) if scored[best] else (None, 0)
 
@@ -115,6 +171,9 @@ def route_question(question: str, entities: Entities | None = None) -> Route:
     text = question.lower().strip()
     if HELP.search(text) and len(text.split()) <= 6:
         return Route("help", reason="greeting or help request")
+    # schema / lineage questions are catalog questions: refuse with a pointer to the Lineage & tables page (7E)
+    if _any(text, SCHEMA_CUES):
+        return Route("out_of_scope", reason="schema / catalog question")
     tool, _ = pick_tool(text)
     policy, data = _any(text, POLICY_CUES), _any(text, DATA_CUES)
     has_entities = bool(entities and (entities.store_ids or entities.tiers or entities.start or entities.limit

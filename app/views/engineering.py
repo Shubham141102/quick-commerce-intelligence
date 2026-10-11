@@ -20,9 +20,10 @@ import streamlit as st  # noqa: E402
 from app.components.charts import (  # noqa: E402
     LAYER_LABELS,
     bar_chart,
-    lineage_sankey,
     metric_history_chart,
+    pipeline_map,
     stage_duration_chart,
+    table_neighbours,
 )
 from app.components.ui import label, notes, page_header, require_workspace, tab_intro  # noqa: E402
 from src.common.paths import PROJECT_ROOT  # noqa: E402
@@ -153,9 +154,12 @@ def lineage() -> None:
     role = _open("lineage")
     tab_intro("Where does each table come from, what uses it, and what does it contain?")
     edges = q.lineage_edges(role)
-    st.subheader("Data flow between layers")
-    st.plotly_chart(lineage_sankey(edges), width="stretch")
-    notes("Width = number of table-to-table links · recorded automatically by the pipeline code, not drawn by hand")
+    st.subheader("How data flows through the pipeline")
+    supporting = st.toggle("Show supporting inputs (run metadata, policies & docs)", value=False, key="lineage_support")
+    st.plotly_chart(pipeline_map(edges, supporting), width="stretch", config={"displayModeBar": False})
+    notes("Read left to right: each box is a stage of the pipeline and how many tables it holds",
+          "Rows that fail Silver's checks go to Quarantine instead of Silver",
+          "Recorded automatically by the pipeline code, not drawn by hand")
 
     st.subheader("Table catalog")
     f1, f2 = st.columns([1, 2])
@@ -167,14 +171,18 @@ def lineage() -> None:
     st.dataframe(catalog, hide_index=True, width="stretch",
                  column_config={"description": st.column_config.TextColumn(width="large")})
 
-    st.subheader("Upstream and downstream of one table")
-    names = sorted(set(edges["source"]) | set(edges["target"]))
+    st.subheader("One table in context")
+    data_layers = {"bronze", "silver", "gold", "ml", "app"}
+    layer_of = dict(zip(edges["source"], edges["source_layer"])) | dict(zip(edges["target"], edges["target_layer"]))
+    names = sorted(n for n, lay in layer_of.items() if lay in data_layers)
     default = names.index("gld_daily_sales") if "gld_daily_sales" in names else 0
-    focus = st.selectbox("Table", names, index=default, key="lineage_focus")
-    st.plotly_chart(lineage_sankey(edges, focus), width="stretch")
-    up = edges.loc[edges["target"] == focus, "source"].tolist()
-    down = edges.loc[edges["source"] == focus, "target"].tolist()
-    notes(f"**Reads from** — {', '.join(up) or 'nothing (a source)'}", f"**Used by** — {', '.join(down) or 'nothing yet'}")
+    focus = st.selectbox("Table", names, index=default, key="lineage_focus",
+                         format_func=lambda n: f"{n}  ·  {LAYER_LABELS.get(layer_of.get(n, ''), '')}")
+    st.plotly_chart(table_neighbours(edges, focus), width="stretch", config={"displayModeBar": False})
+    up = sorted(set(edges.loc[edges["target"] == focus, "source"]))
+    down = sorted(set(edges.loc[edges["source"] == focus, "target"]))
+    notes(f"**{focus}** reads from {len(up)} table(s) and is used by {len(down)}",
+          "Box colour = layer: grey Bronze / Silver · blue Gold / ML · green App snapshot · red Quarantine")
 
     with st.expander("Transformation catalog (every Bronze → Silver rule)"):
         path = PROJECT_ROOT / "docs" / "transformation_catalog.md"

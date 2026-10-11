@@ -287,3 +287,4 @@ run_20261008T170726786,publish,publish_demo_snapshot,"gold,ml,silver dims",data/
 run_20261011T075901488,publish,publish_demo_snapshot,"gold,ml,silver dims",data/demo,python,,400816,,,,,,success,10.68
 run_20261011T080504671,publish,publish_demo_snapshot,"gold,ml,silver dims",data/demo,python,,400849,,,,,,success,9.67
 run_20261011T082301892,publish,publish_demo_snapshot,"gold,ml,silver dims",data/demo,python,,400852,,,,,,success,10.36
+run_20261011T083017363,publish,publish_demo_snapshot,"gold,ml,silver dims",data/demo,python,,400855,,,,,,success,10.83

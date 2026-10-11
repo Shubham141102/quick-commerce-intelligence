@@ -3,6 +3,8 @@
     python -m scripts.check_phase6                  # the 40-question gold set (the bars apply here)
     python -m scripts.check_phase6 --set holdout    # 20 held-out questions written after the first run (6F)
     python -m scripts.check_phase6 --mode llm       # same bars with the optional LLM layer (6G); needs [llm]
+    python -m scripts.check_phase6 --set engineering  # Data Engineer questions (7E): 8 + 2 role checks
+    python -m scripts.check_phase6 --set engineering-holdout   # 8 + 2 written after the first engineering run
 
 Pass bars, fixed before measuring (2026-10-07, Project_Plan_v2.md §9.9):
   6F.1 routing accuracy ≥ 90%        right route (and right tool for data / hybrid questions)
@@ -55,6 +57,45 @@ def expected_text(check: str, p: dict, lk: Lookups) -> str:
     if check == "high_risk_count":
         n = one(f"SELECT count(*) FROM gld_stockout_risk WHERE run_type = 'current' AND risk_tier = 'High'{st}", sp)
         return f"**High risk** — {int(n)}"
+    # ---- Data Engineer (7E): SQL on the published ops tables (verified against the raw logs by check_phase7)
+    if check == "rows_last_run":
+        n = one("""SELECT coalesce(sum(t.rows_written), 0) FROM ops_table_runs t
+                   WHERE t.run_id = (SELECT run_id FROM ops_pipeline_runs WHERE pipeline = 'quick_commerce_pipeline'
+                                     ORDER BY started_at DESC LIMIT 1)""", [])
+        return f"**Rows written** — {int(n):,}"
+    if check == "rows_rejected_last_run":
+        n = one("""SELECT coalesce(sum(t.rows_rejected), 0) FROM ops_table_runs t
+                   WHERE t.run_id = (SELECT run_id FROM ops_pipeline_runs WHERE pipeline = 'quick_commerce_pipeline'
+                                     ORDER BY started_at DESC LIMIT 1)""", [])
+        return f"**Rows rejected** — {int(n):,}"
+    if check == "quarantine_top_dataset":
+        return str(one("SELECT dataset FROM ops_quarantine_summary GROUP BY dataset ORDER BY sum(rows) DESC LIMIT 1", []))
+    if check == "clean_rate_payments":
+        x = one("""SELECT 1 - coalesce(sum(rows_affected) FILTER (WHERE outcome IN ('removed', 'quarantined',
+                          'cascade')), 0) / max(rows_checked) FROM gld_quality_summary WHERE dataset = 'payments'""", [])
+        return f"payments ({float(x):.1%})"
+    if check == "quarantine_payments":
+        n = one("SELECT sum(rows) FROM ops_quarantine_summary WHERE dataset = 'payments'", [])
+        return f"**Rows quarantined** — {int(n):,}"
+    if check == "runs_recorded":
+        n = one("SELECT count(*) FROM ops_pipeline_runs WHERE pipeline = 'quick_commerce_pipeline'", [])
+        return f"**Runs recorded** — {int(n)}"
+    if check == "runs_failed":
+        n = one("SELECT count(*) FROM ops_pipeline_runs WHERE pipeline = 'quick_commerce_pipeline' AND status = 'failed'",
+                [])
+        return f"**Failed** — {int(n)}"
+    if check == "lowest_clean_dataset":
+        return str(one("""SELECT dataset FROM (
+                              SELECT dataset, 1 - coalesce(sum(rows_affected) FILTER (WHERE outcome IN
+                                     ('removed', 'quarantined', 'cascade')), 0) / max(rows_checked) AS clean
+                              FROM gld_quality_summary GROUP BY dataset) ORDER BY clean, dataset LIMIT 1""", []))
+    if check == "quarantine_total":
+        return f"**Rows quarantined** — {int(one('SELECT sum(rows) FROM ops_quarantine_summary', [])):,}"
+    if check == "quarantine_order_items":
+        n = one("SELECT sum(rows) FROM ops_quarantine_summary WHERE dataset = 'order_items'", [])
+        return f"**Rows quarantined** — {int(n):,}"
+    if check == "model_count":
+        return f"**Models** — {int(one('SELECT count(DISTINCT model_name) FROM ops_model_runs', []))}"
     if check == "medium_risk_count":
         n = one(f"SELECT count(*) FROM gld_stockout_risk WHERE run_type = 'current' AND risk_tier = 'Medium'{st}", sp)
         return f"**Medium risk** — {int(n)}"
@@ -133,8 +174,9 @@ def status(ok: bool) -> str:
 
 def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    holdout = "--set" in sys.argv and sys.argv[sys.argv.index("--set") + 1] == "holdout"
-    name = "holdout_questions.yaml" if holdout else "questions.yaml"
+    qset = sys.argv[sys.argv.index("--set") + 1] if "--set" in sys.argv else "gold"
+    name = {"holdout": "holdout_questions.yaml", "engineering": "engineering_questions.yaml",
+            "engineering-holdout": "engineering_holdout_questions.yaml"}.get(qset, "questions.yaml")
     spec = yaml.safe_load((PROJECT_ROOT / "tests" / "rag" / name).read_text(encoding="utf-8"))
     chunks = get_snapshot().query("SELECT * FROM rag_chunks")
     lk = Lookups.from_snapshot()
@@ -144,7 +186,8 @@ def main() -> int:
         print("LLM mode skipped: no LLM configured ([llm] provider / api_key in .streamlit/secrets.toml).")
         return 0
     bot = Assistant(Retriever(chunks), lk, client)
-    run_id = ("rag_holdout_" if holdout else "rag_") + ("llm_" if llm_mode else "") + \
+    run_id = {"holdout": "rag_holdout_", "engineering": "rag_engineering_",
+              "engineering-holdout": "rag_engineering_holdout_"}.get(qset, "rag_") + ("llm_" if llm_mode else "") + \
         datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
 
     rows, misses = [], []
@@ -177,6 +220,10 @@ def main() -> int:
         cite_ok, cite_n = cite_ok + max(g, 0), cite_n + t
         if item["kind"] in ("ambiguous", "out_of_scope"):
             ok = a.route in item["routes"] and (a.route != "out_of_scope" or (not a.citations and a.table is None))
+            if item.get("mentions"):    # e.g. the refusal must point to the right dashboard page (7E)
+                ok = ok and item["mentions"] in a.markdown
+                if item["mentions"] not in a.markdown:
+                    misses.append(f"{item['id']} refusal: «{item['mentions']}» not mentioned — {item['question']}")
             refuse_ok += ok
             refuse_n += 1
         if not r_ok:
@@ -205,9 +252,10 @@ def main() -> int:
                      "citations": "|".join(a.citations), "latency_ms": a.latency_ms, "mode": a.mode})
 
     n_q, n_r = len(spec["questions"]), len(spec["role_checks"])
-    rates = {"routing": route_ok / n_q, "hit3": hit / hit_n if hit_n else 0, "numbers": num_ok / num_n if num_n else 0,
-             "citations": cite_ok / cite_n if cite_n else 1.0, "refusal": refuse_ok / refuse_n if refuse_n else 0,
-             "roles": role_ok / n_r}
+    # None = no question in this set exercises the bar (e.g. no retrieval questions in the engineering set): n/a
+    rates = {"routing": route_ok / n_q, "hit3": hit / hit_n if hit_n else None,
+             "numbers": num_ok / num_n if num_n else None, "citations": cite_ok / cite_n if cite_n else None,
+             "refusal": refuse_ok / refuse_n if refuse_n else None, "roles": role_ok / n_r if n_r else None}
     lines = [("6F.1 Routing accuracy (route + tool)", "routing", f"{route_ok}/{n_q}"),
              ("6F.2 Retrieval hit@3", "hit3", f"{hit}/{hit_n}"),
              ("6F.3 Numbers equal independent SQL", "numbers", f"{num_ok}/{num_n} answers with the expected tool"),
@@ -215,8 +263,13 @@ def main() -> int:
              ("6F.5 Correct refusal / clarification", "refusal", f"{refuse_ok}/{refuse_n}"),
              ("6F.6 Role check (no data outside the workspace)", "roles", f"{role_ok}/{n_r}")]
     mode_label = f"LLM mode ({client.name})" if client else "template mode"
-    print(f"\nPhase 6 evaluation — business assistant ({mode_label}) — {'held-out set' if holdout else 'gold set'}\n")
+    set_label = {"holdout": "held-out set", "engineering": "Data Engineer set",
+                 "engineering-holdout": "Data Engineer held-out set"}.get(qset, "gold set")
+    print(f"\nPhase 6 evaluation — business assistant ({mode_label}) — {set_label}\n")
     for title, key, detail in lines:
+        if rates[key] is None:
+            print(f"  [ n/a] {title:52s}    —    (bar {BARS[key]:.0%})  no question in this set exercises it")
+            continue
         print(f"  [{status(rates[key] >= BARS[key])}] {title:52s} {rates[key]:6.1%}  (bar {BARS[key]:.0%})  {detail}")
     lat = pd.Series([r["latency_ms"] for r in rows])
     if client:
@@ -234,8 +287,10 @@ def main() -> int:
     out = resolve(load_config("small").paths["metadata"]) / "meta_rag_runs" / f"{run_id}.csv"
     write_csv(pd.DataFrame(rows).astype(str), out, LOG_COLUMNS)
     print(f"\n  logged {len(rows)} answers → {out.relative_to(PROJECT_ROOT).as_posix()}")
-    failed = sum(rates[k] < BARS[k] for k in BARS)
-    print(f"\n{len(BARS) - failed} passed, {failed} failed")
+    measured = [k for k in BARS if rates[k] is not None]
+    failed = sum(rates[k] < BARS[k] for k in measured)
+    print(f"\n{len(measured) - failed} passed, {failed} failed" + (f", {len(BARS) - len(measured)} n/a"
+                                                                  if len(measured) < len(BARS) else ""))
     return 0 if failed == 0 else 1
 
 

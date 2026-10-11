@@ -192,58 +192,58 @@ slv_order_items,gld_recommendation_metrics,gld_recommendation_metrics,python,sil
 slv_orders,gld_retention_cohorts,gld_retention_cohorts,python,silver,ml,run_20261005T135746863
 slv_orders,gld_customer_retention,gld_customer_retention,python,silver,ml,run_20261005T135746863
 slv_customers,gld_customer_retention,gld_customer_retention,python,silver,ml,run_20261005T135746863
-gld_daily_sales,demo/gld_daily_sales,publish,python,gold,app,run_20261011T083017363
-gld_daily_category_sales,demo/gld_daily_category_sales,publish,python,gold,app,run_20261011T083017363
-gld_product_performance,demo/gld_product_performance,publish,python,gold,app,run_20261011T083017363
-gld_inventory_daily,demo/gld_inventory_daily,publish,python,gold,app,run_20261011T083017363
-gld_demand_features,demo/gld_demand_features,publish,python,gold,app,run_20261011T083017363
-gld_customer_360,demo/gld_customer_360,publish,python,gold,app,run_20261011T083017363
-gld_customer_category,demo/gld_customer_category,publish,python,gold,app,run_20261011T083017363
-gld_basket_pairs,demo/gld_basket_pairs,publish,python,gold,app,run_20261011T083017363
-gld_delivery_metrics,demo/gld_delivery_metrics,publish,python,gold,app,run_20261011T083017363
-gld_cancellation_metrics,demo/gld_cancellation_metrics,publish,python,gold,app,run_20261011T083017363
-gld_promotion_metrics,demo/gld_promotion_metrics,publish,python,gold,app,run_20261011T083017363
-gld_quality_summary,demo/gld_quality_summary,publish,python,gold,app,run_20261011T083017363
-gld_demand_predictions,demo/gld_demand_predictions,publish,python,ml,app,run_20261011T083017363
-gld_forecast_metrics,demo/gld_forecast_metrics,publish,python,ml,app,run_20261011T083017363
-gld_forecast_feature_importance,demo/gld_forecast_feature_importance,publish,python,ml,app,run_20261011T083017363
-gld_sku_demand_forecast,demo/gld_sku_demand_forecast,publish,python,ml,app,run_20261011T083017363
-gld_stockout_risk,demo/gld_stockout_risk,publish,python,ml,app,run_20261011T083017363
-gld_replenishment,demo/gld_replenishment,publish,python,ml,app,run_20261011T083017363
-gld_stockout_backtest,demo/gld_stockout_backtest,publish,python,ml,app,run_20261011T083017363
-gld_lost_sales,demo/gld_lost_sales,publish,python,ml,app,run_20261011T083017363
-gld_sales_anomalies,demo/gld_sales_anomalies,publish,python,ml,app,run_20261011T083017363
-gld_anomaly_series,demo/gld_anomaly_series,publish,python,ml,app,run_20261011T083017363
-gld_customer_segments,demo/gld_customer_segments,publish,python,ml,app,run_20261011T083017363
-gld_segment_profiles,demo/gld_segment_profiles,publish,python,ml,app,run_20261011T083017363
-gld_segmentation_selection,demo/gld_segmentation_selection,publish,python,ml,app,run_20261011T083017363
-gld_basket_rules,demo/gld_basket_rules,publish,python,ml,app,run_20261011T083017363
-gld_recommendations,demo/gld_recommendations,publish,python,ml,app,run_20261011T083017363
-gld_recommendation_metrics,demo/gld_recommendation_metrics,publish,python,ml,app,run_20261011T083017363
-gld_retention_cohorts,demo/gld_retention_cohorts,publish,python,ml,app,run_20261011T083017363
-gld_customer_retention,demo/gld_customer_retention,publish,python,ml,app,run_20261011T083017363
-slv_products,demo/dim_products,publish,python,silver,app,run_20261011T083017363
-slv_stores,demo/dim_stores,publish,python,silver,app,run_20261011T083017363
-slv_categories,demo/dim_categories,publish,python,silver,app,run_20261011T083017363
-docs/05_demand_forecasting.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T083017363
-docs/06_stockout_replenishment.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T083017363
-docs/08_inventory_explorer_lost_sales.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T083017363
-docs/09_business_workspace.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T083017363
-docs/10_marketing_analytics.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T083017363
-docs/metric_definitions.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T083017363
-policies/cancellation.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T083017363
-policies/delivery.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T083017363
-policies/inventory.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T083017363
-policies/promotion.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T083017363
-policies/refund.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T083017363
-meta_pipeline_runs,demo/ops_pipeline_runs,publish (ops snapshot),python,metadata,app,run_20261011T083017363
-meta_stage_runs,demo/ops_stage_runs,publish (ops snapshot),python,metadata,app,run_20261011T083017363
-meta_table_runs,demo/ops_table_runs,publish (ops snapshot),python,metadata,app,run_20261011T083017363
-meta_quality_results,demo/ops_quality_results,publish (ops snapshot),python,metadata,app,run_20261011T083017363
-qtn_records,demo/ops_quarantine_summary,publish (ops snapshot),python,quarantine,app,run_20261011T083017363
-meta_file_loads,demo/ops_file_loads,publish (ops snapshot),python,metadata,app,run_20261011T083017363
-meta_lineage_edges,demo/ops_lineage,publish (ops snapshot),python,metadata,app,run_20261011T083017363
-meta_table_runs,demo/ops_table_catalog,publish (ops snapshot),python,metadata,app,run_20261011T083017363
-meta_model_runs,demo/ops_model_runs,publish (ops snapshot),python,metadata,app,run_20261011T083017363
-meta_model_metrics,demo/ops_model_metrics,publish (ops snapshot),python,metadata,app,run_20261011T083017363
-meta_rag_runs,demo/ops_assistant_evals,publish (ops snapshot),python,metadata,app,run_20261011T083017363
+gld_daily_sales,demo/gld_daily_sales,publish,python,gold,app,run_20261011T174228502
+gld_daily_category_sales,demo/gld_daily_category_sales,publish,python,gold,app,run_20261011T174228502
+gld_product_performance,demo/gld_product_performance,publish,python,gold,app,run_20261011T174228502
+gld_inventory_daily,demo/gld_inventory_daily,publish,python,gold,app,run_20261011T174228502
+gld_demand_features,demo/gld_demand_features,publish,python,gold,app,run_20261011T174228502
+gld_customer_360,demo/gld_customer_360,publish,python,gold,app,run_20261011T174228502
+gld_customer_category,demo/gld_customer_category,publish,python,gold,app,run_20261011T174228502
+gld_basket_pairs,demo/gld_basket_pairs,publish,python,gold,app,run_20261011T174228502
+gld_delivery_metrics,demo/gld_delivery_metrics,publish,python,gold,app,run_20261011T174228502
+gld_cancellation_metrics,demo/gld_cancellation_metrics,publish,python,gold,app,run_20261011T174228502
+gld_promotion_metrics,demo/gld_promotion_metrics,publish,python,gold,app,run_20261011T174228502
+gld_quality_summary,demo/gld_quality_summary,publish,python,gold,app,run_20261011T174228502
+gld_demand_predictions,demo/gld_demand_predictions,publish,python,ml,app,run_20261011T174228502
+gld_forecast_metrics,demo/gld_forecast_metrics,publish,python,ml,app,run_20261011T174228502
+gld_forecast_feature_importance,demo/gld_forecast_feature_importance,publish,python,ml,app,run_20261011T174228502
+gld_sku_demand_forecast,demo/gld_sku_demand_forecast,publish,python,ml,app,run_20261011T174228502
+gld_stockout_risk,demo/gld_stockout_risk,publish,python,ml,app,run_20261011T174228502
+gld_replenishment,demo/gld_replenishment,publish,python,ml,app,run_20261011T174228502
+gld_stockout_backtest,demo/gld_stockout_backtest,publish,python,ml,app,run_20261011T174228502
+gld_lost_sales,demo/gld_lost_sales,publish,python,ml,app,run_20261011T174228502
+gld_sales_anomalies,demo/gld_sales_anomalies,publish,python,ml,app,run_20261011T174228502
+gld_anomaly_series,demo/gld_anomaly_series,publish,python,ml,app,run_20261011T174228502
+gld_customer_segments,demo/gld_customer_segments,publish,python,ml,app,run_20261011T174228502
+gld_segment_profiles,demo/gld_segment_profiles,publish,python,ml,app,run_20261011T174228502
+gld_segmentation_selection,demo/gld_segmentation_selection,publish,python,ml,app,run_20261011T174228502
+gld_basket_rules,demo/gld_basket_rules,publish,python,ml,app,run_20261011T174228502
+gld_recommendations,demo/gld_recommendations,publish,python,ml,app,run_20261011T174228502
+gld_recommendation_metrics,demo/gld_recommendation_metrics,publish,python,ml,app,run_20261011T174228502
+gld_retention_cohorts,demo/gld_retention_cohorts,publish,python,ml,app,run_20261011T174228502
+gld_customer_retention,demo/gld_customer_retention,publish,python,ml,app,run_20261011T174228502
+slv_products,demo/dim_products,publish,python,silver,app,run_20261011T174228502
+slv_stores,demo/dim_stores,publish,python,silver,app,run_20261011T174228502
+slv_categories,demo/dim_categories,publish,python,silver,app,run_20261011T174228502
+docs/05_demand_forecasting.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T174228502
+docs/06_stockout_replenishment.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T174228502
+docs/08_inventory_explorer_lost_sales.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T174228502
+docs/09_business_workspace.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T174228502
+docs/10_marketing_analytics.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T174228502
+docs/metric_definitions.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T174228502
+policies/cancellation.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T174228502
+policies/delivery.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T174228502
+policies/inventory.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T174228502
+policies/promotion.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T174228502
+policies/refund.md,demo/rag_chunks,publish (chunking),python,knowledge,app,run_20261011T174228502
+meta_pipeline_runs,demo/ops_pipeline_runs,publish (ops snapshot),python,metadata,app,run_20261011T174228502
+meta_stage_runs,demo/ops_stage_runs,publish (ops snapshot),python,metadata,app,run_20261011T174228502
+meta_table_runs,demo/ops_table_runs,publish (ops snapshot),python,metadata,app,run_20261011T174228502
+meta_quality_results,demo/ops_quality_results,publish (ops snapshot),python,metadata,app,run_20261011T174228502
+qtn_records,demo/ops_quarantine_summary,publish (ops snapshot),python,quarantine,app,run_20261011T174228502
+meta_file_loads,demo/ops_file_loads,publish (ops snapshot),python,metadata,app,run_20261011T174228502
+meta_lineage_edges,demo/ops_lineage,publish (ops snapshot),python,metadata,app,run_20261011T174228502
+meta_table_runs,demo/ops_table_catalog,publish (ops snapshot),python,metadata,app,run_20261011T174228502
+meta_model_runs,demo/ops_model_runs,publish (ops snapshot),python,metadata,app,run_20261011T174228502
+meta_model_metrics,demo/ops_model_metrics,publish (ops snapshot),python,metadata,app,run_20261011T174228502
+meta_rag_runs,demo/ops_assistant_evals,publish (ops snapshot),python,metadata,app,run_20261011T174228502

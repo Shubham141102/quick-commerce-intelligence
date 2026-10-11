@@ -55,3 +55,11 @@ def test_periods_relative_to_the_end_of_the_data():
 def test_detectors_and_no_false_tiers():
     assert extract("any payment failures or spikes?", LK).detectors == ["demand_spike", "payment_failure"]
     assert extract("is the forecast highly accurate", LK).tiers == []        # "high" not followed by risk / tier
+
+
+
+def test_datasets_are_recognised_longest_first():
+    assert extract("quarantine for order items", LK).datasets == ["order_items"]          # not "orders"
+    assert extract("rows in returns_refunds", LK).datasets == ["returns_refunds"]
+    assert extract("orders table columns", LK).datasets == ["orders"]
+    assert extract("what is the reorder rule", LK).datasets == []

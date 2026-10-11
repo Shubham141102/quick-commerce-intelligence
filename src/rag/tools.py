@@ -17,6 +17,7 @@ from typing import Callable, Literal
 import pandas as pd
 from pydantic import BaseModel, ConfigDict, Field
 
+from src.common.schemas import SOURCE_SCHEMAS
 from src.rag.entities import Lookups
 from src.serving import queries as q
 from src.serving.permissions import allowed_workspaces
@@ -36,6 +37,7 @@ class ToolParams(BaseModel):
     category_id: str | None = None
     product_id: str | None = None
     detectors: list[Literal["demand_spike", "payment_failure", "store_outage"]] | None = None
+    dataset: str | None = None                  # a source dataset (Data Engineer tools, 7E)
     start: date | None = None
     end: date | None = None
     limit: int = Field(10, ge=1, le=MAX_ROWS)
@@ -50,6 +52,8 @@ def validate_params(raw: dict, lk: Lookups) -> ToolParams:
         raise ToolInputError(f"Unknown category: {p.category_id}")
     if p.product_id and p.product_id not in set(lk.products["product_id"]):
         raise ToolInputError(f"Unknown product: {p.product_id}")
+    if p.dataset and p.dataset not in SOURCE_SCHEMAS:
+        raise ToolInputError(f"Unknown dataset: {p.dataset}")
     for d in (p.start, p.end):
         if d and not lk.first_day <= d <= lk.last_day:
             raise ToolInputError(f"The data covers {lk.first_day:%d %b %Y} – {lk.last_day:%d %b %Y}; {d:%d %b %Y} is outside it.")
@@ -317,6 +321,79 @@ def _promotions(role, p, lk):
         "Before / after comparison, not a controlled test.", total=len(pm))
 
 
+# ----------------------------------------------------------------------------------------------- data engineer (7E)
+def _ts(v) -> str:
+    return "—" if v is None or pd.isna(v) else f"{pd.Timestamp(v):%d %b %Y %H:%M} UTC"
+
+
+def _pipeline_status(role, p, lk):
+    o = q.ops_overview(role)
+    runs = q.pipeline_runs(role, p.limit)
+    return _result("pipeline_status", "Pipeline status", {
+        "Last run": f"{(o['last_status'] or '—')} · {_ts(o['last_started'])} · stages {o['last_stages'] or '—'}",
+        "Runs recorded": str(o["runs"]), "Succeeded": str(o["succeeded"]), "Failed": str(o["failed"]),
+        "Success rate": _pct(o["success_rate"]),
+        "Median run time": "—" if o["median_duration_s"] is None else f"{o['median_duration_s']:.0f} s"},
+        runs[["started_at", "stages", "status", "duration_s", "error"]], "ops_pipeline_runs", o["last_started"],
+        "all recorded pipeline runs", "A failed run never replaces the published data.", total=o["runs"])
+
+
+def _pipeline_rows(role, p, lk):
+    runs = q.pipeline_runs(role, 1)
+    if runs.empty:
+        raise ToolInputError("No pipeline run has been recorded yet.")
+    last = runs.iloc[0]
+    t = q.table_runs_for(role, last["run_id"])
+    by_stage = (t.groupby("stage", as_index=False, sort=False)
+                .agg(tables=("target", "count"), rows_read=("rows_read", "sum"), rows_written=("rows_written", "sum"),
+                     rows_rejected=("rows_rejected", "sum"), rows_deduplicated=("rows_deduplicated", "sum")))
+    num = lambda col: int(pd.to_numeric(t[col], errors="coerce").fillna(0).sum())  # noqa: E731
+    return _result("pipeline_rows", "Rows processed in the last pipeline run", {
+        "Run": f"{last['run_id']} ({last['status']}, stages {last['stages']})",
+        "Rows written": f"{num('rows_written'):,}", "Rows rejected": f"{num('rows_rejected'):,}",
+        "Duplicates removed": f"{num('rows_deduplicated'):,}", "Tables written": str(len(t))},
+        by_stage, "ops_table_runs, ops_pipeline_runs", last["started_at"], "latest recorded run",
+        "Rows written = rows output by every table step in the run.")
+
+
+def _data_quality(role, p, lk):
+    ds = q.quality_by_dataset(role)
+    if p.dataset:
+        ds = ds[ds["dataset"] == p.dataset]
+    worst = ds.sort_values("clean_rate").iloc[0] if len(ds) else None
+    return _result("data_quality", "Data quality by dataset (latest Silver run)", {
+        "Datasets checked": str(len(ds)), "Rows checked": f"{int(ds['rows_checked'].sum()):,}",
+        "Mean clean rate": _pct(ds["clean_rate"].mean()) if len(ds) else "—",
+        "Lowest clean rate": f"{worst['dataset']} ({worst['clean_rate']:.1%})" if worst is not None else "—"},
+        ds.sort_values("clean_rate"), "gld_quality_summary", lk.last_day, p.dataset or "all datasets",
+        "Clean rate = rows kept ÷ rows checked (duplicates removed and quarantined rows excluded).")
+
+
+def _quarantine(role, p, lk):
+    summary = q.quarantine_summary(role, p.dataset)
+    by_ds = q.quarantine_by_dataset(role)
+    if p.dataset:
+        by_ds = by_ds[by_ds["dataset"] == p.dataset]
+    top = summary.iloc[0] if len(summary) else None
+    return _result("quarantine", "Quarantined rows", {
+        "Rows quarantined": f"{int(by_ds['total'].sum()):,}", "Direct (failed a rule)": f"{int(by_ds['direct'].sum()):,}",
+        "Cascade (parent rejected)": f"{int(by_ds['cascade'].sum()):,}",
+        "Largest reason": f"{top['dataset']} · {top['primary_rule']} ({int(top['rows']):,})" if top is not None else "—"},
+        summary, "ops_quarantine_summary", lk.last_day, p.dataset or "all datasets",
+        "Counts and record ids only; raw rejected rows stay on the pipeline machine.", total=len(summary))
+
+
+def _model_health(role, p, lk):
+    reg = q.model_registry(role)
+    hist = q.key_metric_history(role).sort_values("trained_at").groupby("metric").tail(1)
+    headline = {"Models": str(len(reg))}
+    headline |= {m: f"{v:.3f}" for m, v in zip(hist["metric"], hist["value"])}
+    return _result("model_health", "Model registry (latest version of each model)", headline,
+                   reg[["model_name", "model_version", "trained_at", "status"]], "ops_model_runs, ops_model_metrics",
+                   reg["trained_at"].max() if len(reg) else None, "all models",
+                   "WAPE: lower is better · precision: higher is better.")
+
+
 TOOLS: dict[str, Tool] = {t.name: t for t in (
     Tool("inventory_overview", "inventory", "Stock position", "risk tiers, zero stock, reorders, 7-day forecast",
          _inventory_overview),
@@ -341,6 +418,11 @@ TOOLS: dict[str, Tool] = {t.name: t for t in (
          _recommendation_accuracy),
     Tool("retention", "marketing", "Retention", "active, at-risk and lapsed customers", _retention),
     Tool("promotions", "marketing", "Promotions", "promotion uplift and cost", _promotions),
+    Tool("pipeline_status", "engineering", "Pipeline status", "last run, success rate, failed runs", _pipeline_status),
+    Tool("pipeline_rows", "engineering", "Rows processed", "rows written / rejected in the last run", _pipeline_rows),
+    Tool("data_quality", "engineering", "Data quality", "clean rate per dataset", _data_quality),
+    Tool("quarantine", "engineering", "Quarantine", "rejected rows by dataset and rule", _quarantine),
+    Tool("model_health", "engineering", "Model health", "model registry and latest metrics", _model_health),
 )}
 
 

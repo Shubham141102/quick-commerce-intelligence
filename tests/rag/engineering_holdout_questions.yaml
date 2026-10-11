@@ -1,0 +1,25 @@
+# Data Engineer HELD-OUT set (Phase 7E) — 8 questions + 2 role checks. Written 2026-10-11 AFTER the first
+# measurement of tests/rag/engineering_questions.yaml and BEFORE the general fix (measure-aware routing, overlapping
+# phrases counted once, schema questions → page hint), so the fix could not be shaped by these questions.
+
+questions:
+  - {id: EH1, kind: data, role: data_engineer, routes: [data], tool: pipeline_status,
+     question: "How many runs did the pipeline have in total?", check: runs_recorded}
+  - {id: EH2, kind: data, role: data_engineer, routes: [data], tool: pipeline_rows,
+     question: "What was the rejected row count in the latest run?", check: rows_rejected_last_run}
+  - {id: EH3, kind: data, role: data_engineer, routes: [data], tool: quarantine,
+     question: "Which dataset has the most quarantined rows?", check: quarantine_top_dataset}
+  - {id: EH4, kind: data, role: data_engineer, routes: [data], tool: data_quality,
+     question: "What is the clean rate of payments?", check: clean_rate_payments}
+  - {id: EH5, kind: data, role: data_engineer, routes: [data], tool: model_health,
+     question: "How many models are in the registry?", check: model_count}
+  - {id: EH6, kind: data, role: data_engineer, routes: [data], tool: quarantine,
+     question: "Show quarantine reasons for payments", check: quarantine_payments}
+  - {id: EH7, kind: out_of_scope, role: data_engineer, routes: [out_of_scope],
+     question: "What is upstream of the deliveries table?", mentions: "Lineage & tables"}
+  - {id: EH8, kind: out_of_scope, role: data_engineer, routes: [out_of_scope],
+     question: "Which columns are in the reviews dataset?", mentions: "Lineage & tables"}
+
+role_checks:
+  - {id: EHR1, role: marketing_manager, question: "How many models are in the registry?"}
+  - {id: EHR2, role: inventory_manager, question: "Which datasets have rejected records?"}
