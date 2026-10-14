@@ -22,5 +22,5 @@ questions:
      question: "What columns does the orders table have?", mentions: "Lineage & tables"}
 
 role_checks:
-  - {id: ER1, role: business_analyst, question: "How many rows were processed in the last run?"}
+  - {id: ER1, role: growth_manager, question: "How many rows were processed in the last run?"}
   - {id: ER2, role: inventory_manager, question: "Did the pipeline fail last night?"}

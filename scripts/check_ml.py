@@ -121,11 +121,11 @@ def _app_checks(paths: dict, model_version: str) -> list[tuple[str, bool, str]]:
         blocked = 0
         for f in functions:
             try:
-                f("marketing_manager")
+                f("growth_manager")
             except AccessDenied:
                 blocked += 1
         out.append(("12. Inventory data functions work for the right role, block others", works and blocked == len(functions),
-                    f"{len(functions)} functions ran for inventory_manager; {blocked}/{len(functions)} blocked for marketing_manager"))
+                    f"{len(functions)} functions ran for inventory_manager; {blocked}/{len(functions)} blocked for growth_manager"))
     finally:
         if previous is None:
             os.environ.pop("QCI_DEMO_DIR", None)

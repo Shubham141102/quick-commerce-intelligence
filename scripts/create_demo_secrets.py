@@ -17,8 +17,7 @@ from src.common.paths import PROJECT_ROOT
 
 DEMO_USERS = {  # username: (display name, role, default demo password)
     "inventory": ("Inventory Manager (demo)", "inventory_manager", "inventory-demo"),
-    "marketing": ("Marketing Manager (demo)", "marketing_manager", "marketing-demo"),
-    "business": ("Business Analyst (demo)", "business_analyst", "business-demo"),
+    "growth": ("Business & Growth Manager (demo)", "growth_manager", "growth-demo"),
     "engineer": ("Data Engineer (demo)", "data_engineer", "engineer-demo"),
     "admin": ("Demo Administrator", "admin", "admin-demo"),
 }

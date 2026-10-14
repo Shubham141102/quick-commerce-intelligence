@@ -20,6 +20,8 @@ Documentation for the Quick-Commerce Intelligence Platform. Each completed proce
 | 12 | Frontend: login page, persona landing, page design | [12_frontend.md](12_frontend.md) | Done (Data Engineer workspace on hold) |
 | 13 | Business assistant — RAG (Phase 6) | [13_rag_assistant.md](13_rag_assistant.md) | Done (all 6 evaluation bars pass; optional free LLM) |
 | 14 | Data Engineer workspace (Phase 7) | [14_data_engineer_workspace.md](14_data_engineer_workspace.md) | Done (9/9 checks) |
+| 15 | Viva preparation: likely questions and answers | [15_viva_questions.md](15_viva_questions.md) | Reference |
+| 16 | Persona consolidation: Business + Marketing → Business & Growth (4 personas → 3, 16 pages → 12) | [16_persona_consolidation.md](16_persona_consolidation.md) | Code complete, verification pending |
 
 ## Reference documents (generated — do not edit by hand)
 

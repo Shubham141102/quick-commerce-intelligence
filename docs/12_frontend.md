@@ -1,6 +1,6 @@
 # 12. Frontend: Login, Persona Landing and Page Design
 
-**Status:** complete for all four workspaces (the Data Engineer workspace was added in Phase 7) · **Code:** `app/Home.py`, `app/components/{auth,ui,personas}.py`, `app/views/{inventory,business,marketing,welcome,engineering}.py`, `.streamlit/config.toml` · **Run:** `streamlit run app/Home.py`
+**Status:** complete for all three workspaces (Business and Marketing merged into Business & Growth on 2026-10-14, [16_persona_consolidation.md](16_persona_consolidation.md); the Data Engineer workspace was added in Phase 7) · **Code:** `app/Home.py`, `app/components/{auth,ui,personas}.py`, `app/views/{inventory,growth,welcome,engineering}.py`, `.streamlit/config.toml` · **Run:** `streamlit run app/Home.py`
 
 ## What the user sees
 
@@ -17,8 +17,7 @@ streamlit run app/Home.py
         │ sign in
         ▼
  inventory  → 📦 Inventory & Supply Chain     (4 tabs)
- business   → 📈 Business & Revenue           (3 tabs)
- marketing  → 🎯 Customer Growth & Marketing  (5 tabs)
+ growth     → 📈 Business & Growth            (4 pages; was Business 3 + Marketing 5)
  engineer   → 🛠️ Data Engineer                (4 pages, Phase 7)
  admin      → 🏠 Overview → links to every workspace (sidebar menu)
 ```
@@ -32,8 +31,7 @@ Overview plus every group.
 | Workspace | Sidebar pages (URL) |
 |---|---|
 | Inventory & Supply Chain | Overview (`/`), Demand forecasting (`/inventory-forecasting`), Stockout risk & replenishment (`/inventory-stockout`), Inventory explorer (`/inventory-explorer`) |
-| Business & Revenue | Sales & revenue performance, Delivery & operations, Anomaly detection (`/business-…`) |
-| Customer Growth & Marketing | Segments, Basket & affinity, Recommendations, Retention, Promotion effectiveness (`/marketing-…`) |
+| Business & Growth | Performance (`/`), Alerts, Customers, Growth levers (`/growth-…`) — merged from Business & Revenue and Customer Growth & Marketing, see docs/16_persona_consolidation.md |
 | Data Engineer | Pipeline runs (`/`), Data quality & quarantine, Lineage & tables, Model monitoring (`/engineering-…`) — docs/14_data_engineer_workspace.md |
 | Every persona | **Assistant** (last item of the group; next to Overview for the admin) — see docs/13_rag_assistant.md |
 
@@ -49,7 +47,7 @@ moving between them. Running a view file directly (as the tests do) still render
 | Situation | Pages registered | Landing (default) page |
 |---|---|---|
 | Not signed in | the login page only (menu hidden) | Login |
-| One workspace (inventory / business / marketing / engineer) | only that workspace (menu hidden) | that workspace |
+| One workspace (inventory / growth / engineer) | only that workspace (menu hidden) | that workspace |
 | Admin (all workspaces) | Overview + all workspaces (sidebar menu) | Overview |
 
 A persona's workspace is registered as Streamlit's **default page**, so after sign-in the app opens it directly. Other workspaces are **not registered at all** for that user, so typing their URL cannot open them. Every data function also checks the role again (`@workspace(...)` in `src/serving/queries.py`).
@@ -73,7 +71,7 @@ typography, a clear hierarchy. Theme values are real Streamlit theme settings in
 | Tables | Slate header row (#F1F5F9 / #475569), light borders; status cells as soft badges (High #FEF3F2/#B42318, Medium #FFFAEB/#B54708, Low #ECFDF3/#067647) |
 | Charts | One shared style (`charts._base`): white plot, faint horizontal grid only, Inter 12 px, legend top-left. History in light slate, the model's past forecast in slate, forecast / primary series in the accent blue with a light-blue band, thresholds (reorder level, SLA) in amber, problem periods (stockouts, anomaly windows) as a faint red wash |
 | Text | Crisp points, not paragraphs (2026-10-07): explanations are 2–3 grey bullets via `ui.notes()`, one idea each, ~10 words; summaries use `Label — value` (e.g. *Next 7 days — 46 units (~6.6/day)*); info and warning boxes lead with a bold headline. Chart notes say how to read the chart, not which colour is which (the legend does that). No information was removed |
-| Login | Dark brand panel (facts: 12 stores, 3 cities, 6 months; the four workspaces with codes INV / BIZ / MKT / ENG) beside a plain sign-in form |
+| Login | Dark brand panel (facts: 12 stores, 3 cities, 6 months; the three workspaces with codes INV / GRO / ENG) beside a plain sign-in form |
 | Admin overview | Snapshot KPI strip, then a two-column grid of workspace cards with a Live / On hold badge and an "Open" link |
 
 ## Page design
@@ -99,21 +97,17 @@ typography, a clear hierarchy. Theme values are real Streamlit theme settings in
 | | Demand forecasting | How many units will each category sell in the next 7 days, and how far can we trust it? |
 | | Stockout risk & replenishment | Which SKUs will run out before the next delivery, and how much should we order? |
 | | Inventory explorer | What did empty shelves cost us, and why did a SKU run out? |
-| Business | Sales & revenue performance | How are we selling compared with the previous period, and where does revenue come from? |
-| | Delivery & operations | Are we keeping the delivery promise, and why are orders cancelled? |
-| | Anomaly detection | Did something unusual happen that needs investigating? |
-| Marketing | Segments | Who are our customers, and how should we talk to each group? |
-| | Basket & affinity | What do customers buy together? |
-| | Recommendations | What should we show each customer next, and does it work? |
-| | Retention | Who is still ordering, and who is worth winning back? |
-| | Promotion effectiveness | Did our promotions lift sales, and what did they cost? |
+| Business & Growth | Performance | Are we selling more, and are we keeping the delivery promise? |
+| | Alerts | Did something unusual happen that needs investigating? |
+| | Customers | Who are our customers, and who is worth winning back? |
+| | Growth levers | What can we do to sell more: bundles, personal suggestions and promotions? |
 
 ## Tests (`tests/app/test_app.py`)
 
 | Test | What it proves |
 |---|---|
 | `test_login_with_demo_account` | Wrong password is refused; correct password signs in **and lands in the Inventory workspace** |
-| `test_each_persona_lands_in_its_own_workspace` | inventory / business / marketing each open their own workspace after sign-in |
+| `test_each_persona_lands_in_its_own_workspace` | inventory and growth each open their own workspace after sign-in |
 | `test_signed_out_visitor_sees_only_the_login_page` | Before sign-in there is only the login form, no data |
 | `test_admin_lands_on_overview_and_engineer_on_hold_page` | Admin lands on the overview; the engineer sees the on-hold page |
 | existing workspace tests | Each page renders, and other roles get "cannot open" |

@@ -1,0 +1,26 @@
+# Top-forecast HELD-OUT set (Phase 7F revision) — 7 questions + 2 role checks. Written 2026-10-11 AFTER the first
+# forecast measurement (routing 2/5, clarification 0/1) and BEFORE the three general fixes (cross-tool phrase claiming,
+# policy preference only for policy topics, category fallback when a category has no focus SKUs); never used to tune
+# them. Measured once after the fixes; the result is reported as measured.
+# Categories without focus SKUs in this data: Dairy & Eggs, Vegetables, Ice Cream & Desserts, Breakfast & Cereals.
+
+questions:
+  - {id: FH1, kind: data, role: inventory_manager, routes: [data], tool: top_forecast,
+     question: "Which items are expected to be in highest demand over the coming week?", check: top_forecast_product}
+  - {id: FH2, kind: data, role: inventory_manager, routes: [data], tool: top_forecast,
+     question: "Top 3 products with the biggest demand at Koramangala next week", check: top_forecast_product_koramangala}
+  - {id: FH3, kind: data, role: inventory_manager, routes: [data], tool: top_forecast,
+     question: "Which category will see the biggest demand in the next 7 days?", check: top_forecast_category}
+  - {id: FH4, kind: data, role: inventory_manager, routes: [data], tool: top_forecast,
+     question: "Most demanded vegetables next week", check: "category_fallback:Vegetables", mentions: "no focus SKUs"}
+  - {id: FH5, kind: data, role: inventory_manager, routes: [data], tool: top_forecast,
+     question: "Which snacks will sell the most next week?", check: top_forecast_product_snacks}
+  - {id: FH6, kind: ambiguous, role: inventory_manager, routes: [clarify],
+     question: "Show me the forecast", mentions: "most demanded"}
+  - {id: FH7, kind: ambiguous, role: inventory_manager, routes: [clarify],
+     question: "Forecast please", mentions: "most demanded"}
+
+role_checks:
+  # roles renamed 2026-10-14: business_analyst / marketing_manager → growth_manager (persona consolidation)
+  - {id: FHR1, role: growth_manager, question: "Which category will have the highest demand next week?"}
+  - {id: FHR2, role: growth_manager, question: "Which products will sell the most next week?"}

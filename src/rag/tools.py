@@ -189,6 +189,46 @@ def _category_forecast(role, p, lk):
                    RELIABILITY_ACTION[level] if level else "")
 
 
+def _top_forecast(role, p, lk):
+    """The most demanded focus SKUs for the next 7 days, plus the category ranking underneath (7F)."""
+    products = q.top_forecast_products(role, p.store_ids, p.category_id, p.limit)
+    cats = q.top_forecast_categories(role, p.store_ids, 5)
+    if products.empty and p.category_id:    # a category with no focus SKUs: say so and give its category forecast
+        return _category_fallback(role, p, lk)
+    if products.empty:
+        raise ToolInputError("No future forecast is available for that selection.")
+    top, first, last = products.iloc[0], products["first_day"].min(), products["last_day"].max()
+    headline = {"Most demanded product": f"{top['product']} ({top['forecast_7d']:,.1f} units, {top['category']})",
+                "Forecast period": f"{pd.Timestamp(first):%d %b} – {pd.Timestamp(last):%d %b %Y}"}
+    if not p.category_id and len(cats):
+        headline["Most demanded category"] = f"{cats.iloc[0]['category']} ({cats.iloc[0]['forecast_7d']:,.0f} units)"
+    scope = _store_scope(lk, p)
+    if p.category_id:
+        scope += " · " + lk.categories.set_index("category_id").loc[p.category_id, "category_name"]
+    note = ("Product forecasts cover the focus SKUs (each store's 25 most popular products); category forecasts "
+            "cover all products. Categories: " + ", ".join(f"{r.category} {r.forecast_7d:,.0f}" for r in cats.itertuples()))
+    return _result("top_forecast", "Most demanded products, next 7 days", headline,
+                   products.drop(columns=["first_day", "last_day"]),
+                   "gld_sku_demand_forecast, gld_demand_predictions", last, scope, note)
+
+
+def _category_fallback(role, p, lk):
+    """No product-level forecast exists for this category (none of its products is a focus SKU): the honest answer is
+    the category's all-products forecast, with the reason stated (7F revision)."""
+    name = lk.categories.set_index("category_id").loc[p.category_id, "category_name"]
+    cats = q.top_forecast_categories(role, p.store_ids, len(lk.categories))
+    row = cats[cats["category"] == name]
+    if row.empty:
+        raise ToolInputError(f"No future forecast is available for {name}.")
+    scope = _store_scope(lk, p) + " · " + name
+    return _result("top_forecast", f"{name}: forecast for the next 7 days",
+                   {"Next 7 days": f"{row.iloc[0]['forecast_7d']:,.0f} units",
+                    "Category rank": f"{cats.index[cats['category'] == name][0] + 1} of {len(cats)}"},
+                   row.reset_index(drop=True), "gld_demand_predictions", lk.last_day, scope,
+                   f"There are no focus SKUs in {name} (focus SKUs = each store's 25 most popular products), so no "
+                   "product ranking exists; this is the category forecast for all its products.")
+
+
 def _forecast_reliability(role, p, lk):
     acc = q.accuracy_by_category(role)
     acc["reliability"] = acc["model_wape"].map(reliability)
@@ -401,23 +441,25 @@ TOOLS: dict[str, Tool] = {t.name: t for t in (
     Tool("suggested_orders", "inventory", "Suggested orders", "what and how much to reorder", _suggested_orders),
     Tool("category_forecast", "inventory", "Category forecast", "next 7 days for a category", _category_forecast,
          needs=("category_id",)),
+    Tool("top_forecast", "inventory", "Most demanded products", "products and categories ranked by next-7-day "
+         "forecast", _top_forecast),
     Tool("forecast_reliability", "inventory", "Forecast reliability", "how far to trust the forecast per category",
          _forecast_reliability),
     Tool("lost_sales", "inventory", "Lost sales", "sales lost to stockouts", _lost_sales),
-    Tool("sales_overview", "business", "Sales performance", "net revenue, orders, AOV vs previous period",
+    Tool("sales_overview", "growth", "Sales performance", "net revenue, orders, AOV vs previous period",
          _sales_overview),
-    Tool("top_products", "business", "Top products", "best-selling products by revenue", _top_products),
-    Tool("delivery_overview", "business", "Delivery performance", "on-time rate and delivery times",
+    Tool("top_products", "growth", "Top products", "best-selling products by revenue", _top_products),
+    Tool("delivery_overview", "growth", "Delivery performance", "on-time rate and delivery times",
          _delivery_overview),
-    Tool("cancellations", "business", "Cancellations", "cancellations by reason", _cancellations),
-    Tool("anomalies", "business", "Anomalies", "unusual demand, payment failures, quiet hours", _anomalies),
-    Tool("segments", "marketing", "Customer segments", "who our customers are", _segments),
-    Tool("bought_with", "marketing", "Bought together", "products bought with a product", _bought_with,
+    Tool("cancellations", "growth", "Cancellations", "cancellations by reason", _cancellations),
+    Tool("anomalies", "growth", "Anomalies", "unusual demand, payment failures, quiet hours", _anomalies),
+    Tool("segments", "growth", "Customer segments", "who our customers are", _segments),
+    Tool("bought_with", "growth", "Bought together", "products bought with a product", _bought_with,
          needs=("product_id",)),
-    Tool("recommendation_accuracy", "marketing", "Recommendation accuracy", "how good the recommendations are",
+    Tool("recommendation_accuracy", "growth", "Recommendation accuracy", "how good the recommendations are",
          _recommendation_accuracy),
-    Tool("retention", "marketing", "Retention", "active, at-risk and lapsed customers", _retention),
-    Tool("promotions", "marketing", "Promotions", "promotion uplift and cost", _promotions),
+    Tool("retention", "growth", "Retention", "active, at-risk and lapsed customers", _retention),
+    Tool("promotions", "growth", "Promotions", "promotion uplift and cost", _promotions),
     Tool("pipeline_status", "engineering", "Pipeline status", "last run, success rate, failed runs", _pipeline_status),
     Tool("pipeline_rows", "engineering", "Rows processed", "rows written / rejected in the last run", _pipeline_rows),
     Tool("data_quality", "engineering", "Data quality", "clean rate per dataset", _data_quality),
@@ -437,6 +479,7 @@ def run_tool(name: str, role: str, raw_params: dict, lk: Lookups) -> ToolResult:
     params = validate_params(raw_params, lk)
     missing = [n for n in tool.needs if getattr(params, n) in (None, [])]
     if missing:
-        what = {"category_id": "a category (e.g. Dairy & Eggs)", "product_id": "a product name"}
+        what = {"category_id": "a category (e.g. Dairy & Eggs) — or ask for the most demanded products",
+                "product_id": "a product name"}
         raise ToolInputError(f"Please name {' and '.join(what.get(m, m) for m in missing)}.")
     return tool.run(role, params, lk)

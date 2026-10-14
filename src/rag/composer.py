@@ -21,10 +21,9 @@ ROUTE_LABELS = {"data": "Data", "policy": "Policy", "method": "How it works", "h
 EXAMPLES = {
     "inventory": ["Which SKUs are at high risk at Dwarka?", "What is the demand forecast for Dairy & Eggs?",
                   "What should we do when stock falls below the reorder level?"],
-    "business": ["What was net revenue last week?", "How is our on-time delivery rate?",
-                 "What happens when a delivery is late?"],
-    "marketing": ["What are our customer segments?", "What is bought with UrbanPantry Diapers?",
-                  "What are the rules for discounts?"],
+    "growth": ["What was net revenue last week?", "How is our on-time delivery rate?",
+               "What are our customer segments?", "What is bought with UrbanPantry Diapers?",
+               "What are the rules for discounts?"],
     "engineering": ["Show the pipeline run history", "What is the data quality by dataset?",
                     "Which models are in the registry?"],
 }
@@ -39,9 +38,11 @@ PAGE_HINTS = [
                                                                  "duplicates", "clean", "dirty")),
     ("engineering", "Data Engineer → Model monitoring", ("model", "models", "metric", "metrics", "registry", "wape")),
     ("inventory", "Inventory & Supply Chain", ("stock", "inventory", "sku", "skus", "reorder", "stockout")),
-    ("business", "Business & Revenue", ("revenue", "sales", "delivery", "deliveries", "cancellation", "anomaly")),
-    ("marketing", "Customer Growth & Marketing", ("customer", "customers", "segment", "basket", "promotion",
-                                                  "retention")),
+    ("growth", "Business & Growth → Performance", ("revenue", "sales", "delivery", "deliveries", "cancellation")),
+    ("growth", "Business & Growth → Alerts", ("anomaly", "anomalies", "unusual", "spike")),
+    ("growth", "Business & Growth → Customers", ("customer", "customers", "segment", "segments", "retention")),
+    ("growth", "Business & Growth → Growth levers", ("basket", "promotion", "promotions", "recommendation",
+                                                     "recommendations")),
 ]
 
 

@@ -385,3 +385,47 @@ when a guardrail rejects the reply, `template (LLM reply rejected: …)`.
 **Known characteristics (documented, not chased):** short definition questions may be refused; some "why" questions
 are refused instead of clarified; an LLM can still summarise evidence incompletely — the exact evidence stays one
 click away. **Not done (Tier 2):** embedding retrieval (PyTorch too heavy for the free host).
+
+## 7F Most-demanded products (top-forecast tool, 2026-10-11 → 10-14)
+
+**Why:** *"What's the most demanded product for the next 7 days?"* got "Please name a category": the assistant could
+forecast one category but could not rank. **New tool `top_forecast`** (inventory workspace, tool 22): focus SKUs ranked
+by their summed forecast for the 7 days after the data ends, plus the category ranking underneath. Focus SKUs = each
+store's 25 most popular products (the only products with a SKU-level forecast); category forecasts cover all products,
+and the answer says so.
+
+**Evaluation first:** `tests/rag/forecast_questions.yaml` (5 questions + 2 role checks) was written before the tool.
+
+### First measurement: 4 bars — routing 2/5 FAIL, clarification 0/1 FAIL, numbers 2/2, roles 2/2
+
+| Miss | Root cause |
+|---|---|
+| F03 "Which categories have the highest expected demand next week?" → category forecast | words claimed by the longer ranking phrase also scored for the category-forecast tool (33 vs 21) |
+| F05 "What is the forecast?" → an unrelated policy passage | the 6F "one generic word → prefer a policy" rule also fired for topics that have no policy |
+| F04 "Most demanded dairy products…" → error | **the question was wrong:** no Dairy & Eggs product is a focus SKU, so its expected answer could not exist; the tool also failed badly (error instead of an honest answer) |
+
+### Approved revision (user decision 2026-10-11): general fixes + a new held-out set written before them
+
+1. **A word scores for one tool only:** across tools, the longest matching phrase claims its words first.
+2. **Policy preference only for topics with a policy** (delivery, cancellations, promotions, inventory, revenue/refunds).
+3. **Category fallback:** a category with no focus SKUs gets "There are no focus SKUs in X" plus the category's
+   7-day forecast and rank.
+4. **F04 corrected (disclosed):** it now expects the honest answer ("no focus SKUs" + the Dairy & Eggs category forecast
+   from independent SQL). Route and tool expectation unchanged.
+
+`tests/rag/forecast_holdout_questions.yaml` (7 questions + 2 role checks; fallback tested on Vegetables) was written
+before the fixes. **Disclosure:** FH7 ("Forecast please") has the same wording as an app test written in the original 7F
+build; it was left in the set unchanged.
+
+### Re-measure (once, 2026-10-14)
+
+| Bar | Forecast set | Forecast held-out |
+|---|---|---|
+| Routing ≥ 90% | ✅ 100% (5/5) | ✅ 100% (7/7) |
+| Numbers 100% | ✅ 4/4 | ✅ 5/5 |
+| Refusal / clarification ≥ 90% | ✅ 1/1 | ✅ 2/2 |
+| Roles 100% | ✅ 2/2 | ✅ 2/2 |
+
+**Regression check:** gold, held-out, engineering and engineering held-out were re-run and compared per question with
+the 2026-10-11 runs: **no question changed outcome** (gold 6/6; held-out 17/20 routing and the engineering held-out EH2
+miss are the same known misses as before).

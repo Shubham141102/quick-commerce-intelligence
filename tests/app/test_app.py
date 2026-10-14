@@ -1,4 +1,5 @@
-"""Workspaces (Phases 4D, 5B, 5C, 5E): publish snapshot, role checks in data functions, login, pages render."""
+"""Workspaces (Phases 4D, 5B, 5C, 5E; three personas since 2026-10-14): publish snapshot, role checks in data
+functions, login, pages render."""
 
 import bcrypt
 import pytest
@@ -42,7 +43,7 @@ def test_snapshot_published_within_limits(app_env):
 def test_data_functions_check_the_role(app_env, fn, args):
     assert fn("inventory_manager", *args) is not None
     assert fn("admin", *args) is not None
-    for role in ("marketing_manager", "business_analyst", "data_engineer", None):
+    for role in ("growth_manager", "data_engineer", None):
         with pytest.raises(AccessDenied):
             fn(role, *args)
 
@@ -75,84 +76,105 @@ def test_inventory_workspace_renders(app_env):
 
 def test_other_roles_are_blocked_from_inventory(app_env):
     at = AppTest.from_file(str(PROJECT_ROOT / "app" / "views" / "inventory.py"), default_timeout=120)
-    at.session_state["user"] = {"username": "m", "name": "M", "role": "marketing_manager"}
+    at.session_state["user"] = {"username": "g", "name": "G", "role": "growth_manager"}
     at.run()
     assert not at.exception
     assert any("cannot open" in e.value for e in at.error)
     assert not at.metric
 
 
-BUSINESS_USER = {"username": "business", "name": "Business Analyst (demo)", "role": "business_analyst"}
+# ------------------------------------------------------------------------------------------- business & growth
+# One persona since 2026-10-14 (former Business & Revenue 5B/5C + Customer Growth & Marketing 5E).
+GROWTH_USER = {"username": "growth", "name": "Business & Growth Manager (demo)", "role": "growth_manager"}
+GROWTH_VIEW = str(PROJECT_ROOT / "app" / "views" / "growth.py")
 
 
 def _business_functions():
-    b = q.period_bounds("business_analyst")
+    b = q.period_bounds("growth_manager")
     s, e = b["first_day"].date(), b["last_day"].date()
     return [(q.sales_kpis, (s, e)), (q.sales_trend, (s, e)), (q.revenue_by_store, (s, e)),
             (q.category_contribution, (s, e)), (q.top_products, (s, e)), (q.delivery_kpis, (s, e)),
             (q.delivery_trend, (s, e)), (q.delivery_by_store, (s, e)), (q.cancellations_by_reason, (s, e)),
-            (q.anomaly_summary, ()), (q.anomaly_list, ()), (q.anomaly_series, ("A0001",))]
+            (q.store_scorecard, (s, e)), (q.anomaly_summary, ()), (q.anomaly_list, ()), (q.anomaly_series, ("A0001",))]
 
 
 def test_business_functions_check_the_role(app_env):
     for fn, args in _business_functions():
-        assert fn("business_analyst", *args) is not None
+        assert fn("growth_manager", *args) is not None
         assert fn("admin", *args) is not None
-        for role in ("inventory_manager", "marketing_manager", "data_engineer", None):
+        for role in ("inventory_manager", "data_engineer", None):
             with pytest.raises(AccessDenied):
                 fn(role, *args)
 
 
 def test_shared_filters_open_to_every_business_persona(app_env):
-    for role in ("inventory_manager", "business_analyst", "marketing_manager", "admin"):
+    for role in ("inventory_manager", "growth_manager", "admin"):
         assert len(q.stores(role)) > 0 and len(q.categories(role)) > 0
     with pytest.raises(AccessDenied):
         q.stores("data_engineer")
 
 
+def test_old_roles_no_longer_exist(app_env):
+    for role in ("business_analyst", "marketing_manager"):
+        with pytest.raises(AccessDenied):
+            q.sales_kpis(role, None, None)
+
+
 def test_business_numbers_match_gold(app_env):
-    b = q.period_bounds("business_analyst")
+    b = q.period_bounds("growth_manager")
     s, e = b["first_day"].date(), b["last_day"].date()
-    total = q.sales_kpis("business_analyst", s, e)["current"]
-    by_store = q.revenue_by_store("business_analyst", s, e)
+    total = q.sales_kpis("growth_manager", s, e)["current"]
+    by_store = q.revenue_by_store("growth_manager", s, e)
     assert abs(float(by_store["net_revenue"].sum()) - float(total["net_revenue"])) < 0.01
     assert int(by_store["orders_completed"].sum()) == int(total["orders_completed"])
 
 
-def test_business_workspace_renders(app_env):
-    at = AppTest.from_file(str(PROJECT_ROOT / "app" / "views" / "business.py"), default_timeout=120)
-    at.session_state["user"] = BUSINESS_USER
+def test_store_scorecard_equals_the_two_store_tables(app_env):
+    b = q.period_bounds("growth_manager")
+    s, e = b["first_day"].date(), b["last_day"].date()
+    card = q.store_scorecard("growth_manager", s, e).set_index("store")
+    rev = q.revenue_by_store("growth_manager", s, e).set_index("store")
+    dlv = q.delivery_by_store("growth_manager", s, e).set_index("store")
+    assert set(card.index) == set(rev.index)
+    for col in ("net_revenue", "orders_completed", "aov", "cancellation_rate"):
+        assert (card[col] - rev.loc[card.index, col]).abs().max() < 1e-6, col
+    for col in ("on_time_rate", "avg_minutes"):
+        assert (card[col] - dlv.loc[card.index, col]).abs().max() < 1e-6, col
+
+
+def test_growth_workspace_renders(app_env):
+    at = AppTest.from_file(GROWTH_VIEW, default_timeout=120)
+    at.session_state["user"] = GROWTH_USER
     at.run()
     assert not at.exception, at.exception
     labels = {m.label for m in at.metric}
-    assert {"Net revenue", "Completed orders", "Average order value", "On-time rate"} <= labels
+    assert {"Net revenue", "Completed orders", "Average order value", "On-time rate"} <= labels   # Performance
+    assert {"Demand spike", "Payment failure"} <= labels and "Store outage (experimental)" not in labels  # Alerts
+    assert {"Customers", "Repeat rate", "Promotions"} <= labels                                  # Customers, levers
     assert not at.error
 
 
-def test_inventory_role_is_blocked_from_business(app_env):
-    at = AppTest.from_file(str(PROJECT_ROOT / "app" / "views" / "business.py"), default_timeout=120)
+def test_inventory_role_is_blocked_from_growth(app_env):
+    at = AppTest.from_file(GROWTH_VIEW, default_timeout=120)
     at.session_state["user"] = INVENTORY_USER
     at.run()
     assert not at.exception and any("cannot open" in e.value for e in at.error) and not at.metric
 
 
 def test_anomaly_list_and_series_agree(app_env):
-    found = q.anomaly_list("business_analyst")
+    found = q.anomaly_list("growth_manager")
     assert len(found) > 0 and found["score"].is_monotonic_decreasing
-    summary = q.anomaly_summary("business_analyst")
+    summary = q.anomaly_summary("growth_manager")
     assert int(summary["anomalies"].sum()) == len(found)
-    series = q.anomaly_series("business_analyst", found["anomaly_id"].iloc[0])
+    series = q.anomaly_series("growth_manager", found["anomaly_id"].iloc[0])
     assert len(series) > 0 and (series["expected"] >= 0).all()
 
 
-# ------------------------------------------------------------------------------------------- marketing (5E)
-MARKETING_USER = {"username": "marketing", "name": "Marketing Manager (demo)", "role": "marketing_manager"}
-
-
+# ------------------------------------------------------------------------------------------- customers & growth levers
 def _marketing_functions():
-    seg = int(q.segment_profiles("marketing_manager")["segment_id"].iloc[0])
-    cust = q.recommendation_customers("marketing_manager", None, 1)["customer_id"].iloc[0]
-    prod = q.rule_products("marketing_manager")["product_id"].iloc[0]
+    seg = int(q.segment_profiles("growth_manager")["segment_id"].iloc[0])
+    cust = q.recommendation_customers("growth_manager", None, 1)["customer_id"].iloc[0]
+    prod = q.rule_products("growth_manager")["product_id"].iloc[0]
     return [(q.marketing_kpis, ()), (q.segment_profiles, ()), (q.segmentation_selection, ()),
             (q.segment_customers, (seg,)), (q.basket_rules, ()), (q.rule_products, ()), (q.product_partners, (prod,)),
             (q.recommendation_metrics, ()), (q.recommendation_customers, ()), (q.customer_recommendations, (cust,)),
@@ -162,15 +184,15 @@ def _marketing_functions():
 
 def test_marketing_functions_check_the_role(app_env):
     for fn, args in _marketing_functions():
-        assert fn("marketing_manager", *args) is not None
+        assert fn("growth_manager", *args) is not None
         assert fn("admin", *args) is not None
-        for role in ("inventory_manager", "business_analyst", "data_engineer", None):
+        for role in ("inventory_manager", "data_engineer", None):
             with pytest.raises(AccessDenied):
                 fn(role, *args)
 
 
 def test_marketing_numbers_are_consistent(app_env):
-    role = "marketing_manager"
+    role = "growth_manager"
     prof = q.segment_profiles(role)
     k = q.marketing_kpis(role)
     assert int(prof["customers"].sum()) == int(k["buyers"])            # every buyer is in exactly one segment
@@ -180,23 +202,6 @@ def test_marketing_numbers_are_consistent(app_env):
     assert list(recs["rank"]) == list(range(1, len(recs) + 1)) and len(recs) <= 10
     assert (q.basket_rules(role)["lift"] >= 2).all()
     assert set(q.recommendation_metrics(role)["method"]) == {"hybrid", "repeat", "popularity"}
-
-
-def test_marketing_workspace_renders(app_env):
-    at = AppTest.from_file(str(PROJECT_ROOT / "app" / "views" / "marketing.py"), default_timeout=120)
-    at.session_state["user"] = MARKETING_USER
-    at.run()
-    assert not at.exception, at.exception
-    labels = {m.label for m in at.metric}
-    assert {"Customers", "Repeat rate", "Hybrid (used)", "Promotions"} <= labels
-    assert not at.error
-
-
-def test_business_role_is_blocked_from_marketing(app_env):
-    at = AppTest.from_file(str(PROJECT_ROOT / "app" / "views" / "marketing.py"), default_timeout=120)
-    at.session_state["user"] = BUSINESS_USER
-    at.run()
-    assert not at.exception and any("cannot open" in e.value for e in at.error) and not at.metric
 
 
 # ------------------------------------------------------------------------------------------- landing (frontend)
@@ -211,8 +216,7 @@ def _home(user):
 
 @pytest.mark.parametrize("user, expected", [
     (INVENTORY_USER, "High risk"),
-    (BUSINESS_USER, "Net revenue"),
-    ({"username": "marketing", "name": "Marketing Manager (demo)", "role": "marketing_manager"}, "Repeat rate"),
+    (GROWTH_USER, "Net revenue"),      # lands on Performance
 ])
 def test_each_persona_lands_in_its_own_workspace(app_env, user, expected):
     at = _home(user)
@@ -254,11 +258,11 @@ def test_assistant_page_refuses_other_workspace_data(app_env):
     at = _assistant_page(INVENTORY_USER)
     at.chat_input[0].set_value("What was net revenue last week?").run()
     text = " ".join(m.value for m in at.markdown)
-    assert "Not in your workspace" in text and "Business & Revenue" in text and "₹" not in text
+    assert "Not in your workspace" in text and "Business & Growth" in text and "₹" not in text
 
 
 def test_assistant_suggested_question_click(app_env):
-    at = _assistant_page(BUSINESS_USER)
+    at = _assistant_page(GROWTH_USER)
     at.button[0].click().run()
     assert not at.exception and len(at.chat_message) == 2               # question + answer
 
@@ -278,7 +282,7 @@ def _engineering_functions():
 def test_engineering_functions_check_the_role(app_env):
     for fn, args in _engineering_functions():
         assert fn("data_engineer", *args) is not None and fn("admin", *args) is not None
-        for role in ("inventory_manager", "business_analyst", "marketing_manager", None):
+        for role in ("inventory_manager", "growth_manager", None):
             with pytest.raises(AccessDenied):
                 fn(role, *args)
 

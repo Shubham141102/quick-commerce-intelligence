@@ -12,7 +12,8 @@ Routes
 
 Tool choice: every tool has trigger phrases; the tool whose distinct matched phrases are longest wins (so "at risk
 customers" beats "at risk"); phrases match whole words / stems. Counting questions ("how many rows…") only compete
-between tools that report that measure (7E revision).
+between tools that report that measure (7E revision). A word belongs to one tool only: the longest phrase claims it
+first (7F revision).
 """
 
 from __future__ import annotations
@@ -33,6 +34,9 @@ TOOL_PHRASES: dict[str, tuple[str, ...]] = {
                          "replenishment quantity", "how many units to order"),
     "category_forecast": ("forecast", "expected demand", "demand next", "next 7 days", "next week", "expected sales",
                           "predicted demand", "how many units will"),
+    # ranking by forecast (7F) — phrases from what the tool does: which items / categories lead future demand
+    "top_forecast": ("most demanded", "highest demand", "in highest demand", "highest expected demand", "most in demand",
+                     "sell the most", "will sell most", "top selling next week", "biggest demand", "demand ranking"),
     "forecast_reliability": ("forecast reliability", "trust the forecast", "forecast accuracy", "reliable forecast",
                              "how accurate is the forecast", "wape by category", "reliability"),
     "lost_sales": ("lost sales", "lost revenue", "cost of stockouts", "sales lost", "lost units", "stockouts cost"),
@@ -125,6 +129,10 @@ COUNT_STOP = frozenset("""can could are is was were be been did do does have has
 the a an in of for at on to from by with that which""".split())
 # Schema / catalog questions: answered by the Data Engineer catalog page, not by the knowledge base (7E revision).
 SCHEMA_CUES = ("column", "columns", "schema", "grain", "lineage", "upstream", "downstream", "data type", "data types")
+# Tools whose topic has a policy (policies/*.md: delivery, cancellation, promotion, inventory, refund → revenue). Only
+# these may prefer a policy passage for a one-generic-word question; "What is the forecast?" has no policy (7F revision).
+POLICY_TOPIC_TOOLS = frozenset({"delivery_overview", "cancellations", "promotions", "inventory_overview",
+                                "at_risk_skus", "suggested_orders", "lost_sales", "sales_overview"})
 
 
 def _distinct(phrases: list[str]) -> list[str]:
@@ -139,8 +147,28 @@ def _distinct(phrases: list[str]) -> list[str]:
 
 
 def _scores(question: str, exclude: set[str] = frozenset()) -> dict[str, int]:
+    """Each tool's score = total length of its distinct matched phrases. Words are claimed across tools, longest
+    phrase first: a phrase overlapping a longer phrase of ANOTHER tool does not count ("highest expected demand"
+    claims "expected demand", so the category forecast cannot also score it) — 7F revision. Overlaps within one
+    tool are handled by _distinct, as before."""
     excluded = {_norm(p).strip() for p in exclude}
-    return {t: sum(len(p) for p in _distinct(ps) if p not in excluded) for t, ps in _matched(question).items()}
+    words = _norm(question).split()
+    hits = []
+    for order, (tool, phrases) in enumerate(_matched(question).items()):
+        for p in _distinct(phrases):
+            if p in excluded:
+                continue
+            n = len(p.split())
+            spans = [range(k, k + n) for k in range(len(words) - n + 1) if words[k:k + n] == p.split()]
+            hits.append((len(p), order, tool, spans))
+    claimed: dict[int, str] = {}
+    scores = dict.fromkeys(TOOL_PHRASES, 0)
+    for length, _, tool, spans in sorted(hits, key=lambda h: (-h[0], h[1])):
+        free = [s for s in spans if all(claimed.get(k, tool) == tool for k in s)]
+        if free:
+            scores[tool] += length
+            claimed.update({k: tool for s in free for k in s})
+    return scores
 
 
 def pick_tool(question: str) -> tuple[str | None, int]:
@@ -194,10 +222,11 @@ def route_question(question: str, entities: Entities | None = None) -> Route:
     if not tool and _any(text, METHOD_WEAK):
         return Route("method", None, ("metric", "method"), "definition question")
     # 6. a data topic. When it rests on exactly ONE generic word ("delivery", "cancellation") with no report cue and
-    #    no entity, the assistant prefers a clearly matching policy section (6F revision).
+    #    no entity, the assistant prefers a clearly matching policy section (6F revision) — only for topics that have
+    #    a policy (7F revision).
     if tool:
         stems = {_norm(p).strip() for p in _matched(text)[tool]}       # "delivery" / "deliveries" count once
-        generic = (len(stems) == 1 and " " not in next(iter(stems))
+        generic = (tool in POLICY_TOPIC_TOOLS and len(stems) == 1 and " " not in next(iter(stems))
                    and not _any(text, REPORT_CUES) and not has_entities)
         return Route("data", tool, None, "data topic" + (f" + cue: {data[0]}" if data else ""), generic=generic)
     # 7. anything else: search all knowledge; becomes out_of_scope when nothing relevant is found

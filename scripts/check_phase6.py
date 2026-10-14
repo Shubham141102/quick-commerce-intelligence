@@ -5,6 +5,7 @@
     python -m scripts.check_phase6 --mode llm       # same bars with the optional LLM layer (6G); needs [llm]
     python -m scripts.check_phase6 --set engineering  # Data Engineer questions (7E): 8 + 2 role checks
     python -m scripts.check_phase6 --set engineering-holdout   # 8 + 2 written after the first engineering run
+    python -m scripts.check_phase6 --set forecast     # most-demanded products / categories (7F): 5 + 2
 
 Pass bars, fixed before measuring (2026-10-07, Project_Plan_v2.md §9.9):
   6F.1 routing accuracy ≥ 90%        right route (and right tool for data / hybrid questions)
@@ -63,6 +64,26 @@ def expected_text(check: str, p: dict, lk: Lookups) -> str:
                    WHERE t.run_id = (SELECT run_id FROM ops_pipeline_runs WHERE pipeline = 'quick_commerce_pipeline'
                                      ORDER BY started_at DESC LIMIT 1)""", [])
         return f"**Rows written** — {int(n):,}"
+    # ---- top forecast (7F): products / categories ranked by the next-7-day forecast
+    if check.startswith("top_forecast_product"):
+        where = {"top_forecast_product": "", "top_forecast_product_bandra":
+                 " AND f.store_id = (SELECT store_id FROM dim_stores WHERE store_name LIKE '%Bandra')",
+                 "top_forecast_product_koramangala":
+                 " AND f.store_id = (SELECT store_id FROM dim_stores WHERE store_name LIKE '%Koramangala')",
+                 "top_forecast_product_snacks":
+                 " AND f.category_id = (SELECT category_id FROM dim_categories WHERE category_name = 'Snacks & Namkeen')",
+                 }[check]
+        return str(one(f"""SELECT p.product_name FROM gld_sku_demand_forecast f JOIN dim_products p USING (product_id)
+                           WHERE f.run_type = 'future'{where}
+                           GROUP BY p.product_name ORDER BY sum(f.forecast_units) DESC, p.product_name LIMIT 1""", []))
+    if check == "top_forecast_category":
+        return str(one("""SELECT c.category_name FROM gld_demand_predictions d JOIN dim_categories c USING (category_id)
+                          WHERE d.run_type = 'future' GROUP BY c.category_name
+                          ORDER BY sum(d.forecast_units) DESC, c.category_name LIMIT 1""", []))
+    if check.startswith("category_fallback:"):  # a category without focus SKUs: its all-products category forecast
+        x = one("""SELECT sum(d.forecast_units) FROM gld_demand_predictions d JOIN dim_categories c USING (category_id)
+                   WHERE d.run_type = 'future' AND c.category_name = ?""", [check.split(":", 1)[1]])
+        return f"{float(x):,.0f} units"
     if check == "rows_rejected_last_run":
         n = one("""SELECT coalesce(sum(t.rows_rejected), 0) FROM ops_table_runs t
                    WHERE t.run_id = (SELECT run_id FROM ops_pipeline_runs WHERE pipeline = 'quick_commerce_pipeline'
@@ -176,7 +197,9 @@ def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     qset = sys.argv[sys.argv.index("--set") + 1] if "--set" in sys.argv else "gold"
     name = {"holdout": "holdout_questions.yaml", "engineering": "engineering_questions.yaml",
-            "engineering-holdout": "engineering_holdout_questions.yaml"}.get(qset, "questions.yaml")
+            "engineering-holdout": "engineering_holdout_questions.yaml",
+            "forecast": "forecast_questions.yaml",
+            "forecast-holdout": "forecast_holdout_questions.yaml"}.get(qset, "questions.yaml")
     spec = yaml.safe_load((PROJECT_ROOT / "tests" / "rag" / name).read_text(encoding="utf-8"))
     chunks = get_snapshot().query("SELECT * FROM rag_chunks")
     lk = Lookups.from_snapshot()
@@ -187,7 +210,8 @@ def main() -> int:
         return 0
     bot = Assistant(Retriever(chunks), lk, client)
     run_id = {"holdout": "rag_holdout_", "engineering": "rag_engineering_",
-              "engineering-holdout": "rag_engineering_holdout_"}.get(qset, "rag_") + ("llm_" if llm_mode else "") + \
+              "engineering-holdout": "rag_engineering_holdout_", "forecast": "rag_forecast_",
+              "forecast-holdout": "rag_forecast_holdout_"}.get(qset, "rag_") + ("llm_" if llm_mode else "") + \
         datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
 
     rows, misses = [], []
@@ -210,10 +234,13 @@ def main() -> int:
                                                      if numbers_in(want) else want in a.markdown)
             else:
                 n = want in a.markdown
+            if item.get("mentions"):    # a data answer that must also say something (e.g. "no focus SKUs", 7F)
+                n = n and item["mentions"] in a.markdown
             num_ok += n
             num_n += 1
             if not n:
-                misses.append(f"{item['id']} number: expected «{want}»")
+                misses.append(f"{item['id']} number: expected «{want}»"
+                              + (f" and «{item['mentions']}»" if item.get("mentions") else ""))
         g, t = citations_ok(a.evidence_markdown or a.markdown, chunks)
         if a.evidence_markdown:         # every citation must also appear in the LLM text
             g -= sum(c not in a.markdown for c in a.citations)
@@ -264,7 +291,9 @@ def main() -> int:
              ("6F.6 Role check (no data outside the workspace)", "roles", f"{role_ok}/{n_r}")]
     mode_label = f"LLM mode ({client.name})" if client else "template mode"
     set_label = {"holdout": "held-out set", "engineering": "Data Engineer set",
-                 "engineering-holdout": "Data Engineer held-out set"}.get(qset, "gold set")
+                 "engineering-holdout": "Data Engineer held-out set",
+                 "forecast": "top-forecast set",
+                 "forecast-holdout": "top-forecast held-out set"}.get(qset, "gold set")
     print(f"\nPhase 6 evaluation — business assistant ({mode_label}) — {set_label}\n")
     for title, key, detail in lines:
         if rates[key] is None:

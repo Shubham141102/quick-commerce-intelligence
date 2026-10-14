@@ -76,7 +76,7 @@ def check_5a(paths: dict, strict: bool = True) -> list[tuple[str, bool, str]]:
         store, product = risk["store_id"].iloc[0], risk["product_id"].iloc[0]
         calls = [lambda r: q.explorer_timeline(r, store, product), lambda r: q.explorer_summary(r, store, product),
                  q.lost_sales_by_store, lambda r: q.top_lost_sales_skus(r, 5)]
-        ok, blocked = _role_checked(calls, "inventory_manager", ("marketing_manager", "business_analyst", "data_engineer"))
+        ok, blocked = _role_checked(calls, "inventory_manager", ("growth_manager", "data_engineer"))
         out.append(("5A.4 Explorer data functions work for inventory, blocked for others", ok,
                     f"{len(calls)} functions; {blocked}/{len(calls)} refuse every other role"))
     return out
@@ -127,11 +127,11 @@ def check_5b(paths: dict) -> list[tuple[str, bool, str]]:
     sales, dm = read_table(gold, DAILY_SALES), read_table(gold, DELIVERY_METRICS)
     out = []
     with _Snapshot(paths):
-        b = q.period_bounds("business_analyst")
+        b = q.period_bounds("growth_manager")
         s, e = b["first_day"].date(), b["last_day"].date()
-        k = q.sales_kpis("business_analyst", s, e)["current"]
-        stores = q.revenue_by_store("business_analyst", s, e)
-        cats = q.category_contribution("business_analyst", s, e)
+        k = q.sales_kpis("growth_manager", s, e)["current"]
+        stores = q.revenue_by_store("growth_manager", s, e)
+        cats = q.category_contribution("growth_manager", s, e)
         same = (abs(float(k["net_revenue"]) - float(sales["net_revenue"].sum())) < 0.01
                 and abs(float(stores["net_revenue"].sum()) - float(sales["net_revenue"].sum())) < 0.01
                 and abs(float(cats["revenue"].sum()) - float(sales["gmv"].sum())) < 0.01
@@ -139,7 +139,7 @@ def check_5b(paths: dict) -> list[tuple[str, bool, str]]:
         out.append(("5B.1 Sales page totals equal Gold (net revenue, by store, by category, orders)", same,
                     f"net revenue ₹{float(k['net_revenue']):,.2f}; {int(k['orders_completed']):,} completed orders; "
                     f"AOV ₹{k['aov']:,.2f}"))
-        d = q.delivery_kpis("business_analyst", s, e)
+        d = q.delivery_kpis("growth_manager", s, e)
         weighted = float((dm["on_time_rate"].fillna(0) * dm["delivered"]).sum() / dm["delivered"].sum())
         ok = int(d["delivered"]) == int(dm["delivered"].sum()) and abs(float(d["on_time_rate"]) - weighted) < 1e-6
         out.append(("5B.2 Delivery page equals Gold (delivered, on-time rate)", ok,
@@ -148,9 +148,10 @@ def check_5b(paths: dict) -> list[tuple[str, bool, str]]:
         calls = [lambda r: q.sales_kpis(r, s, e), lambda r: q.sales_trend(r, s, e), lambda r: q.revenue_by_store(r, s, e),
                  lambda r: q.category_contribution(r, s, e), lambda r: q.top_products(r, s, e),
                  lambda r: q.delivery_kpis(r, s, e), lambda r: q.delivery_trend(r, s, e),
-                 lambda r: q.delivery_by_store(r, s, e), lambda r: q.cancellations_by_reason(r, s, e)]
-        ok, blocked = _role_checked(calls, "business_analyst", ("inventory_manager", "marketing_manager", "data_engineer"))
-        out.append(("5B.3 Business data functions: analyst allowed, other roles blocked", ok,
+                 lambda r: q.delivery_by_store(r, s, e), lambda r: q.cancellations_by_reason(r, s, e),
+                 lambda r: q.store_scorecard(r, s, e)]
+        ok, blocked = _role_checked(calls, "growth_manager", ("inventory_manager", "data_engineer"))
+        out.append(("5B.3 Business data functions: Business & Growth allowed, other roles blocked", ok,
                     f"{len(calls)} functions; {blocked}/{len(calls)} refuse every other role"))
     return out
 
@@ -211,8 +212,8 @@ def check_5c(paths: dict) -> list[tuple[str, bool, str]]:
     with _Snapshot(paths):
         aid = found["anomaly_id"].iloc[0] if len(found) else "A0001"
         calls = [lambda r: q.anomaly_list(r), lambda r: q.anomaly_series(r, aid), lambda r: q.anomaly_summary(r)]
-        ok, blocked = _role_checked(calls, "business_analyst", ("inventory_manager", "marketing_manager", "data_engineer"))
-        out.append(("5C.6 Anomaly data functions: analyst allowed, other roles blocked", ok,
+        ok, blocked = _role_checked(calls, "growth_manager", ("inventory_manager", "data_engineer"))
+        out.append(("5C.6 Anomaly data functions: Business & Growth allowed, other roles blocked", ok,
                     f"{len(calls)} functions; {blocked}/{len(calls)} refuse every other role"))
     return out
 
@@ -289,8 +290,8 @@ def check_5d(paths: dict) -> list[tuple[str, bool, str]]:
                  q.recommendation_customers, lambda r: q.customer_recommendations(r, cid),
                  lambda r: q.segment_top_recommendations(r, sid), q.retention_cohorts, q.retention_status,
                  q.retention_customers, q.promotion_metrics]
-        ok, blocked = _role_checked(calls, "marketing_manager", ("inventory_manager", "business_analyst", "data_engineer"))
-        out.append(("5D.7 Marketing data functions: marketing manager allowed, other roles blocked", ok,
+        ok, blocked = _role_checked(calls, "growth_manager", ("inventory_manager", "data_engineer"))
+        out.append(("5D.7 Marketing data functions: Business & Growth allowed, other roles blocked", ok,
                     f"{len(calls)} functions; {blocked}/{len(calls)} refuse every other role"))
     return out
 

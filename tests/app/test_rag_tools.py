@@ -8,8 +8,7 @@ from src.rag.tools import TOOLS, ToolInputError, available_tools, run_tool
 from src.serving import queries as q
 from src.serving.permissions import AccessDenied
 
-ROLE_OF = {"inventory": "inventory_manager", "business": "business_analyst", "marketing": "marketing_manager",
-           "engineering": "data_engineer"}
+ROLE_OF = {"inventory": "inventory_manager", "growth": "growth_manager", "engineering": "data_engineer"}
 
 
 @pytest.fixture(scope="module")
@@ -21,7 +20,7 @@ def _params(name: str, lk: Lookups) -> dict:
     if name == "category_forecast":
         return {"category_id": lk.categories["category_id"].iloc[0]}
     if name == "bought_with":
-        return {"product_id": q.rule_products("marketing_manager")["product_id"].iloc[0]}
+        return {"product_id": q.rule_products("growth_manager")["product_id"].iloc[0]}
     return {}
 
 
@@ -44,18 +43,18 @@ def test_tools_refuse_other_roles(app_env, lk):
     with pytest.raises(AccessDenied):
         run_tool("sales_overview", "inventory_manager", {}, lk)
     with pytest.raises(AccessDenied):
-        run_tool("at_risk_skus", "marketing_manager", {}, lk)
+        run_tool("at_risk_skus", "growth_manager", {}, lk)
 
 
 def test_inputs_are_validated(app_env, lk):
     with pytest.raises(ToolInputError):
-        run_tool("sales_overview", "business_analyst", {"start": lk.first_day.replace(year=2020)}, lk)
+        run_tool("sales_overview", "growth_manager", {"start": lk.first_day.replace(year=2020)}, lk)
     with pytest.raises(ToolInputError):
         run_tool("at_risk_skus", "inventory_manager", {"store_ids": ["S99"]}, lk)
     with pytest.raises(ToolInputError):
         run_tool("category_forecast", "inventory_manager", {}, lk)          # needs a category
     with pytest.raises(ValidationError):
-        run_tool("top_products", "business_analyst", {"limit": 500}, lk)     # at most 20 rows
+        run_tool("top_products", "growth_manager", {"limit": 500}, lk)     # at most 20 rows
     with pytest.raises(ValidationError):
         run_tool("at_risk_skus", "inventory_manager", {"sql": "DROP TABLE x"}, lk)   # no unknown parameters
 
@@ -64,8 +63,8 @@ def test_numbers_equal_the_dashboard_functions(app_env, lk):
     k = q.inventory_kpis("inventory_manager")
     r = run_tool("at_risk_skus", "inventory_manager", {}, lk)
     assert r.headline["High risk"] == str(int(k["high"])) and r.headline["Medium risk"] == str(int(k["medium"]))
-    s = q.sales_kpis("business_analyst", lk.first_day, lk.last_day)["current"]
-    r = run_tool("sales_overview", "business_analyst", {}, lk)
+    s = q.sales_kpis("growth_manager", lk.first_day, lk.last_day)["current"]
+    r = run_tool("sales_overview", "growth_manager", {}, lk)
     assert r.headline["Net revenue"].startswith(f"₹{float(s['net_revenue']):,.0f}")
 
 
@@ -82,4 +81,4 @@ def test_engineering_tools_equal_the_dashboard(app_env, lk):
     with pytest.raises(ToolInputError):
         run_tool("quarantine", role, {"dataset": "nonsense"}, lk)
     with pytest.raises(AccessDenied):
-        run_tool("pipeline_rows", "business_analyst", {}, lk)
+        run_tool("pipeline_rows", "growth_manager", {}, lk)

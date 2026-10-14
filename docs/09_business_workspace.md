@@ -1,5 +1,7 @@
 # 9. Business & Revenue Workspace (Phases 5B, 5C)
 
+> **2026-10-14:** this workspace was merged with Customer Growth & Marketing into **Business & Growth** (`app/views/growth.py`, role `growth_manager`): sales + delivery → *Performance*, anomaly detection → *Alerts*. Methods, metrics and results below are unchanged. See [16_persona_consolidation.md](16_persona_consolidation.md).
+
 **Status:** complete, with one documented known limitation (5C.2) · **Code:** `app/views/business.py`, `src/serving/queries.py` (business functions), `src/ml/anomaly.py` · **Run:** `python -m scripts.run_pipeline --stages ml,publish`, then `streamlit run app/Home.py` · **Check:** `python -m scripts.check_phase5`
 **Outputs (columns in [gold_catalog.md](gold_catalog.md)):** `gld_sales_anomalies`, `gld_anomaly_series` · **Login:** the Business Analyst demo account (and admin)
 

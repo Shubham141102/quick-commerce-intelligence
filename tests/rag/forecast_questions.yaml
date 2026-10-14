@@ -1,0 +1,24 @@
+# Top-forecast evaluation (Phase 7F) — 5 questions + 2 role checks. Written 2026-10-12 BEFORE the top-forecast tool,
+# its router phrases and the new clarification text were built; never used to tune them.
+# Ranking = forecast units summed over the 7 days after the data ends (and over the selected stores).
+
+questions:
+  - {id: F01, kind: data, role: inventory_manager, routes: [data], tool: top_forecast,
+     question: "Which products will sell the most in the next 7 days?", check: top_forecast_product}
+  - {id: F02, kind: data, role: inventory_manager, routes: [data], tool: top_forecast,
+     question: "What are the top 5 most demanded products next week at Bandra?", check: top_forecast_product_bandra}
+  - {id: F03, kind: data, role: inventory_manager, routes: [data], tool: top_forecast,
+     question: "Which categories have the highest expected demand next week?", check: top_forecast_category}
+  # F04 CORRECTED after the first measurement (2026-10-11, disclosed in docs/14 §7F): the original check expected a
+  # dairy product name, which cannot exist — no Dairy & Eggs product is a focus SKU. It now expects the honest answer:
+  # say there are no focus SKUs and give the Dairy & Eggs category forecast. Route/tool expectation unchanged.
+  - {id: F04, kind: data, role: inventory_manager, routes: [data], tool: top_forecast,
+     question: "Most demanded dairy products for the next 7 days", check: "category_fallback:Dairy & Eggs",
+     mentions: "no focus SKUs"}
+  - {id: F05, kind: ambiguous, role: inventory_manager, routes: [clarify],
+     question: "What is the forecast?", mentions: "most demanded"}
+
+role_checks:
+  # roles renamed 2026-10-14: business_analyst / marketing_manager → growth_manager (persona consolidation)
+  - {id: FR1, role: growth_manager, question: "Which products will be in highest demand next week?"}
+  - {id: FR2, role: growth_manager, question: "What are the most demanded products in the next 7 days?"}

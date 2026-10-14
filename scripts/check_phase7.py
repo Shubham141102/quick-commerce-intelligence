@@ -136,12 +136,12 @@ def main() -> int:
     refused = 0
     for c in calls:
         n = 0
-        for role in ("inventory_manager", "business_analyst", "marketing_manager"):
+        for role in ("inventory_manager", "growth_manager"):
             try:
                 c(role)
             except AccessDenied:
                 n += 1
-        refused += n == 3
+        refused += n == 2
     out.append(("7.8 Role check: engineer and admin allowed, every other role refused", allowed and refused == len(calls),
                 f"{len(calls)} functions; {refused}/{len(calls)} refuse every other role"))
 

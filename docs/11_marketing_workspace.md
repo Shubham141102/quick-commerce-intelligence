@@ -1,5 +1,7 @@
 # 11. Customer Growth & Marketing Workspace (Phase 5E)
 
+> **2026-10-14:** this workspace was merged with Business & Revenue into **Business & Growth** (`app/views/growth.py`, role `growth_manager`, login `growth`): segments + retention → *Customers*; basket, recommendations and promotions → *Growth levers*. Methods and results below are unchanged. See [16_persona_consolidation.md](16_persona_consolidation.md).
+
 **Status:** complete · **Code:** `app/views/marketing.py`, `src/serving/queries.py` (15 marketing functions), `app/components/charts.py` (`cohort_heatmap`, `segment_bubble_chart`) · **Run:** `streamlit run app/Home.py` · **Login:** the Marketing Manager demo account (and admin)
 **Data:** the published snapshot in `data/demo/` (33 tables, 32.8 MB), read through DuckDB. The models behind the page are described in [10_marketing_analytics.md](10_marketing_analytics.md).
 

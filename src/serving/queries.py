@@ -51,12 +51,12 @@ def snapshot_info() -> dict[str, str]:
 
 # ----------------------------------------------------------------------------------- filters
 
-@workspace("inventory", "business", "marketing")
+@workspace("inventory", "growth")
 def stores() -> pd.DataFrame:
     return _q("SELECT store_id, store_name, city FROM dim_stores ORDER BY store_id")
 
 
-@workspace("inventory", "business", "marketing")
+@workspace("inventory", "growth")
 def categories() -> pd.DataFrame:
     return _q("SELECT category_id, category_name FROM dim_categories ORDER BY category_name")
 
@@ -113,6 +113,32 @@ def category_forecast(store_id: str, category_id: str) -> pd.DataFrame:
                  SELECT forecast_date, NULL, NULL, forecast_units, lower_units, upper_units FROM gld_demand_predictions
                  WHERE run_type = 'future' AND store_id = ? AND category_id = ?
                  ORDER BY day""", [store_id, category_id, store_id, category_id])
+
+
+@workspace("inventory")
+def top_forecast_products(store_ids: list[str] | None = None, category_id: str | None = None,
+                          limit: int = 10) -> pd.DataFrame:
+    """Focus SKUs ranked by forecast units over the 7 days after the data ends (summed over the selected stores)."""
+    f1, p1 = _in("f.store_id", store_ids)
+    f2, p2 = _in("f.category_id", [category_id] if category_id else None)
+    return _q(f"""SELECT p.product_name AS product, c.category_name AS category,
+                         round(sum(f.forecast_units), 1) AS forecast_7d, count(DISTINCT f.store_id) AS stores,
+                         min(f.forecast_date) AS first_day, max(f.forecast_date) AS last_day
+                  FROM gld_sku_demand_forecast f JOIN dim_products p USING (product_id)
+                  JOIN dim_categories c ON c.category_id = f.category_id
+                  WHERE f.run_type = 'future'{f1}{f2}
+                  GROUP BY p.product_name, c.category_name ORDER BY forecast_7d DESC, product LIMIT ?""",
+              [*p1, *p2, int(limit)])
+
+
+@workspace("inventory")
+def top_forecast_categories(store_ids: list[str] | None = None, limit: int = 10) -> pd.DataFrame:
+    """Categories (all products) ranked by forecast units over the 7 days after the data ends."""
+    f, p = _in("d.store_id", store_ids)
+    return _q(f"""SELECT c.category_name AS category, round(sum(d.forecast_units), 1) AS forecast_7d
+                  FROM gld_demand_predictions d JOIN dim_categories c USING (category_id)
+                  WHERE d.run_type = 'future'{f}
+                  GROUP BY c.category_name ORDER BY forecast_7d DESC, category LIMIT ?""", [*p, int(limit)])
 
 
 @workspace("inventory")
@@ -231,13 +257,13 @@ def stockout_backtest() -> pd.DataFrame:
 
 # =================================================================================== business workspace
 
-@workspace("business")
+@workspace("growth")
 def period_bounds() -> dict:
     row = _q("SELECT min(business_date) AS first_day, max(business_date) AS last_day FROM gld_daily_sales").iloc[0]
     return row.to_dict()
 
 
-@workspace("business")
+@workspace("growth")
 def sales_kpis(start, end, store_ids: list[str] | None = None) -> dict:
     """Shared-metric KPIs for a date range, plus the same KPIs for the equally long period just before it."""
     f, p = _in("store_id", store_ids)
@@ -258,7 +284,7 @@ def sales_kpis(start, end, store_ids: list[str] | None = None) -> dict:
     return {"current": calc(start, end), "previous": calc(prev_start.date(), prev_end.date()), "days": days}
 
 
-@workspace("business")
+@workspace("growth")
 def sales_trend(start, end, store_ids: list[str] | None = None, grain: str = "day") -> pd.DataFrame:
     unit = {"day": "day", "week": "week"}[grain]
     f, p = _in("store_id", store_ids)
@@ -268,7 +294,7 @@ def sales_trend(start, end, store_ids: list[str] | None = None, grain: str = "da
                   FROM gld_daily_sales WHERE business_date BETWEEN ? AND ?{f} GROUP BY 1 ORDER BY 1""", [start, end, *p])
 
 
-@workspace("business")
+@workspace("growth")
 def revenue_by_store(start, end, store_ids: list[str] | None = None) -> pd.DataFrame:
     f, p = _in("d.store_id", store_ids)
     return _q(f"""SELECT s.store_name AS store, s.city, sum(d.net_revenue) AS net_revenue,
@@ -279,7 +305,7 @@ def revenue_by_store(start, end, store_ids: list[str] | None = None) -> pd.DataF
                   WHERE d.business_date BETWEEN ? AND ?{f} GROUP BY ALL ORDER BY net_revenue DESC""", [start, end, *p])
 
 
-@workspace("business")
+@workspace("growth")
 def category_contribution(start, end, store_ids: list[str] | None = None) -> pd.DataFrame:
     f, p = _in("d.store_id", store_ids)
     return _q(f"""SELECT c.category_name AS category, sum(d.revenue) AS revenue, sum(d.units) AS units,
@@ -288,7 +314,7 @@ def category_contribution(start, end, store_ids: list[str] | None = None) -> pd.
                   WHERE d.business_date BETWEEN ? AND ?{f} GROUP BY ALL ORDER BY revenue DESC""", [start, end, *p])
 
 
-@workspace("business")
+@workspace("growth")
 def top_products(start, end, limit: int = 15) -> pd.DataFrame:
     """Network-wide top products for the months overlapping the range (product performance is monthly)."""
     return _q("""SELECT p.product_name AS product, c.category_name AS category, sum(pp.units) AS units,
@@ -299,7 +325,7 @@ def top_products(start, end, limit: int = 15) -> pd.DataFrame:
                  GROUP BY ALL ORDER BY revenue DESC LIMIT ?""", [start, end, limit])
 
 
-@workspace("business")
+@workspace("growth")
 def delivery_kpis(start, end, store_ids: list[str] | None = None) -> dict:
     f, p = _in("store_id", store_ids)
     r = _q(f"""SELECT sum(deliveries) AS deliveries, sum(delivered) AS delivered, sum(failed) AS failed,
@@ -311,7 +337,7 @@ def delivery_kpis(start, end, store_ids: list[str] | None = None) -> dict:
     return r.to_dict()
 
 
-@workspace("business")
+@workspace("growth")
 def delivery_trend(start, end, store_ids: list[str] | None = None) -> pd.DataFrame:
     f, p = _in("store_id", store_ids)
     return _q(f"""SELECT business_date AS day, sum(delivered) AS delivered, sum(failed) AS failed,
@@ -321,7 +347,7 @@ def delivery_trend(start, end, store_ids: list[str] | None = None) -> pd.DataFra
                   GROUP BY 1 ORDER BY 1""", [start, end, *p])
 
 
-@workspace("business")
+@workspace("growth")
 def delivery_by_store(start, end, store_ids: list[str] | None = None) -> pd.DataFrame:
     f, p = _in("d.store_id", store_ids)
     return _q(f"""SELECT s.store_name AS store, sum(d.delivered) AS delivered, sum(d.failed) AS failed,
@@ -332,7 +358,31 @@ def delivery_by_store(start, end, store_ids: list[str] | None = None) -> pd.Data
                   WHERE d.business_date BETWEEN ? AND ?{f} GROUP BY ALL ORDER BY on_time_rate""", [start, end, *p])
 
 
-@workspace("business")
+@workspace("growth")
+def store_scorecard(start, end, store_ids: list[str] | None = None) -> pd.DataFrame:
+    """One row per store: revenue and the delivery promise side by side (the two store tables of the former
+    Business pages, merged for the Business & Growth Performance page). Same formulas as revenue_by_store and
+    delivery_by_store."""
+    f1, p1 = _in("d.store_id", store_ids)
+    f2, p2 = _in("m.store_id", store_ids)
+    return _q(f"""WITH sales AS (
+                      SELECT d.store_id, sum(d.net_revenue) AS net_revenue, sum(d.orders_completed) AS orders_completed,
+                             round(sum(d.gmv - d.discount) / nullif(sum(d.orders_completed), 0), 2) AS aov,
+                             round(sum(d.orders_cancelled) / nullif(sum(d.orders_placed), 0), 4) AS cancellation_rate
+                      FROM gld_daily_sales d WHERE d.business_date BETWEEN ? AND ?{f1} GROUP BY ALL),
+                  promise AS (
+                      SELECT m.store_id,
+                             round(sum(m.on_time_rate * m.delivered) / nullif(sum(m.delivered), 0), 4) AS on_time_rate,
+                             round(sum(m.avg_delivery_minutes * m.delivered) / nullif(sum(m.delivered), 0), 1)
+                                 AS avg_minutes
+                      FROM gld_delivery_metrics m WHERE m.business_date BETWEEN ? AND ?{f2} GROUP BY ALL)
+                  SELECT s.store_name AS store, s.city, sales.net_revenue, sales.orders_completed, sales.aov,
+                         promise.on_time_rate, promise.avg_minutes, sales.cancellation_rate
+                  FROM sales JOIN dim_stores s USING (store_id) LEFT JOIN promise USING (store_id)
+                  ORDER BY sales.net_revenue DESC""", [start, end, *p1, start, end, *p2])
+
+
+@workspace("growth")
 def cancellations_by_reason(start, end, store_ids: list[str] | None = None) -> pd.DataFrame:
     f, p = _in("store_id", store_ids)
     return _q(f"""SELECT stage, reason, sum(cancellations) AS cancellations
@@ -341,13 +391,13 @@ def cancellations_by_reason(start, end, store_ids: list[str] | None = None) -> p
                   GROUP BY ALL ORDER BY cancellations DESC""", [start, end, *p])
 
 
-@workspace("business")
+@workspace("growth")
 def anomaly_summary() -> pd.DataFrame:
     return _q("""SELECT detector, count(*) AS anomalies, count(*) FILTER (WHERE severity = 'High') AS high_severity
                  FROM gld_sales_anomalies GROUP BY ALL ORDER BY detector""")
 
 
-@workspace("business")
+@workspace("growth")
 def anomaly_list(detectors: list[str] | None = None, store_ids: list[str] | None = None) -> pd.DataFrame:
     f1, p1 = _in("a.detector", detectors)
     f2, p2 = _in("a.store_id", store_ids)
@@ -359,7 +409,7 @@ def anomaly_list(detectors: list[str] | None = None, store_ids: list[str] | None
                   WHERE TRUE{f1}{f2} ORDER BY a.score DESC, a.business_date""", [*p1, *p2])
 
 
-@workspace("business")
+@workspace("growth")
 def anomaly_series(anomaly_id: str) -> pd.DataFrame:
     return _q("""SELECT s.ts AS time, s.observed, s.expected, a.detector, a.start_ts, a.end_ts
                  FROM gld_anomaly_series s JOIN gld_sales_anomalies a USING (anomaly_id)
@@ -367,7 +417,7 @@ def anomaly_series(anomaly_id: str) -> pd.DataFrame:
 
 
 # ------------------------------------------------------------------------------------------- marketing (5D/5E)
-@workspace("marketing")
+@workspace("growth")
 def marketing_kpis() -> dict:
     row = _q("""SELECT count(*) AS customers,
                        count(*) FILTER (WHERE status <> 'never_ordered') AS buyers,
@@ -380,17 +430,17 @@ def marketing_kpis() -> dict:
     return row
 
 
-@workspace("marketing")
+@workspace("growth")
 def segment_profiles() -> pd.DataFrame:
     return _q("SELECT * EXCLUDE (model_version) FROM gld_segment_profiles ORDER BY customers DESC")
 
 
-@workspace("marketing")
+@workspace("growth")
 def segmentation_selection() -> pd.DataFrame:
     return _q("SELECT k, silhouette, inertia, chosen, stability_ari FROM gld_segmentation_selection ORDER BY k")
 
 
-@workspace("marketing")
+@workspace("growth")
 def segment_customers(segment_id: int, limit: int = 200) -> pd.DataFrame:
     return _q("""SELECT c.customer_id, c.city_id, c.orders_completed, c.total_spend, c.avg_order_value,
                         c.recency_days, r.status, c.top_category
@@ -399,7 +449,7 @@ def segment_customers(segment_id: int, limit: int = 200) -> pd.DataFrame:
                  WHERE s.segment_id = ? ORDER BY c.total_spend DESC LIMIT ?""", [int(segment_id), int(limit)])
 
 
-@workspace("marketing")
+@workspace("growth")
 def basket_rules(category_ids: list[str] | None = None, min_lift: float = 2.0, limit: int = 200) -> pd.DataFrame:
     f, p = _in("r.antecedent_category", category_ids)
     return _q(f"""SELECT r.antecedent, r.consequent, ca.category_name AS antecedent_category,
@@ -411,26 +461,26 @@ def basket_rules(category_ids: list[str] | None = None, min_lift: float = 2.0, l
               [float(min_lift), *p, int(limit)])
 
 
-@workspace("marketing")
+@workspace("growth")
 def rule_products() -> pd.DataFrame:
     return _q("""SELECT DISTINCT antecedent_id AS product_id, antecedent AS product_name
                  FROM gld_basket_rules ORDER BY product_name""")
 
 
-@workspace("marketing")
+@workspace("growth")
 def product_partners(product_id: str) -> pd.DataFrame:
     return _q("""SELECT consequent AS bought_with, consequent_category AS category_id, baskets_both, confidence, lift
                  FROM gld_basket_rules WHERE antecedent_id = ? ORDER BY confidence DESC""", [product_id])
 
 
-@workspace("marketing")
+@workspace("growth")
 def recommendation_metrics() -> pd.DataFrame:
     return _q("""SELECT method, weights, precision_at_10, recall_at_10, hit_rate, coverage, customers
                  FROM gld_recommendation_metrics
                  ORDER BY CASE method WHEN 'hybrid' THEN 1 WHEN 'repeat' THEN 2 ELSE 3 END""")
 
 
-@workspace("marketing")
+@workspace("growth")
 def recommendation_customers(segment_id: int | None = None, limit: int = 300) -> pd.DataFrame:
     where, params = ("WHERE s.segment_id = ?", [int(segment_id)]) if segment_id is not None else ("", [])
     return _q(f"""SELECT s.customer_id, s.segment_label, c.orders_completed, c.total_spend
@@ -438,7 +488,7 @@ def recommendation_customers(segment_id: int | None = None, limit: int = 300) ->
                   {where} ORDER BY c.total_spend DESC LIMIT ?""", [*params, int(limit)])
 
 
-@workspace("marketing")
+@workspace("growth")
 def customer_recommendations(customer_id: str) -> pd.DataFrame:
     return _q("""SELECT r.rank, p.product_name AS product, c.category_name AS category, r.reason, r.score
                  FROM gld_recommendations r LEFT JOIN dim_products p USING (product_id)
@@ -446,7 +496,7 @@ def customer_recommendations(customer_id: str) -> pd.DataFrame:
                  WHERE r.customer_id = ? ORDER BY r.rank""", [customer_id])
 
 
-@workspace("marketing")
+@workspace("growth")
 def segment_top_recommendations(segment_id: int, limit: int = 10) -> pd.DataFrame:
     return _q("""SELECT p.product_name AS product, count(*) AS customers,
                         count(*) FILTER (WHERE r.reason = 'often bought with your items') AS as_cross_sell
@@ -456,13 +506,13 @@ def segment_top_recommendations(segment_id: int, limit: int = 10) -> pd.DataFram
                  GROUP BY ALL ORDER BY customers DESC LIMIT ?""", [int(segment_id), int(limit)])
 
 
-@workspace("marketing")
+@workspace("growth")
 def retention_cohorts() -> pd.DataFrame:
     return _q("""SELECT cohort_month, month_offset, cohort_size, active_customers, retention_rate
                  FROM gld_retention_cohorts ORDER BY cohort_month, month_offset""")
 
 
-@workspace("marketing")
+@workspace("growth")
 def retention_status() -> pd.DataFrame:
     return _q("""SELECT status, value_tier, count(*) AS customers, sum(total_spend) AS total_spend
                  FROM gld_customer_retention GROUP BY status, value_tier
@@ -470,7 +520,7 @@ def retention_status() -> pd.DataFrame:
                                       WHEN 'lapsed' THEN 4 ELSE 5 END, value_tier""")
 
 
-@workspace("marketing")
+@workspace("growth")
 def retention_customers(statuses: list[str] | None = None, tiers: list[str] | None = None,
                         overdue_only: bool = False, limit: int = 300) -> pd.DataFrame:
     f1, p1 = _in("r.status", statuses)
@@ -483,7 +533,7 @@ def retention_customers(statuses: list[str] | None = None, tiers: list[str] | No
                   ORDER BY r.total_spend DESC LIMIT ?""", [*p1, *p2, int(limit)])
 
 
-@workspace("marketing")
+@workspace("growth")
 def promotion_metrics() -> pd.DataFrame:
     return _q("""SELECT m.name, c.category_name AS category, m.discount_pct, m.start_date, m.end_date, m.days_active,
                         m.orders_with_promotion, m.discount_cost, m.promo_daily_units, m.baseline_daily_units,

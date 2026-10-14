@@ -225,7 +225,8 @@ def assistant_evals(meta: Path, pending: dict | None = None) -> pd.DataFrame:
     for run_id, g in r.groupby("run_id"):
         stamp = re.search(r"(\d{8}T\d{6})", run_id)
         rate = lambda col: (g[col].astype(str) == "True").sum() / max(1, g[col].isin(["True", "False"]).sum())  # noqa: E731
-        qset = ("engineering held-out" if "engineering_holdout" in run_id else "engineering" if "engineering" in run_id
+        qset = ("forecast held-out" if "rag_forecast_holdout" in run_id else "forecast" if "rag_forecast" in run_id else
+                "engineering held-out" if "engineering_holdout" in run_id else "engineering" if "engineering" in run_id
                 else "held-out" if "holdout" in run_id else "gold")
         out.append({"run_id": run_id, "question_set": qset,
                     "mode": "llm" if "_llm_" in run_id else "template",

@@ -10,16 +10,12 @@ PERSONAS = {
         "use_cases": ["Inventory health overview", "Demand forecasting", "Stockout risk & replenishment",
                       "Inventory explorer & lost sales"],
     },
-    "business": {
-        "icon": ":material/monitoring:", "code": "BIZ", "title": "Business & Revenue", "page": "views/business.py",
-        "tagline": "How the business is performing: revenue, orders, delivery promise, and anything unusual.",
-        "use_cases": ["Sales & revenue performance", "Delivery & operations", "Anomaly detection"],
-    },
-    "marketing": {
-        "icon": ":material/campaign:", "code": "MKT", "title": "Customer Growth & Marketing", "page": "views/marketing.py",
-        "tagline": "Know the customers, grow the basket and bring lapsing customers back.",
-        "use_cases": ["Customer segmentation", "Basket & affinity", "Recommendations", "Retention",
-                      "Promotion effectiveness"],
+    "growth": {
+        "icon": ":material/monitoring:", "code": "GRO", "title": "Business & Growth", "page": "views/growth.py",
+        "tagline": "Are we growing profitably and keeping customers? Revenue, the delivery promise, customers and "
+                   "the levers to grow.",
+        "use_cases": ["Performance (sales & delivery)", "Alerts (anomalies)", "Customers (segments & retention)",
+                      "Growth levers (basket, recommendations, promotions)"],
     },
     "engineering": {
         "icon": ":material/engineering:", "code": "ENG", "title": "Data Engineer", "page": "views/engineering.py",

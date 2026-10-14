@@ -87,7 +87,7 @@ def test_engineering_tools_are_routed(question, tool):
 def test_page_hints_only_for_own_workspace():
     from src.rag.composer import page_hints
     assert page_hints("schema of the reviews table", ["engineering"]) == ["Data Engineer → Lineage & tables"]
-    assert page_hints("schema of the reviews table", ["business"]) == []
+    assert page_hints("schema of the reviews table", ["growth"]) == []
 
 
 
@@ -112,3 +112,24 @@ def test_schema_questions_get_the_catalog_hint():
 def test_counted_noun_stops_at_the_verb():
     # "run" here is a verb, not a pipeline run (found by the held-out set, 7E)
     assert pick_tool("how many offers can run together in a week")[0] != "pipeline_status"
+
+
+
+def test_ranking_questions_go_to_top_forecast():
+    # phrasings that are not in the 7F evaluation set
+    assert pick_tool("what will be in highest demand at the weekend")[0] == "top_forecast"
+    assert pick_tool("which items sell the most next week")[0] == "top_forecast"
+    assert route_question("forecast for bakery", Entities()).tool == "category_forecast"     # unchanged
+
+
+def test_words_are_claimed_once_across_tools():
+    # 7F revision: "highest expected demand" claims its words, so "expected demand" cannot also score elsewhere
+    assert pick_tool("which stores have the highest expected demand tomorrow")[0] == "top_forecast"
+    assert pick_tool("expected demand next week for fruits")[0] == "category_forecast"      # no ranking phrase
+
+
+def test_policy_preference_only_for_topics_with_a_policy():
+    # 7F revision: one generic word prefers a policy only when the topic has one (delivery yes, forecast / segments no)
+    assert route_question("delivery?", Entities()).generic
+    assert not route_question("forecast?", Entities()).generic
+    assert not route_question("segments?", Entities()).generic

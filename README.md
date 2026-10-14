@@ -15,6 +15,7 @@ The full design is in [`docs/Project_Plan_v2.md`](docs/Project_Plan_v2.md); all 
 | 5 | Inventory explorer, Business and Marketing workspaces | Done (lost sales, anomalies, segmentation, basket rules, recommendations, retention; check_phase5 18 pass, 2 known limitations, 0 failed) |
 | 6 | Business assistant (RAG) | Done (policies + metric definitions + model cards, BM25 retrieval, 16 role-checked data tools, rule-based router, Assistant page; check_phase6 6/6 bars in template and LLM mode; optional free LLM: gpt-oss-120b via Groq) |
 | 7 | Data Engineer workspace | Done (pipeline runs, data quality & quarantine, lineage & tables, model monitoring; check_phase7 9/9; Assistant tools for the engineer: engineering evaluation set passes) |
+| — | Persona consolidation (Business + Marketing → Business & Growth; 16 pages → 12) | Code complete, verification pending ([docs/16](docs/16_persona_consolidation.md)) |
 | 8 | Hardening + deployment | Not started |
 
 ## Setup
@@ -76,8 +77,10 @@ python -m scripts.create_demo_secrets      # once: .streamlit/secrets.toml with 
 streamlit run app/Home.py                  # http://localhost:8501  — e.g. login: inventory / inventory-demo
 ```
 
-The app opens on the login page; each demo account lands directly in its own workspace (`inventory`,
-`business`, `marketing`, `engineer`; `admin` sees all). It reads only `data/demo/`
+The app opens on the login page; each demo account lands directly in its own workspace: three personas,
+`inventory` (Inventory & Supply Chain), `growth` (Business & Growth) and `engineer` (Data Engineer); `admin` sees
+all. Business and Marketing were merged into Business & Growth on 2026-10-14
+([docs/16_persona_consolidation.md](docs/16_persona_consolidation.md)). It reads only `data/demo/`
 through DuckDB (no Spark needed). Details: [docs/12_frontend.md](docs/12_frontend.md); demo logins:
 [docs/07_inventory_workspace.md](docs/07_inventory_workspace.md).
 

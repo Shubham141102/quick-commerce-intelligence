@@ -196,7 +196,7 @@ REGISTRY: tuple[FileEntry, ...] = (
     FileEntry("src/transformations/gold/operations.py", "3", "Delivery, cancellation and promotion metrics; quality "
               "summary", "Silver deliveries, cancellations, promotions; metadata",
               "gld_delivery_metrics, gld_cancellation_metrics, gld_promotion_metrics, gld_quality_summary",
-              "Business / Marketing / Data Engineer workspaces"),
+              "Business & Growth / Data Engineer workspaces"),
     FileEntry("src/transformations/gold/run.py", "3", "The gold stage: build the 12 Gold tables in order; typed Gold "
               "reader", "data/silver/", "data/gold/gld_*", "pipeline stage gold"),
     FileEntry("src/transformations/gold/catalog.py", "3", "Render the Gold catalog and the metric definitions",
@@ -317,14 +317,13 @@ REGISTRY: tuple[FileEntry, ...] = (
     FileEntry("app/views/assistant.py", "6", "Assistant page (every persona): suggested questions, chat, route badge, "
               "answer table, Evidence & sources, mode; index cached per snapshot", "src/rag (assistant), session",
               "page", "Home.py"),
-    FileEntry("app/views/business.py", "5", "Business & Revenue workspace: sales & revenue performance, delivery & "
-              "operations, anomaly detection", "src/serving/queries.py (business functions)", "page", "Home.py"),
+    FileEntry("app/views/growth.py", "5", "Business & Growth workspace (former Business & Revenue + Customer Growth "
+              "& Marketing): Performance (sales + delivery), Alerts (anomalies), Customers (segments + retention), "
+              "Growth levers (basket, recommendations, promotions)", "src/serving/queries.py (growth functions)",
+              "pages", "Home.py"),
     FileEntry("app/views/engineering.py", "7", "Data Engineer workspace: pipeline runs, data quality & quarantine, "
               "lineage & tables (Sankey + catalog), model monitoring (registry, metric history, assistant evaluations)",
               "src/serving/queries.py (engineering functions)", "pages", "Home.py"),
-    FileEntry("app/views/marketing.py", "5", "Customer Growth & Marketing workspace: segments, basket & affinity, "
-              "recommendations, retention (descriptive), promotion effectiveness",
-              "src/serving/queries.py (marketing functions)", "page", "Home.py"),
 
     # ------------------------------------------------------------------ scripts
     FileEntry("scripts/run_pipeline.py", "2", "Run pipeline stages from the command line", "stage names",
